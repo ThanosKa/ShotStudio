@@ -45,7 +45,7 @@ ShotStudio is a SaaS at `shotstudio` that turns 3 raw mobile screenshots plus mi
 31. As a user, I can sign out from the sidebar at any time.
 32. As a user, navigating to an invalid route returns a styled 404 page with a "Go home" link.
 33. As a user, all output images conform to the App Store iPhone 6.7" portrait specification (1290×2796 PNG, sRGB, no transparency).
-34. As an operator, errors surface in Sentry; OpenRouter and Stripe usage are monitored against budget caps configured in those vendors' dashboards.
+34. As an operator, OpenRouter and Stripe usage are monitored against budget caps configured in those vendors' dashboards.
 
 ## Implementation Decisions
 
@@ -57,7 +57,7 @@ ShotStudio is a SaaS at `shotstudio` that turns 3 raw mobile screenshots plus mi
 
 **Credits.** User credit balance is a single integer column on the `users` table. Atomic operations are exposed: `debit(userId, n)` and `refund(userId, n)`, each wrapping a Postgres transaction that updates `users.credits` and inserts a row into `transactions`. The credit accounting policy is *debit-before-AI-call, refund-on-failure*: the credit is removed when the generation job starts and only restored if the system fails to deliver four valid images. This is safer than debit-after because long-running AI calls can drop the connection, leaving the user paid for output they never received.
 
-**Generation.** A single deep module exposes one interface: `generate(input) → outputUrls[4]`. Internally it (1) validates the input shape, (2) constructs four prompt templates derived from the chosen style preset and the user-provided context, (3) fires four parallel calls to OpenRouter's `gpt-image-2` endpoint using `Promise.allSettled` so partial failures do not cancel siblings, (4) retries any single failed shot once with exponential backoff plus jitter, (5) returns the four image data URLs to the caller. The HTTP route running this module declares `maxDuration = 300` and runs on Vercel Fluid Compute, billed on Active CPU pricing — idle time waiting on OpenRouter is effectively free.
+**Generation.** A single deep module exposes one interface: `generate(input) → outputUrls[4]`. Internally it (1) validates the input shape, (2) constructs four prompt templates derived from the chosen style preset and the user-provided context, (3) fires four parallel calls to OpenRouter's `gpt-image-2` endpoint using `Promise.allSettled` so partial failures do not cancel siblings, (4) retries any single failed shot once with exponential backoff plus jitter, (5) returns the four image data URLs to the caller. The HTTP route running this module declares `export const maxDuration = 300` so Vercel allows the long-running call to complete.
 
 **Job status.** Each generation creates a row in `generations` (status: `pending` | `complete` | `failed`). Generated image URLs are *not* persisted; they are returned only to the originating browser session. The frontend polls `GET /api/generations/[id]` every 2 seconds during processing. When `status = complete` the response carries the four temporary base64 image URLs for in-browser display. Once the user downloads or closes the tab, the URLs are unrecoverable.
 
@@ -65,7 +65,7 @@ ShotStudio is a SaaS at `shotstudio` that turns 3 raw mobile screenshots plus mi
 
 **Rate limiting.** Upstash Redis sliding-window rate limit keyed on Clerk user ID. The default cap (e.g., 20 generations per hour) is configurable via env var. Returns HTTP 429 with retry-after metadata when exceeded.
 
-**Error monitoring.** Sentry SDK on both server and client. Failed generations, Stripe webhook errors, and rate-limit anomalies are surfaced. OpenRouter cost monitoring is handled through OpenRouter's native dashboard with a hard spending cap configured upstream.
+**Error monitoring.** Vercel's built-in logs + the `generations` table (status/failure_reason rows) are the operator surface in v1. OpenRouter cost monitoring is handled through OpenRouter's native dashboard with a hard spending cap configured upstream.
 
 ### Schemas
 
@@ -171,8 +171,7 @@ Each "set" delivers exactly 4 PNG files at 1290×2796 portrait (App Store iPhone
 - **Rate limiting + webhook idempotency:** Upstash Redis
 - **AI:** OpenRouter → `gpt-image-2` (high-quality tier)
 - **Image post-processing:** `sharp`
-- **Error monitoring:** Sentry
-- **Hosting:** Vercel (Fluid Compute, `maxDuration = 300` on the generation route)
+- **Hosting:** Vercel (`maxDuration = 300` on the generation route)
 
 ## Testing Decisions
 
@@ -182,7 +181,7 @@ Each "set" delivers exactly 4 PNG files at 1290×2796 portrait (App Store iPhone
 - **Generation failure paths.** Mock OpenRouter to return (a) all-success, (b) 1-of-4 failure, (c) all-failure, (d) timeout. Assert that the user-visible state and credit balance are correct in each case.
 - **Rate-limit boundary.** Send N+1 requests in N seconds; assert HTTP 429 on the last.
 - **Manual visual QA before launch.** Generate 50 sample sets across all 4 presets and at least 6 categories. Reject the launch if fewer than ~85% of generated sets are visually shippable. Iterate prompt templates until the bar is hit. This is *the* gate on going public; the engineering is straightforward, the prompt quality is the product.
-- **Production monitoring.** Sentry for errors. The `generations` table is queried periodically for `status = 'failed'` rate trends; if it crosses a threshold, the launch is paused.
+- **Production monitoring.** Vercel logs for runtime errors. The `generations` table is queried periodically for `status = 'failed'` rate trends; if it crosses a threshold, the launch is paused.
 
 ## Out of Scope (v1)
 
