@@ -4,10 +4,10 @@ import { useEffect } from "react";
 
 export default function GlobalError({
   error,
-  reset,
+  unstable_retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  unstable_retry: () => void;
 }) {
   useEffect(() => {
     // eslint-disable-next-line no-console
@@ -35,7 +35,7 @@ export default function GlobalError({
             {error.digest ? `Reference: ${error.digest}` : "An unexpected error occurred."}
           </p>
           <button
-            onClick={reset}
+            onClick={() => unstable_retry()}
             style={{
               padding: "10px 16px",
               border: "1px solid #000",

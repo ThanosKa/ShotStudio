@@ -1,15 +1,20 @@
+import { cache } from "react";
 import { eq, sql } from "drizzle-orm";
 import { db } from "./index";
 import { users } from "./schema";
 
-export async function getUserCredits(userId: string): Promise<number> {
+/**
+ * Per-request memoized via `React.cache` so multiple Server Components in the
+ * same render tree (e.g. layout + page + nav) share a single DB hit.
+ */
+export const getUserCredits = cache(async (userId: string): Promise<number> => {
   const [row] = await db
     .select({ credits: users.credits })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
   return row?.credits ?? 0;
-}
+});
 
 /**
  * Just-in-time user sync — Clerk's recommended pattern over webhooks.

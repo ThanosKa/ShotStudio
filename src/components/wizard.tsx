@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -77,14 +77,17 @@ export function Wizard() {
     preset || (category ? CATEGORY_DEFAULT_PRESET[category] : "");
   const taglineWords = wordCount(tagline);
 
+  // Track latest shots in a ref so the unmount cleanup revokes the
+  // currently-active object URLs rather than the stale initial array.
+  const shotsRef = useRef(shots);
+  shotsRef.current = shots;
+
   useEffect(() => {
     return () => {
-      for (const s of shots) {
+      for (const s of shotsRef.current) {
         if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
       }
     };
-    // intentionally only on unmount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function compressIntoSlot(idx: number, raw: File) {

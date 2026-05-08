@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 
 export default function ErrorBoundary({
   error,
-  reset,
+  unstable_retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  unstable_retry: () => void;
 }) {
   useEffect(() => {
     // eslint-disable-next-line no-console
@@ -25,7 +25,7 @@ export default function ErrorBoundary({
             : "An unexpected error occurred."}
         </p>
         <div className="flex justify-center gap-3">
-          <Button onClick={reset}>Try again</Button>
+          <Button onClick={() => unstable_retry()}>Try again</Button>
           <Button variant="outline" asChild>
             <a href="/">Go home</a>
           </Button>

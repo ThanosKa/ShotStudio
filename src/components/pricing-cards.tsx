@@ -25,11 +25,24 @@ export function PricingCards() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ packageId }),
       });
-      const data = await res
-        .json()
-        .catch(() => ({ error: `Checkout failed (${res.status})` }));
+      const data: unknown = await res.json().catch(() => null);
       if (!res.ok) {
-        throw new Error(data.error ?? `Checkout failed (${res.status})`);
+        const msg =
+          data &&
+          typeof data === "object" &&
+          "error" in data &&
+          typeof (data as { error: unknown }).error === "string"
+            ? (data as { error: string }).error
+            : `Checkout failed (${res.status})`;
+        throw new Error(msg);
+      }
+      if (
+        !data ||
+        typeof data !== "object" ||
+        !("checkoutUrl" in data) ||
+        typeof (data as { checkoutUrl: unknown }).checkoutUrl !== "string"
+      ) {
+        throw new Error("Checkout response missing redirect URL.");
       }
       window.location.href = (data as { checkoutUrl: string }).checkoutUrl;
     } catch (err) {
