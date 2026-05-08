@@ -2,7 +2,7 @@ const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey) throw new Error("OPENROUTER_API_KEY is not set");
 
 const ENDPOINT = "https://openrouter.ai/api/v1";
-const MODEL = "openai/gpt-image-2";
+const MODEL = "openai/gpt-5.4-image-2";
 
 export type ImageGenerationInput = {
   prompt: string;

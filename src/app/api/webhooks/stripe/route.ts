@@ -3,9 +3,10 @@ import type { NextRequest } from "next/server";
 import Stripe from "stripe";
 import { grant } from "@/lib/credits";
 import { db } from "@/lib/db";
-import { creditPackages, users } from "@/lib/db/schema";
+import { users } from "@/lib/db/schema";
 import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
 import { logger } from "@/lib/logger";
+import { getCreditPackage } from "@/lib/packages";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
@@ -43,10 +44,12 @@ export async function POST(req: NextRequest) {
   const scoped = log.child({ eventId: event.id, eventType: event.type });
 
   const idemKey = `stripe:event:${event.id}`;
-  const claimed = await redis.set(idemKey, "1", { nx: true, ex: IDEMPOTENCY_TTL_SECONDS });
-  if (claimed !== "OK") {
-    scoped.info("duplicate event — already processed");
-    return new Response("OK", { status: 200 });
+  if (redis) {
+    const claimed = await redis.set(idemKey, "1", { nx: true, ex: IDEMPOTENCY_TTL_SECONDS });
+    if (claimed !== "OK") {
+      scoped.info("duplicate event — already processed");
+      return new Response("OK", { status: 200 });
+    }
   }
 
   try {
@@ -61,11 +64,7 @@ export async function POST(req: NextRequest) {
         return new Response("OK", { status: 200 });
       }
 
-      const [pack] = await db
-        .select()
-        .from(creditPackages)
-        .where(eq(creditPackages.id, packageId))
-        .limit(1);
+      const pack = getCreditPackage(packageId);
 
       if (!pack) {
         handler.error("unknown package on completed session");
@@ -117,7 +116,7 @@ export async function POST(req: NextRequest) {
       scoped.debug("unhandled event type");
     }
   } catch (err) {
-    await redis.del(idemKey);
+    if (redis) await redis.del(idemKey);
     scoped.error({ err }, "stripe webhook handler failed");
     return new Response("Handler error", { status: 500 });
   }

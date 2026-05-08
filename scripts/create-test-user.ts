@@ -1,7 +1,7 @@
 import { createClerkClient } from "@clerk/nextjs/server";
 
-const EMAIL = process.env.TEST_USER_EMAIL ?? "test@test.com";
-const PASSWORD = process.env.TEST_USER_PASSWORD ?? "12345678";
+const EMAIL = "test@test.com";
+const PASSWORD = "12345678";
 
 async function main() {
   const secretKey = process.env.CLERK_SECRET_KEY;

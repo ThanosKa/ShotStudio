@@ -1,53 +1,63 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { db } from "@/lib/db";
-import { creditPackages } from "@/lib/db/schema";
-import { stripe } from "@/lib/stripe";
+import { logger } from "@/lib/logger";
+import { CREDIT_PACKAGE_IDS, getCreditPackage } from "@/lib/packages";
 
 const Body = z.object({
-  packageId: z.enum(["starter", "growth", "studio"]),
+  packageId: z.enum(CREDIT_PACKAGE_IDS),
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+function jsonError(status: number, error: string) {
+  return Response.json({ error }, { status });
+}
+
 export async function POST(req: NextRequest) {
+  const log = logger.child({ action: "checkout" });
+
   const { userId } = await auth();
-  if (!userId) return new Response("Unauthorized", { status: 401 });
+  if (!userId) return jsonError(401, "Unauthorized");
 
   const parsed = Body.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return new Response("Invalid body", { status: 400 });
+  if (!parsed.success) return jsonError(400, "Invalid request body");
 
-  const [pack] = await db
-    .select()
-    .from(creditPackages)
-    .where(eq(creditPackages.id, parsed.data.packageId))
-    .limit(1);
+  if (!process.env.STRIPE_SECRET_KEY) {
+    log.warn("STRIPE_SECRET_KEY not set — checkout disabled");
+    return jsonError(503, "Checkout is not configured yet.");
+  }
 
-  if (!pack || !pack.active) return new Response("Package unavailable", { status: 404 });
-  if (!pack.stripePriceId) return new Response("Package not configured", { status: 503 });
+  try {
+    const pack = getCreditPackage(parsed.data.packageId);
 
-  const user = await currentUser();
-  const email = user?.emailAddresses[0]?.emailAddress;
+    if (!pack) return jsonError(404, "Package unavailable");
+    if (!pack.stripePriceId) return jsonError(503, "Package not configured");
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    line_items: [{ price: pack.stripePriceId, quantity: 1 }],
-    customer_email: email,
-    client_reference_id: userId,
-    allow_promotion_codes: true,
-    automatic_tax: { enabled: true },
-    success_url: `${APP_URL}/home?purchase=success`,
-    cancel_url: `${APP_URL}/pricing?purchase=cancelled`,
-    metadata: {
-      userId,
-      packageId: pack.id,
-      credits: String(pack.credits),
-    },
-  });
+    const { stripe } = await import("@/lib/stripe");
+    const user = await currentUser();
+    const email = user?.emailAddresses[0]?.emailAddress;
 
-  if (!session.url) return new Response("No checkout URL", { status: 500 });
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [{ price: pack.stripePriceId, quantity: 1 }],
+      customer_email: email,
+      client_reference_id: userId,
+      allow_promotion_codes: true,
+      automatic_tax: { enabled: true },
+      success_url: `${APP_URL}/home?purchase=success`,
+      cancel_url: `${APP_URL}/pricing?purchase=cancelled`,
+      metadata: {
+        userId,
+        packageId: pack.id,
+        credits: String(pack.credits),
+      },
+    });
 
-  return Response.json({ checkoutUrl: session.url });
+    if (!session.url) return jsonError(500, "No checkout URL");
+    return Response.json({ checkoutUrl: session.url });
+  } catch (err) {
+    log.error({ err, userId }, "checkout failed");
+    return jsonError(500, "Checkout failed. Please try again.");
+  }
 }

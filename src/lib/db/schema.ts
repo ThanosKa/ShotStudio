@@ -1,5 +1,4 @@
 import {
-  boolean,
   integer,
   jsonb,
   pgTable,
@@ -23,15 +22,6 @@ export const transactions = pgTable("transactions", {
   stripePaymentId: text("stripe_payment_id"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
-export const creditPackages = pgTable("credit_packages", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  credits: integer("credits").notNull(),
-  priceCents: integer("price_cents").notNull(),
-  stripePriceId: text("stripe_price_id"),
-  active: boolean("active").notNull().default(true),
 });
 
 export const generations = pgTable("generations", {
