@@ -27,12 +27,10 @@ const Body = z.object({
     "clean_minimal",
     "bold_playful",
   ]),
-  headlines: z
-    .array(z.string().optional())
-    .length(3)
-    .optional(),
-  screenshots: z.array(z.string()).length(3),
 });
+
+const ALLOWED_MIME = ["image/jpeg", "image/png"];
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB per file after client compression
 
 function jsonError(status: number, error: string, init?: ResponseInit) {
   return Response.json({ error }, { status, ...init });
@@ -44,26 +42,44 @@ export async function POST(req: NextRequest) {
 
   const log = logger.child({ action: "generations.create", userId });
 
-  const parsed = Body.safeParse(await req.json().catch(() => null));
+  let formData: FormData;
+  try {
+    formData = await req.formData();
+  } catch {
+    return jsonError(400, "Expected multipart/form-data");
+  }
+
+  const parsed = Body.safeParse({
+    appName: formData.get("appName"),
+    tagline: formData.get("tagline"),
+    category: formData.get("category"),
+    stylePreset: formData.get("stylePreset"),
+  });
   if (!parsed.success) {
     return jsonError(400, parsed.error.issues[0]?.message ?? "Invalid request body");
   }
   const input = parsed.data;
+
+  const screenshotFiles: File[] = [];
+  for (let i = 0; i < 3; i++) {
+    const f = formData.get(`screenshot_${i}`);
+    if (!(f instanceof File)) {
+      return jsonError(400, `Missing screenshot_${i}`);
+    }
+    if (!ALLOWED_MIME.includes(f.type)) {
+      return jsonError(400, "Screenshots must be JPEG or PNG.");
+    }
+    if (f.size > MAX_FILE_BYTES) {
+      return jsonError(400, "Screenshot too large after compression.");
+    }
+    screenshotFiles.push(f);
+  }
 
   const rl = await generationRateLimit.limit(userId);
   if (!rl.success) {
     return jsonError(429, "Too many generations — try again later.", {
       headers: { "Retry-After": String(Math.ceil((rl.reset - Date.now()) / 1000)) },
     });
-  }
-
-  for (const s of input.screenshots) {
-    if (!s.startsWith("data:image/png") && !s.startsWith("data:image/jpeg")) {
-      return jsonError(400, "Screenshots must be PNG or JPEG.");
-    }
-    if (s.length > 14_000_000) {
-      return jsonError(400, "Screenshot too large (max ~10 MB).");
-    }
   }
 
   try {
@@ -88,15 +104,20 @@ export async function POST(req: NextRequest) {
     .returning({ id: generations.id });
   const generationId = row.id;
 
+  const screenshotDataUrls = (await Promise.all(
+    screenshotFiles.map(async (f) => {
+      const buf = Buffer.from(await f.arrayBuffer());
+      return `data:${f.type};base64,${buf.toString("base64")}`;
+    }),
+  )) as [string, string, string];
+
   try {
     const imageUrls = await generate({
       appName: input.appName,
       tagline: input.tagline,
       category: input.category,
       stylePreset: input.stylePreset,
-      headlines: input.headlines as
-        | [string?, string?, string?]
-        | undefined,
+      screenshots: screenshotDataUrls,
     });
 
     await db

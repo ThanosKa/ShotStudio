@@ -6,12 +6,43 @@ const MODEL = "openai/gpt-5.4-image-2";
 
 export type ImageGenerationInput = {
   prompt: string;
-  size: "1024x1024" | "1024x1536" | "1536x1024";
+  /**
+   * Optional reference images as data URLs (e.g. `data:image/jpeg;base64,...`).
+   * Sent as `image_url` content parts alongside the text prompt for image-to-image generation.
+   */
   referenceImages?: string[];
+  aspectRatio?: string;
+  imageSize?: "0.5K" | "1K" | "2K" | "4K";
 };
 
+type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
+type ChatCompletionResponse = {
+  choices?: Array<{
+    message?: {
+      images?: Array<{
+        type?: string;
+        image_url?: { url?: string };
+      }>;
+    };
+  }>;
+};
+
+/**
+ * Returns raw base64 (no `data:image/...` prefix) so callers can hand it to
+ * `Buffer.from(b64, "base64")` directly.
+ */
 export async function generateImage(input: ImageGenerationInput): Promise<string> {
-  const res = await fetch(`${ENDPOINT}/images/generations`, {
+  const content: ContentPart[] = [{ type: "text", text: input.prompt }];
+  if (input.referenceImages) {
+    for (const url of input.referenceImages) {
+      content.push({ type: "image_url", image_url: { url } });
+    }
+  }
+
+  const res = await fetch(`${ENDPOINT}/chat/completions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -21,10 +52,13 @@ export async function generateImage(input: ImageGenerationInput): Promise<string
     },
     body: JSON.stringify({
       model: MODEL,
-      prompt: input.prompt,
-      size: input.size,
-      n: 1,
-      quality: "high",
+      modalities: ["image", "text"],
+      messages: [{ role: "user", content }],
+      image_config: {
+        aspect_ratio: input.aspectRatio ?? "9:16",
+        image_size: input.imageSize ?? "2K",
+      },
+      stream: false,
     }),
   });
 
@@ -32,8 +66,13 @@ export async function generateImage(input: ImageGenerationInput): Promise<string
     throw new Error(`OpenRouter ${res.status}: ${await res.text()}`);
   }
 
-  const data: { data: Array<{ b64_json: string }> } = await res.json();
-  const b64 = data.data[0]?.b64_json;
-  if (!b64) throw new Error("OpenRouter returned no image");
-  return b64;
+  const data = (await res.json()) as ChatCompletionResponse;
+  const dataUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+  if (!dataUrl) throw new Error("OpenRouter returned no image");
+
+  const commaIdx = dataUrl.indexOf(",");
+  if (commaIdx < 0 || !dataUrl.startsWith("data:")) {
+    throw new Error("OpenRouter returned malformed image URL");
+  }
+  return dataUrl.slice(commaIdx + 1);
 }

@@ -8,26 +8,43 @@ export type GenerateInput = {
   tagline: string;
   category: string;
   stylePreset: StylePresetId;
-  headlines?: [string?, string?, string?];
+  /**
+   * 3 user-uploaded screenshots as data URLs. Mapped to roles in this order:
+   * [hero_feature, differentiator, another_feature]. The "title" shot has no reference.
+   */
+  screenshots: [string, string, string];
 };
 
 const ROLES: ShotRole[] = ["title", "hero_feature", "differentiator", "another_feature"];
 
-async function runShot(input: GenerateInput, role: ShotRole, index: number) {
+function referencesForRole(role: ShotRole, screenshots: GenerateInput["screenshots"]): string[] {
+  switch (role) {
+    case "title":
+      return [];
+    case "hero_feature":
+      return [screenshots[0]];
+    case "differentiator":
+      return [screenshots[1]];
+    case "another_feature":
+      return [screenshots[2]];
+  }
+}
+
+async function runShot(input: GenerateInput, role: ShotRole) {
   const preset = STYLE_PRESETS[input.stylePreset];
   const prompt = buildPrompt({
     appName: input.appName,
     tagline: input.tagline,
     category: input.category,
     role,
-    headline: index > 0 ? input.headlines?.[index - 1] : undefined,
     preset,
   });
+  const referenceImages = referencesForRole(role, input.screenshots);
 
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const b64 = await generateImage({ prompt, size: "1024x1536" });
+      const b64 = await generateImage({ prompt, referenceImages });
       const png = await upscaleToAppStore(b64);
       return `data:image/png;base64,${png.toString("base64")}`;
     } catch (err) {
@@ -40,7 +57,7 @@ async function runShot(input: GenerateInput, role: ShotRole, index: number) {
 
 export async function generate(input: GenerateInput): Promise<string[]> {
   const results = await Promise.allSettled(
-    ROLES.map((role, idx) => runShot(input, role, idx)),
+    ROLES.map((role) => runShot(input, role)),
   );
 
   const failures = results.filter((r) => r.status === "rejected");
