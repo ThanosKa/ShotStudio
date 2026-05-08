@@ -24,11 +24,9 @@ Next.js 16 (App Router) · TypeScript strict · Tailwind v4 + shadcn/ui · Drizz
 - `src/app/` — App Router routes, including `api/webhooks/{clerk,stripe}/route.ts`
 - `src/lib/` — `db/`, `emails/`, `generation/`, plus `credits.ts`, `stripe.ts`, `resend.ts`, `redis.ts`, `ratelimit.ts`, `openrouter.ts`
 - `emails/` — React Email templates (rendered server-side, sent via Resend)
-- `.doc/PRD.md` — full product spec; read before non-trivial product changes
 
 ## Non-obvious rules
 
-- **No image persistence.** Generated images and uploaded screenshots are returned to the browser and never written to disk, S3, or the DB. The `generations` table stores status only — no `image_urls` column. Privacy is a marketing line and a compliance simplifier; do not add storage as a "small enhancement."
 - **Credit accounting is debit-before-AI, refund-on-failure.** Use `debit/refund/grant` from `src/lib/credits.ts`; do not bypass the transaction.
 - **Webhooks are idempotent.** Stripe events are deduped via Upstash Redis (event ID + TTL); Resend sends use idempotency keys (`welcome-email/<userId>`, `credits-purchased/<stripeEventId>`). Preserve these on any change.
 - **Resend SDK does not throw** — destructure `{ data, error }` and check `error` explicitly.
