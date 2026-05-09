@@ -86,10 +86,11 @@ export async function POST(req: NextRequest) {
         })
         .where(eq(users.id, id))
         .returning({ id: users.id });
-      scoped.info(
-        { userId: id, anonymized: result.length > 0 },
-        "user anonymized after deletion",
-      );
+      if (result.length > 0) {
+        scoped.info({ userId: id }, "user anonymized after deletion");
+      } else {
+        scoped.warn({ userId: id }, "user.deleted but no row matched");
+      }
     }
   } catch (err) {
     scoped.error({ err }, "clerk webhook handler failed");

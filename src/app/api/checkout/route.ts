@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
 
   const rl = await checkoutRateLimit.limit(userId);
   if (!rl.success) {
+    log.warn({ userId }, "checkout rate limit hit");
     return jsonError(429, "Too many checkout attempts — please wait a moment.", {
       headers: {
         ...rateLimitHeaders(rl),
@@ -66,6 +67,10 @@ export async function POST(req: NextRequest) {
     });
 
     if (!session.url) return jsonError(500, "No checkout URL");
+    log.info(
+      { userId, packageId: pack.id, sessionId: session.id },
+      "checkout session created",
+    );
     return Response.json({ checkoutUrl: session.url });
   } catch (err) {
     log.error({ err, userId }, "checkout failed");

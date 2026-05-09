@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import type { Logger } from "pino";
 import { InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
 import { db } from "@/lib/db";
 import {
@@ -119,6 +120,7 @@ async function runShot(
     stylePreset: StylePresetId;
     screenshotDataUrls: [string, string, string];
   },
+  log: Logger,
 ): Promise<string> {
   const preset = STYLE_PRESETS[ctx.stylePreset];
   const prompt = buildPrompt({
@@ -139,15 +141,23 @@ async function runShot(
       return `data:image/png;base64,${png.toString("base64")}`;
     } catch (err) {
       lastError = err;
+      log.warn({ err, role, attempt }, "shot attempt failed");
       await new Promise((r) => setTimeout(r, 500 + Math.random() * 500));
     }
   }
+  log.error({ err: lastError, role }, "shot exhausted retries");
   throw lastError;
 }
 
 export async function runGeneration(
   input: RunGenerationInput,
 ): Promise<GenerationOutcome> {
+  const log = logger.child({
+    action: "generation.run",
+    userId: input.userId,
+    stylePreset: input.stylePreset,
+  });
+
   const invalid = validateScreenshots(input.screenshots);
   if (invalid) return invalid;
 
@@ -165,6 +175,9 @@ export async function runGeneration(
     throw err;
   }
 
+  const shotLog = log.child({ generationId });
+  shotLog.info("generation started");
+
   const screenshotDataUrls = (await Promise.all(
     input.screenshots.map(async (f) => {
       const buf = Buffer.from(await f.arrayBuffer());
@@ -176,13 +189,17 @@ export async function runGeneration(
 
   const results = await Promise.allSettled(
     ROLES.map((role) =>
-      runShot(role, {
-        appName: input.appName,
-        tagline: input.tagline,
-        category: input.category,
-        stylePreset: input.stylePreset,
-        screenshotDataUrls,
-      }),
+      runShot(
+        role,
+        {
+          appName: input.appName,
+          tagline: input.tagline,
+          category: input.category,
+          stylePreset: input.stylePreset,
+          screenshotDataUrls,
+        },
+        shotLog,
+      ),
     ),
   );
 
@@ -197,8 +214,8 @@ export async function runGeneration(
       });
     } catch (refundErr) {
       // Reconciler is the safety net; the user-facing outcome stays the same.
-      logger.error(
-        { err: refundErr, generationId },
+      shotLog.error(
+        { err: refundErr },
         "inline refund failed; reconciler will retry",
       );
     }

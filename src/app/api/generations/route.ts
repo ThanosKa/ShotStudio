@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
 
   const rl = await generationRateLimit.limit(userId);
   if (!rl.success) {
+    log.warn("rate limit hit");
     return jsonError(429, "Too many generations — try again later.", {
       headers: {
         ...rateLimitHeaders(rl),
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
   // JIT user sync — closes the Clerk-vs-Stripe webhook race.
   await getEmailAndEnsureUser(userId);
 
+  const startedAt = Date.now();
   const outcome = await runGeneration({
     userId,
     appName: input.appName,
@@ -75,10 +77,14 @@ export async function POST(req: NextRequest) {
     stylePreset: input.stylePreset,
     screenshots: [screenshotFiles[0], screenshotFiles[1], screenshotFiles[2]],
   });
+  const durationMs = Date.now() - startedAt;
 
   switch (outcome.kind) {
     case "ok":
-      log.info({ generationId: outcome.generationId }, "generation complete");
+      log.info(
+        { generationId: outcome.generationId, durationMs },
+        "generation complete",
+      );
       return Response.json({
         generationId: outcome.generationId,
         imageUrls: outcome.imageUrls,
@@ -88,10 +94,10 @@ export async function POST(req: NextRequest) {
     case "insufficient_credits":
       return jsonError(402, "Insufficient credits.");
     case "user_not_ready":
-      log.error({}, "user not ready at debit");
+      log.warn("user not ready at debit");
       return jsonError(409, "Account not ready — please retry in a moment.");
     case "failed_and_refunded":
-      log.error({ reason: outcome.reason }, "generation failed");
+      log.error({ reason: outcome.reason, durationMs }, "generation failed");
       return jsonError(502, "Generation failed. Your credit has been refunded.");
   }
 }

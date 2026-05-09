@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   if (redis) {
     const claimed = await redis.set(idemKey, "1", { nx: true, ex: IDEMPOTENCY_TTL_SECONDS });
     if (claimed !== "OK") {
-      scoped.info("duplicate event — already processed");
+      scoped.debug("duplicate event — already processed");
       return new Response("OK", { status: 200 });
     }
   }
