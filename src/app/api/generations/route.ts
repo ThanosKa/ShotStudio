@@ -1,14 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
-import {
-  debitAndStartGeneration,
-  getEmailAndEnsureUser,
-  markGenerationComplete,
-  markGenerationFailed,
-} from "@/lib/db/queries";
-import { generate } from "@/lib/generation";
+import { getEmailAndEnsureUser } from "@/lib/db/queries";
+import { runGeneration } from "@/lib/generation";
 import { STYLE_PRESET_IDS } from "@/lib/generation/presets";
 import { jsonError } from "@/lib/http";
 import { logger } from "@/lib/logger";
@@ -25,9 +19,6 @@ const Body = z.object({
   category: z.string().min(1),
   stylePreset: z.enum(STYLE_PRESET_IDS),
 });
-
-const ALLOWED_MIME = ["image/jpeg", "image/png"];
-const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -60,12 +51,6 @@ export async function POST(req: NextRequest) {
     if (!(f instanceof File)) {
       return jsonError(400, `Missing screenshot_${i}`);
     }
-    if (!ALLOWED_MIME.includes(f.type)) {
-      return jsonError(400, "Screenshots must be JPEG or PNG.");
-    }
-    if (f.size > MAX_FILE_BYTES) {
-      return jsonError(400, "Screenshot too large after compression.");
-    }
     screenshotFiles.push(f);
   }
 
@@ -82,60 +67,31 @@ export async function POST(req: NextRequest) {
   // JIT user sync — closes the Clerk-vs-Stripe webhook race.
   await getEmailAndEnsureUser(userId);
 
-  let generationId: string;
-  try {
-    const started = await debitAndStartGeneration({
-      userId,
-      appName: input.appName,
-      stylePreset: input.stylePreset,
-      category: input.category,
-    });
-    generationId = started.generationId;
-  } catch (err) {
-    if (err instanceof InsufficientCreditsError) {
+  const outcome = await runGeneration({
+    userId,
+    appName: input.appName,
+    tagline: input.tagline,
+    category: input.category,
+    stylePreset: input.stylePreset,
+    screenshots: [screenshotFiles[0], screenshotFiles[1], screenshotFiles[2]],
+  });
+
+  switch (outcome.kind) {
+    case "ok":
+      log.info({ generationId: outcome.generationId }, "generation complete");
+      return Response.json({
+        generationId: outcome.generationId,
+        imageUrls: outcome.imageUrls,
+      });
+    case "invalid_input":
+      return jsonError(400, outcome.message);
+    case "insufficient_credits":
       return jsonError(402, "Insufficient credits.");
-    }
-    if (err instanceof UserNotFoundError) {
-      log.error({ err }, "user not found at debit");
+    case "user_not_ready":
+      log.error({}, "user not ready at debit");
       return jsonError(409, "Account not ready — please retry in a moment.");
-    }
-    log.error({ err }, "debit/start failed");
-    return jsonError(500, "Server error");
-  }
-
-  const screenshotDataUrls = (await Promise.all(
-    screenshotFiles.map(async (f) => {
-      const buf = Buffer.from(await f.arrayBuffer());
-      return `data:${f.type};base64,${buf.toString("base64")}`;
-    }),
-  )) as [string, string, string];
-  // Release ~5MB-per-file File handles before the long-running generate() await.
-  screenshotFiles.length = 0;
-
-  try {
-    const imageUrls = await generate({
-      appName: input.appName,
-      tagline: input.tagline,
-      category: input.category,
-      stylePreset: input.stylePreset,
-      screenshots: screenshotDataUrls,
-    });
-
-    await markGenerationComplete(generationId);
-
-    log.info({ generationId }, "generation complete");
-    return Response.json({ generationId, imageUrls });
-  } catch (err) {
-    log.error({ err, generationId }, "generation failed");
-    await markGenerationFailed(
-      generationId,
-      err instanceof Error ? err.message : "unknown",
-    );
-    try {
-      await refund(userId, 1, { reason: "generation_failed", generationId });
-    } catch (refundErr) {
-      log.error({ err: refundErr, generationId }, "refund failed");
-    }
-    return jsonError(502, "Generation failed. Your credit has been refunded.");
+    case "failed_and_refunded":
+      log.error({ reason: outcome.reason }, "generation failed");
+      return jsonError(502, "Generation failed. Your credit has been refunded.");
   }
 }

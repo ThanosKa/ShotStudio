@@ -1,51 +1,6 @@
-import { and, eq, lt, sql } from "drizzle-orm";
-import type { InferInsertModel } from "drizzle-orm";
-import { InsufficientCreditsError, UserNotFoundError } from "@/lib/credits";
+import { and, eq, lt } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { generations, transactions, users } from "@/lib/db/schema";
-
-type NewGeneration = Pick<
-  InferInsertModel<typeof generations>,
-  "userId" | "appName" | "stylePreset" | "category"
->;
-
-/**
- * Atomic: debit one credit and insert a pending generation row in the same
- * transaction. Throws InsufficientCreditsError or UserNotFoundError on failure.
- */
-export async function debitAndStartGeneration(input: NewGeneration) {
-  return db.transaction(async (tx) => {
-    const updated = await tx
-      .update(users)
-      .set({ credits: sql`${users.credits} - 1` })
-      .where(sql`${users.id} = ${input.userId} AND ${users.credits} >= 1`)
-      .returning({ credits: users.credits });
-
-    if (updated.length === 0) {
-      const [exists] = await tx
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.id, input.userId))
-        .limit(1);
-      if (!exists) throw new UserNotFoundError(input.userId);
-      throw new InsufficientCreditsError();
-    }
-
-    await tx.insert(transactions).values({
-      userId: input.userId,
-      type: "usage",
-      amount: -1,
-      metadata: { reason: "generation" },
-    });
-
-    const [row] = await tx
-      .insert(generations)
-      .values({ ...input, status: "pending" })
-      .returning({ id: generations.id });
-
-    return { generationId: row.id, balance: updated[0].credits };
-  });
-}
+import { generations } from "@/lib/db/schema";
 
 export async function markGenerationComplete(generationId: string) {
   await db

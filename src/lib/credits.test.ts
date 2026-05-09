@@ -2,12 +2,8 @@ import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 import { db } from "@/lib/db";
 import { generations, transactions, users } from "@/lib/db/schema";
-import {
-  debitAndStartGeneration,
-  ensureUser,
-  reapStalePending,
-} from "@/lib/db/queries";
-import { grant, InsufficientCreditsError, UserNotFoundError } from "./credits";
+import { ensureUser, reapStalePending } from "@/lib/db/queries";
+import { grant } from "./credits";
 
 describe("grant", () => {
   test("is idempotent on duplicate stripePaymentId", async () => {
@@ -24,38 +20,6 @@ describe("grant", () => {
       .from(transactions)
       .where(eq(transactions.stripePaymentId, "evt_X"));
     expect(txs).toHaveLength(1);
-  });
-});
-
-describe("debitAndStartGeneration", () => {
-  test("blocks at 0 credits and inserts no generation row", async () => {
-    await ensureUser("u_zero", "u_zero@test");
-
-    await expect(
-      debitAndStartGeneration({
-        userId: "u_zero",
-        appName: "Acme",
-        stylePreset: "soft_bright",
-        category: "productivity",
-      }),
-    ).rejects.toBeInstanceOf(InsufficientCreditsError);
-
-    const gens = await db
-      .select()
-      .from(generations)
-      .where(eq(generations.userId, "u_zero"));
-    expect(gens).toHaveLength(0);
-  });
-
-  test("throws UserNotFoundError on missing user (not FK error)", async () => {
-    await expect(
-      debitAndStartGeneration({
-        userId: "ghost",
-        appName: "Acme",
-        stylePreset: "soft_bright",
-        category: "productivity",
-      }),
-    ).rejects.toBeInstanceOf(UserNotFoundError);
   });
 });
 

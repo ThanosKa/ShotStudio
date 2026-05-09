@@ -13,6 +13,16 @@ vi.mock("@/lib/db", () => ({
   schema,
 }));
 
+// 1×1 transparent PNG in base64. Lets sharp.upscaleToAppStore run on real
+// bytes without hitting the network; tests that need OpenRouter to throw or
+// return specific data override this via `vi.mocked(generateImage)`.
+const ONE_PX_PNG_B64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
+vi.mock("@/lib/openrouter", () => ({
+  generateImage: vi.fn(async () => ONE_PX_PNG_B64),
+}));
+
 beforeEach(async () => {
   const { db } = await createTestDb();
   currentDb = db;
