@@ -1,13 +1,9 @@
 import type { NextRequest } from "next/server";
-import Stripe from "stripe";
-import { grant } from "@/lib/credits";
-import { ensureUser } from "@/lib/db/queries";
-import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
+import type Stripe from "stripe";
+import { runCheckoutFulfillment } from "@/lib/billing/checkout";
 import { logger } from "@/lib/logger";
-import { getCreditPackage } from "@/lib/packages";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
-import { pluralize } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,11 +15,6 @@ const WEBHOOK_SECRET: string = (() => {
 })();
 
 const IDEMPOTENCY_TTL_SECONDS = 60 * 60 * 24;
-
-function formatAmount(amountCents: number, currency: string) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() })
-    .format(amountCents / 100);
-}
 
 export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID();
@@ -58,70 +49,33 @@ export async function POST(req: NextRequest) {
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.userId ?? session.client_reference_id ?? null;
-      const packageId = session.metadata?.packageId ?? null;
-      const handler = scoped.child({ sessionId: session.id, userId, packageId });
+      const outcome = await runCheckoutFulfillment({
+        session,
+        eventId: event.id,
+      });
 
-      if (!userId || !packageId) {
-        handler.error("missing userId or packageId on completed session");
-        return new Response("OK", { status: 200 });
-      }
-
-      const pack = getCreditPackage(packageId);
-
-      if (!pack) {
-        handler.error("unknown package on completed session");
-        return new Response("OK", { status: 200 });
-      }
-
-      // Kick off the receipt-URL fetch in parallel with our DB writes — it
-      // doesn't depend on the user/grant work and otherwise adds 200–500ms to
-      // the critical path.
-      const piPromise: Promise<Stripe.PaymentIntent | null> =
-        typeof session.payment_intent === "string"
-          ? stripe.paymentIntents
-              .retrieve(session.payment_intent, { expand: ["latest_charge"] })
-              .catch((err) => {
-                handler.warn({ err, paymentIntent: session.payment_intent }, "failed to fetch receipt url");
-                return null;
-              })
-          : Promise.resolve(null);
-
-      // Close the Clerk-vs-Stripe webhook race: if the Clerk user.created event
-      // hasn't been processed yet, ensureUser() upserts a row so grant() can
-      // attach credits.
-      const checkoutEmail = session.customer_details?.email ?? null;
-      if (checkoutEmail) await ensureUser(userId, checkoutEmail);
-
-      const newBalance = await grant(userId, pack.credits, session.id);
-      handler.info({ creditsAdded: pack.credits, newBalance }, "credits granted");
-
-      const pi = await piPromise;
-      const charge = pi?.latest_charge;
-      const receiptUrl =
-        charge && typeof charge !== "string" ? charge.receipt_url ?? null : null;
-
-      if (checkoutEmail) {
-        const { data, error } = await sendCreditsPurchasedEmail({
-          to: checkoutEmail,
-          stripeEventId: event.id,
-          firstName: session.customer_details?.name?.split(" ")[0] ?? null,
-          packageName: `${pack.name} — ${pack.credits} ${pluralize(pack.credits, "set")}`,
-          creditsAdded: pack.credits,
-          newBalance,
-          amountFormatted: formatAmount(
-            session.amount_total ?? pack.priceCents,
-            session.currency ?? "usd",
-          ),
-          receiptUrl,
-        });
-        if (error) {
-          handler.error({ err: error }, "purchase email failed");
-        } else {
-          handler.info({ emailId: data?.id }, "purchase email sent");
-        }
-      } else {
-        handler.warn("no email available for purchase confirmation");
+      switch (outcome.kind) {
+        case "ok":
+          scoped.info(
+            {
+              userId: outcome.userId,
+              creditsGranted: outcome.creditsGranted,
+              newBalance: outcome.newBalance,
+              emailSent: outcome.emailSent,
+            },
+            "checkout fulfilled",
+          );
+          return new Response("OK", { status: 200 });
+        case "invalid_metadata":
+          scoped.error({ missing: outcome.missing }, "missing session metadata");
+          return new Response("OK", { status: 200 });
+        case "unknown_pack":
+          scoped.error({ packageId: outcome.packageId }, "unknown package");
+          return new Response("OK", { status: 200 });
+        case "user_not_ready":
+          if (redis) await redis.del(idemKey);
+          scoped.warn({ userId: outcome.userId }, "user not ready — letting Stripe retry");
+          return new Response("User not ready", { status: 500 });
       }
     } else {
       scoped.debug("unhandled event type");
