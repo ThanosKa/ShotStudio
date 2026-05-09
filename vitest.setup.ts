@@ -2,6 +2,12 @@ import { beforeEach, vi } from "vitest";
 import { createTestDb, type TestDb } from "./src/lib/db/test-db";
 import * as schema from "./src/lib/db/schema";
 
+// Stripe Price IDs are read at module load by `@/lib/packages`. Pre-populate
+// them so `getCreditPackage(...).stripePriceId` is defined in tests.
+process.env.STRIPE_PRICE_STARTER ??= "price_test_starter";
+process.env.STRIPE_PRICE_GROWTH ??= "price_test_growth";
+process.env.STRIPE_PRICE_STUDIO ??= "price_test_studio";
+
 // Mutable holder so `beforeEach` can swap in a fresh DB per test without
 // re-mocking. The `get db()` accessor below reads the live value.
 let currentDb: TestDb;

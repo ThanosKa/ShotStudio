@@ -5,7 +5,8 @@ import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/db/queries";
 import { transactions, users } from "@/lib/db/schema";
 import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
-import { runCheckoutFulfillment } from "./checkout";
+import { stripe } from "@/lib/stripe";
+import { createCheckoutSession, runCheckoutFulfillment } from "./checkout";
 
 vi.mock("@/lib/stripe", () => ({
   stripe: {
@@ -13,6 +14,14 @@ vi.mock("@/lib/stripe", () => ({
       retrieve: vi.fn(async () => ({
         latest_charge: { receipt_url: "https://stripe.test/receipt/x" },
       })),
+    },
+    checkout: {
+      sessions: {
+        create: vi.fn(async () => ({
+          id: "cs_new_1",
+          url: "https://checkout.stripe.test/c/cs_new_1",
+        })),
+      },
     },
   },
 }));
@@ -142,5 +151,45 @@ describe("runCheckoutFulfillment", () => {
     const txs = await db.select().from(transactions);
     expect(txs).toHaveLength(0);
     expect(vi.mocked(sendCreditsPurchasedEmail)).not.toHaveBeenCalled();
+  });
+});
+
+describe("createCheckoutSession", () => {
+  test("ok: builds Stripe session with userId metadata, returns checkout url", async () => {
+    vi.mocked(stripe.checkout.sessions.create).mockClear();
+
+    const outcome = await createCheckoutSession({
+      userId: "u_pay",
+      packageId: "growth",
+      email: "u_pay@test",
+    });
+
+    expect(outcome.kind).toBe("ok");
+    if (outcome.kind !== "ok") return;
+    expect(outcome.checkoutUrl).toBe("https://checkout.stripe.test/c/cs_new_1");
+
+    expect(vi.mocked(stripe.checkout.sessions.create)).toHaveBeenCalledTimes(1);
+    const arg = vi.mocked(stripe.checkout.sessions.create).mock.calls[0][0]!;
+    expect(arg.mode).toBe("payment");
+    expect(arg.client_reference_id).toBe("u_pay");
+    expect(arg.customer_email).toBe("u_pay@test");
+    expect(arg.metadata).toMatchObject({ userId: "u_pay", packageId: "growth" });
+    expect(arg.line_items?.[0]).toMatchObject({
+      price: "price_test_growth",
+      quantity: 1,
+    });
+  });
+
+  test("unknown_pack: no Stripe call", async () => {
+    vi.mocked(stripe.checkout.sessions.create).mockClear();
+
+    const outcome = await createCheckoutSession({
+      userId: "u_pay",
+      packageId: "enterprise",
+      email: "u_pay@test",
+    });
+
+    expect(outcome).toEqual({ kind: "unknown_pack", packageId: "enterprise" });
+    expect(vi.mocked(stripe.checkout.sessions.create)).not.toHaveBeenCalled();
   });
 });

@@ -9,7 +9,46 @@ import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
 import { logger } from "@/lib/logger";
 import { getCreditPackage } from "@/lib/packages";
 import { stripe } from "@/lib/stripe";
-import { pluralize } from "@/lib/utils";
+import { APP_URL, pluralize } from "@/lib/utils";
+
+export type CreateCheckoutSessionInput = {
+  userId: string;
+  packageId: string;
+  email: string | null;
+};
+
+export type CreateCheckoutSessionOutcome =
+  | { kind: "ok"; checkoutUrl: string }
+  | { kind: "unknown_pack"; packageId: string }
+  | { kind: "pack_unconfigured"; packageId: string };
+
+export async function createCheckoutSession(
+  input: CreateCheckoutSessionInput,
+): Promise<CreateCheckoutSessionOutcome> {
+  const pack = getCreditPackage(input.packageId);
+  if (!pack) return { kind: "unknown_pack", packageId: input.packageId };
+  if (!pack.stripePriceId) {
+    return { kind: "pack_unconfigured", packageId: input.packageId };
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    line_items: [{ price: pack.stripePriceId, quantity: 1 }],
+    customer_email: input.email ?? undefined,
+    client_reference_id: input.userId,
+    allow_promotion_codes: true,
+    automatic_tax: { enabled: true },
+    success_url: `${APP_URL}/home?purchase=success`,
+    cancel_url: `${APP_URL}/pricing?purchase=cancelled`,
+    metadata: {
+      userId: input.userId,
+      packageId: pack.id,
+    },
+  });
+
+  if (!session.url) throw new Error("Stripe returned a session with no url");
+  return { kind: "ok", checkoutUrl: session.url };
+}
 
 export type CheckoutFulfillmentInput = {
   session: Stripe.Checkout.Session;
