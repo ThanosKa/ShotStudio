@@ -6,11 +6,13 @@ import { logger } from "@/lib/logger";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const STALE_AFTER_MS = 15 * 60 * 1000;
+// Generation route maxDuration is 300s (5 min); anything pending after 7 min is
+// provably orphaned (route was killed without running its in-route refund path).
+const STALE_AFTER_MS = 7 * 60 * 1000;
 
 /**
- * Reaps generations stuck in `pending` longer than 15 min and refunds the
- * credit. Auth via Vercel Cron's `Authorization: Bearer ${CRON_SECRET}` header.
+ * Reaps generations stuck in `pending` past the route's maxDuration and refunds
+ * the credit. Auth via Vercel Cron's `Authorization: Bearer ${CRON_SECRET}` header.
  *
  * Wire into vercel.json:
  *   { "crons": [{ "path": "/api/cron/reconcile-generations", "schedule": "*\/10 * * * *" }] }

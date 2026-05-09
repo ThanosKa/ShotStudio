@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { eq, sql } from "drizzle-orm";
-import { db } from "../index";
-import { users } from "../schema";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
 
 export const getUserCredits = cache(async (userId: string): Promise<number> => {
   const row = await db.query.users.findFirst({

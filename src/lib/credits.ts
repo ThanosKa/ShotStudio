@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
-import { db } from "./db";
-import { transactions, users } from "./db/schema";
+import { db } from "@/lib/db";
+import { transactions, users } from "@/lib/db/schema";
 
 export class InsufficientCreditsError extends Error {
   constructor() {
@@ -14,39 +14,6 @@ export class UserNotFoundError extends Error {
     super(`User not found: ${userId}`);
     this.name = "UserNotFoundError";
   }
-}
-
-export async function debit(
-  userId: string,
-  n: number,
-  metadata?: Record<string, unknown>,
-) {
-  return db.transaction(async (tx) => {
-    const updated = await tx
-      .update(users)
-      .set({ credits: sql`${users.credits} - ${n}` })
-      .where(sql`${users.id} = ${userId} AND ${users.credits} >= ${n}`)
-      .returning({ credits: users.credits });
-
-    if (updated.length === 0) {
-      const [exists] = await tx
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
-      if (!exists) throw new UserNotFoundError(userId);
-      throw new InsufficientCreditsError();
-    }
-
-    await tx.insert(transactions).values({
-      userId,
-      type: "usage",
-      amount: -n,
-      metadata: metadata ?? null,
-    });
-
-    return updated[0].credits;
-  });
 }
 
 export async function refund(
@@ -92,7 +59,12 @@ export async function grant(
         amount: n,
         stripePaymentId,
       })
-      .onConflictDoNothing({ target: transactions.stripePaymentId })
+      .onConflictDoNothing({
+        target: transactions.stripePaymentId,
+        // Required: matches the partial unique index's WHERE clause so
+        // Postgres' arbiter inference can find it.
+        where: sql`${transactions.stripePaymentId} is not null`,
+      })
       .returning({ id: transactions.id });
 
     if (inserted.length === 0) {

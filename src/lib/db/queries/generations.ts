@@ -1,8 +1,8 @@
 import { and, eq, lt, sql } from "drizzle-orm";
 import type { InferInsertModel } from "drizzle-orm";
 import { InsufficientCreditsError, UserNotFoundError } from "@/lib/credits";
-import { db } from "../index";
-import { generations, transactions, users } from "../schema";
+import { db } from "@/lib/db";
+import { generations, transactions, users } from "@/lib/db/schema";
 
 type NewGeneration = Pick<
   InferInsertModel<typeof generations>,

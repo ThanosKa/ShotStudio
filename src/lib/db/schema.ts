@@ -43,7 +43,9 @@ export const users = pgTable(
   },
   (t) => [
     uniqueIndex("users_email_uniq").on(t.email),
-    uniqueIndex("users_stripe_customer_id_uniq").on(t.stripeCustomerId),
+    uniqueIndex("users_stripe_customer_id_uniq")
+      .on(t.stripeCustomerId)
+      .where(sql`${t.stripeCustomerId} is not null`),
   ],
 );
 

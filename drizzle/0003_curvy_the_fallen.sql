@@ -1,0 +1,2 @@
+DROP INDEX "users_stripe_customer_id_uniq";--> statement-breakpoint
+CREATE UNIQUE INDEX "users_stripe_customer_id_uniq" ON "users" USING btree ("stripe_customer_id") WHERE "users"."stripe_customer_id" is not null;
