@@ -1,9 +1,10 @@
+import { APP_URL } from "@/lib/env";
+
 const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey) throw new Error("OPENROUTER_API_KEY is not set");
 
 const ENDPOINT = "https://openrouter.ai/api/v1";
 const MODEL = "openai/gpt-5.4-image-2";
-const HTTP_REFERER = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export type ImageGenerationInput = {
   prompt: string;
@@ -56,7 +57,7 @@ export async function generateImage(input: ImageGenerationInput): Promise<string
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": HTTP_REFERER,
+        "HTTP-Referer": APP_URL,
         "X-Title": "ShotStudio",
       },
       body: JSON.stringify({

@@ -1,17 +1,16 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { BuyCreditsPanel } from "@/components/buy-credits-panel";
 import { Wizard } from "@/components/wizard";
-import { ensureUser, getUserCredits } from "@/lib/db/queries";
+import { getEmailAndEnsureUser } from "@/lib/auth";
+import { getUserCredits } from "@/lib/db/queries";
 
 export default async function HomePage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const user = await currentUser();
-  const email = user?.emailAddresses[0]?.emailAddress;
-  if (email) await ensureUser(userId, email);
+  await getEmailAndEnsureUser(userId);
 
   const credits = await getUserCredits(userId);
 

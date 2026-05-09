@@ -10,6 +10,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { STYLE_PRESET_IDS } from "../generation/presets";
 
 export const transactionType = pgEnum("transaction_type", [
   "purchase",
@@ -23,12 +24,7 @@ export const generationStatus = pgEnum("generation_status", [
   "failed",
 ]);
 
-export const stylePreset = pgEnum("style_preset", [
-  "soft_bright",
-  "dark_premium",
-  "clean_minimal",
-  "bold_playful",
-]);
+export const stylePreset = pgEnum("style_preset", STYLE_PRESET_IDS);
 
 export const users = pgTable(
   "users",

@@ -1,6 +1,8 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import { APP_URL } from "@/lib/env";
+import { jsonError } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import { CREDIT_PACKAGE_IDS, getCreditPackage } from "@/lib/packages";
 import { checkoutRateLimit, rateLimitHeaders } from "@/lib/ratelimit";
@@ -11,12 +13,6 @@ export const dynamic = "force-dynamic";
 const Body = z.object({
   packageId: z.enum(CREDIT_PACKAGE_IDS),
 });
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
-function jsonError(status: number, error: string, init?: ResponseInit) {
-  return Response.json({ error }, { status, ...init });
-}
 
 export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID();

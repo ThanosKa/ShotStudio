@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 // Generation route maxDuration is 300s (5 min); anything pending after 7 min is
 // provably orphaned (route was killed without running its in-route refund path).
@@ -30,21 +31,27 @@ export async function GET(req: NextRequest) {
   const cutoff = new Date(Date.now() - STALE_AFTER_MS);
   const reaped = await reapStalePending(cutoff);
 
-  let refunded = 0;
-  for (const row of reaped) {
-    try {
-      await refund(row.userId, 1, {
+  const results = await Promise.allSettled(
+    reaped.map((row) =>
+      refund(row.userId, 1, {
         reason: "reconciler_timeout",
         generationId: row.id,
-      });
+      }),
+    ),
+  );
+
+  let refunded = 0;
+  results.forEach((r, i) => {
+    if (r.status === "fulfilled") {
       refunded += 1;
-    } catch (err) {
+    } else {
+      const row = reaped[i];
       log.error(
-        { err, userId: row.userId, generationId: row.id },
+        { err: r.reason, userId: row.userId, generationId: row.id },
         "refund failed for reaped generation",
       );
     }
-  }
+  });
 
   log.info({ reaped: reaped.length, refunded }, "reconciler done");
   return Response.json({ reaped: reaped.length, refunded });

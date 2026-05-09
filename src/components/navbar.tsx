@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import { pluralize } from "@/lib/utils";
 
 export function Navbar({ credits }: { credits: number }) {
   return (
@@ -11,7 +12,7 @@ export function Navbar({ credits }: { credits: number }) {
         </Link>
         <div className="flex items-center gap-4">
           <span className="rounded-full border px-3 py-1 text-sm">
-            {credits} {credits === 1 ? "credit" : "credits"}
+            {credits} {pluralize(credits, "credit")}
           </span>
           <UserButton appearance={dark} />
         </div>

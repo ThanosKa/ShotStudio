@@ -1,8 +1,11 @@
-export type StylePresetId =
-  | "soft_bright"
-  | "dark_premium"
-  | "clean_minimal"
-  | "bold_playful";
+export const STYLE_PRESET_IDS = [
+  "soft_bright",
+  "dark_premium",
+  "clean_minimal",
+  "bold_playful",
+] as const;
+
+export type StylePresetId = (typeof STYLE_PRESET_IDS)[number];
 
 export type StylePreset = {
   id: StylePresetId;

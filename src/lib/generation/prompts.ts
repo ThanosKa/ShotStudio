@@ -11,7 +11,6 @@ export type ShotInput = {
 };
 
 export function buildPrompt(input: ShotInput): string {
-  // Placeholder. Real prompts iterated during pre-launch QA.
   const referenceLine =
     input.role === "title"
       ? "No reference image provided — invent a hero composition."

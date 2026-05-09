@@ -19,20 +19,16 @@ import {
 } from "@/lib/generation/presets";
 import { ResultPanel } from "@/components/result-panel";
 import { WizardStepper } from "@/components/wizard-stepper";
+import { parseApiError } from "@/lib/http";
 import { compressImage } from "@/lib/image/compress";
 import { cn } from "@/lib/utils";
+import {
+  TAGLINE_MAX_WORDS,
+  TAGLINE_MIN_WORDS,
+  wordCount,
+} from "@/lib/validation/tagline";
 
-const CATEGORIES = [
-  "productivity",
-  "wellness",
-  "finance",
-  "games",
-  "social",
-  "education",
-  "lifestyle",
-  "dev tools",
-  "other",
-] as const;
+const CATEGORIES = Object.keys(CATEGORY_DEFAULT_PRESET);
 
 const SHOT_LABELS = ["Hero feature", "Differentiator", "Another feature"] as const;
 
@@ -54,10 +50,6 @@ const EMPTY_SHOT: ShotState = {
   compressing: false,
 };
 
-function wordCount(s: string) {
-  return s.trim().split(/\s+/).filter(Boolean).length;
-}
-
 export function Wizard() {
   const [step, setStep] = useState<Step>(0);
   const [appName, setAppName] = useState("");
@@ -77,8 +69,6 @@ export function Wizard() {
     preset || (category ? CATEGORY_DEFAULT_PRESET[category] : "");
   const taglineWords = wordCount(tagline);
 
-  // Track latest shots in a ref so the unmount cleanup revokes the
-  // currently-active object URLs rather than the stale initial array.
   const shotsRef = useRef(shots);
   shotsRef.current = shots;
 
@@ -90,41 +80,35 @@ export function Wizard() {
     };
   }, []);
 
+  function updateShot(idx: number, updater: (s: ShotState) => ShotState) {
+    setShots((prev) => prev.map((s, i) => (i === idx ? updater(s) : s)));
+  }
+
   async function compressIntoSlot(idx: number, raw: File) {
-    setShots((prev) =>
-      prev.map((s, i) => {
-        if (i !== idx) return s;
-        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
-        return { file: null, previewUrl: null, compressing: true };
-      }),
-    );
+    updateShot(idx, (s) => {
+      if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+      return { file: null, previewUrl: null, compressing: true };
+    });
     try {
       const compressed = await compressImage(raw);
       const url = URL.createObjectURL(compressed);
-      setShots((prev) =>
-        prev.map((s, i) =>
-          i === idx
-            ? { file: compressed, previewUrl: url, compressing: false }
-            : s,
-        ),
-      );
+      updateShot(idx, () => ({
+        file: compressed,
+        previewUrl: url,
+        compressing: false,
+      }));
     } catch {
-      setShots((prev) =>
-        prev.map((s, i) => (i === idx ? EMPTY_SHOT : s)),
-      );
+      updateShot(idx, () => EMPTY_SHOT);
       setError("Couldn't process that image. Try another file.");
     }
   }
 
   function setShotFile(idx: number, file: File | null) {
     if (!file) {
-      setShots((prev) =>
-        prev.map((s, i) => {
-          if (i !== idx) return s;
-          if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
-          return EMPTY_SHOT;
-        }),
-      );
+      updateShot(idx, (s) => {
+        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+        return EMPTY_SHOT;
+      });
       return;
     }
     void compressIntoSlot(idx, file);
@@ -143,8 +127,8 @@ export function Wizard() {
   function validateStep(s: Step): string | null {
     if (s === 0) {
       if (!appName.trim()) return "App name is required.";
-      if (taglineWords < 5 || taglineWords > 10)
-        return "Tagline must be 5–10 words.";
+      if (taglineWords < TAGLINE_MIN_WORDS || taglineWords > TAGLINE_MAX_WORDS)
+        return `Tagline must be ${TAGLINE_MIN_WORDS}–${TAGLINE_MAX_WORDS} words.`;
       if (!category) return "Pick a category.";
       return null;
     }
@@ -203,14 +187,7 @@ export function Wizard() {
       });
       const data: unknown = await res.json().catch(() => null);
       if (!res.ok || !data || typeof data !== "object") {
-        const msg =
-          data &&
-          typeof data === "object" &&
-          "error" in data &&
-          typeof (data as { error: unknown }).error === "string"
-            ? (data as { error: string }).error
-            : `Generation failed (${res.status})`;
-        throw new Error(msg);
+        throw new Error(parseApiError(res.status, data, "Generation failed"));
       }
       const ok = data as { imageUrls?: string[] };
       if (!ok.imageUrls || ok.imageUrls.length !== 4) {
@@ -366,12 +343,15 @@ function StepApp({
               "font-mono text-[10px] uppercase tracking-widest",
               taglineWords === 0 && "text-muted-foreground",
               taglineWords > 0 &&
-                (taglineWords < 5 || taglineWords > 10) &&
+                (taglineWords < TAGLINE_MIN_WORDS ||
+                  taglineWords > TAGLINE_MAX_WORDS) &&
                 "text-red-400",
-              taglineWords >= 5 && taglineWords <= 10 && "text-emerald-400",
+              taglineWords >= TAGLINE_MIN_WORDS &&
+                taglineWords <= TAGLINE_MAX_WORDS &&
+                "text-emerald-400",
             )}
           >
-            {taglineWords}/5–10 words
+            {taglineWords}/{TAGLINE_MIN_WORDS}–{TAGLINE_MAX_WORDS} words
           </span>
         </div>
         <Input
@@ -596,4 +576,3 @@ function GeneratingPanel() {
   );
 }
 
-export type { Status };

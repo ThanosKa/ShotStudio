@@ -1,15 +1,13 @@
-import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import Stripe from "stripe";
 import { grant } from "@/lib/credits";
-import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/db/queries";
-import { users } from "@/lib/db/schema";
 import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
 import { logger } from "@/lib/logger";
 import { getCreditPackage } from "@/lib/packages";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
+import { pluralize } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,7 +18,7 @@ const WEBHOOK_SECRET: string = (() => {
   return v;
 })();
 
-const IDEMPOTENCY_TTL_SECONDS = 60 * 60 * 24; // 24h
+const IDEMPOTENCY_TTL_SECONDS = 60 * 60 * 24;
 
 function formatAmount(amountCents: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() })
@@ -76,41 +74,39 @@ export async function POST(req: NextRequest) {
         return new Response("OK", { status: 200 });
       }
 
+      // Kick off the receipt-URL fetch in parallel with our DB writes — it
+      // doesn't depend on the user/grant work and otherwise adds 200–500ms to
+      // the critical path.
+      const piPromise: Promise<Stripe.PaymentIntent | null> =
+        typeof session.payment_intent === "string"
+          ? stripe.paymentIntents
+              .retrieve(session.payment_intent, { expand: ["latest_charge"] })
+              .catch((err) => {
+                handler.warn({ err, paymentIntent: session.payment_intent }, "failed to fetch receipt url");
+                return null;
+              })
+          : Promise.resolve(null);
+
       // Close the Clerk-vs-Stripe webhook race: if the Clerk user.created event
       // hasn't been processed yet, ensureUser() upserts a row so grant() can
-      // attach credits. Email comes from Stripe customer details as a fallback.
+      // attach credits.
       const checkoutEmail = session.customer_details?.email ?? null;
       if (checkoutEmail) await ensureUser(userId, checkoutEmail);
 
       const newBalance = await grant(userId, pack.credits, session.id);
       handler.info({ creditsAdded: pack.credits, newBalance }, "credits granted");
 
-      const [user] = await db
-        .select({ email: users.email })
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
-      const email = user?.email ?? checkoutEmail;
+      const pi = await piPromise;
+      const charge = pi?.latest_charge;
+      const receiptUrl =
+        charge && typeof charge !== "string" ? charge.receipt_url ?? null : null;
 
-      let receiptUrl: string | null = null;
-      if (typeof session.payment_intent === "string") {
-        try {
-          const pi = await stripe.paymentIntents.retrieve(session.payment_intent, {
-            expand: ["latest_charge"],
-          });
-          const charge = pi.latest_charge;
-          if (charge && typeof charge !== "string") receiptUrl = charge.receipt_url ?? null;
-        } catch (err) {
-          handler.warn({ err, paymentIntent: session.payment_intent }, "failed to fetch receipt url");
-        }
-      }
-
-      if (email) {
+      if (checkoutEmail) {
         const { data, error } = await sendCreditsPurchasedEmail({
-          to: email,
+          to: checkoutEmail,
           stripeEventId: event.id,
           firstName: session.customer_details?.name?.split(" ")[0] ?? null,
-          packageName: `${pack.name} — ${pack.credits} ${pack.credits === 1 ? "set" : "sets"}`,
+          packageName: `${pack.name} — ${pack.credits} ${pluralize(pack.credits, "set")}`,
           creditsAdded: pack.credits,
           newBalance,
           amountFormatted: formatAmount(

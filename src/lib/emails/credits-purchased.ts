@@ -1,8 +1,7 @@
-import { render } from "react-email";
 import CreditsPurchasedEmail from "../../../emails/credits-purchased";
-import { FROM_EMAIL, resend } from "../resend";
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shotstudio.app";
+import { APP_URL } from "../env";
+import { pluralize } from "../utils";
+import { sendTransactional } from "./send";
 
 export async function sendCreditsPurchasedEmail(params: {
   to: string;
@@ -14,39 +13,18 @@ export async function sendCreditsPurchasedEmail(params: {
   amountFormatted: string;
   receiptUrl?: string | null;
 }) {
-  const {
-    to,
-    stripeEventId,
-    firstName,
-    packageName,
-    creditsAdded,
-    newBalance,
-    amountFormatted,
-    receiptUrl,
-  } = params;
-
-  const element = CreditsPurchasedEmail({
-    firstName,
-    packageName,
-    creditsAdded,
-    newBalance,
-    amountFormatted,
-    receiptUrl,
-    appUrl: APP_URL,
+  return sendTransactional({
+    element: CreditsPurchasedEmail({
+      firstName: params.firstName,
+      packageName: params.packageName,
+      creditsAdded: params.creditsAdded,
+      newBalance: params.newBalance,
+      amountFormatted: params.amountFormatted,
+      receiptUrl: params.receiptUrl,
+      appUrl: APP_URL,
+    }),
+    to: params.to,
+    subject: `Payment confirmed — ${params.creditsAdded} ${pluralize(params.creditsAdded, "credit")} added`,
+    idempotencyKey: `credits-purchased/${params.stripeEventId}`,
   });
-  const [html, text] = await Promise.all([
-    render(element),
-    render(element, { plainText: true }),
-  ]);
-
-  return resend.emails.send(
-    {
-      from: FROM_EMAIL,
-      to,
-      subject: `Payment confirmed — ${creditsAdded} credit${creditsAdded === 1 ? "" : "s"} added`,
-      html,
-      text,
-    },
-    { idempotencyKey: `credits-purchased/${stripeEventId}` },
-  );
 }

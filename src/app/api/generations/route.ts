@@ -1,16 +1,19 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import { getEmailAndEnsureUser } from "@/lib/auth";
 import { InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
 import {
   debitAndStartGeneration,
-  ensureUser,
   markGenerationComplete,
   markGenerationFailed,
 } from "@/lib/db/queries";
 import { generate } from "@/lib/generation";
+import { STYLE_PRESET_IDS } from "@/lib/generation/presets";
+import { jsonError } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import { generationRateLimit, rateLimitHeaders } from "@/lib/ratelimit";
+import { taglineSchema } from "@/lib/validation/tagline";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,28 +21,13 @@ export const maxDuration = 300;
 
 const Body = z.object({
   appName: z.string().min(1).max(60),
-  tagline: z
-    .string()
-    .min(1)
-    .refine((s) => {
-      const w = s.trim().split(/\s+/).filter(Boolean).length;
-      return w >= 5 && w <= 10;
-    }, "Tagline must be 5–10 words"),
+  tagline: taglineSchema,
   category: z.string().min(1),
-  stylePreset: z.enum([
-    "soft_bright",
-    "dark_premium",
-    "clean_minimal",
-    "bold_playful",
-  ]),
+  stylePreset: z.enum(STYLE_PRESET_IDS),
 });
 
 const ALLOWED_MIME = ["image/jpeg", "image/png"];
-const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB per file after client compression
-
-function jsonError(status: number, error: string, init?: ResponseInit) {
-  return Response.json({ error }, { status, ...init });
-}
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -92,9 +80,7 @@ export async function POST(req: NextRequest) {
   }
 
   // JIT user sync — closes the Clerk-vs-Stripe webhook race.
-  const clerkUser = await currentUser();
-  const email = clerkUser?.emailAddresses[0]?.emailAddress;
-  if (email) await ensureUser(userId, email);
+  await getEmailAndEnsureUser(userId);
 
   let generationId: string;
   try {
@@ -123,6 +109,8 @@ export async function POST(req: NextRequest) {
       return `data:${f.type};base64,${buf.toString("base64")}`;
     }),
   )) as [string, string, string];
+  // Release ~5MB-per-file File handles before the long-running generate() await.
+  screenshotFiles.length = 0;
 
   try {
     const imageUrls = await generate({

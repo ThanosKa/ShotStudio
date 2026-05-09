@@ -3,20 +3,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { parseApiError } from "@/lib/http";
+import {
+  CREDIT_PACKAGE_LIST,
+  type CreditPackageId,
+  formatPriceUSD,
+} from "@/lib/packages";
+import { pluralize } from "@/lib/utils";
 
-const PACKS = [
-  { id: "starter", name: "Starter", credits: 1, price: "$7", blurb: "One App Store set" },
-  { id: "growth", name: "Growth", credits: 4, price: "$17", blurb: "Four sets — for iterating" },
-  { id: "studio", name: "Studio", credits: 10, price: "$37", blurb: "Ten sets — for portfolios" },
-] as const;
-
-type PackId = (typeof PACKS)[number]["id"];
+const BLURBS: Record<CreditPackageId, string> = {
+  starter: "One App Store set",
+  growth: "Four sets — for iterating",
+  studio: "Ten sets — for portfolios",
+};
 
 export function PricingCards() {
-  const [busy, setBusy] = useState<PackId | null>(null);
+  const [busy, setBusy] = useState<CreditPackageId | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function buy(packageId: PackId) {
+  async function buy(packageId: CreditPackageId) {
     setError(null);
     setBusy(packageId);
     try {
@@ -26,16 +31,7 @@ export function PricingCards() {
         body: JSON.stringify({ packageId }),
       });
       const data: unknown = await res.json().catch(() => null);
-      if (!res.ok) {
-        const msg =
-          data &&
-          typeof data === "object" &&
-          "error" in data &&
-          typeof (data as { error: unknown }).error === "string"
-            ? (data as { error: string }).error
-            : `Checkout failed (${res.status})`;
-        throw new Error(msg);
-      }
+      if (!res.ok) throw new Error(parseApiError(res.status, data, "Checkout failed"));
       if (
         !data ||
         typeof data !== "object" ||
@@ -54,19 +50,19 @@ export function PricingCards() {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-3">
-        {PACKS.map((p) => (
+        {CREDIT_PACKAGE_LIST.map((p) => (
           <Card key={p.id} className="flex h-full flex-col">
             <CardHeader>
               <CardTitle className="text-xl">{p.name}</CardTitle>
-              <CardDescription>{p.blurb}</CardDescription>
+              <CardDescription>{BLURBS[p.id]}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col justify-between gap-8 pb-6">
               <div>
                 <div className="text-4xl font-semibold tracking-tight">
-                  {p.price}
+                  {formatPriceUSD(p.priceCents)}
                 </div>
                 <div className="mt-1 text-sm text-muted-foreground">
-                  {p.credits} {p.credits === 1 ? "credit" : "credits"}
+                  {p.credits} {pluralize(p.credits, "credit")}
                 </div>
               </div>
               <Button

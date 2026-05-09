@@ -17,17 +17,18 @@ export type GenerateInput = {
 
 const ROLES: ShotRole[] = ["title", "hero_feature", "differentiator", "another_feature"];
 
-function referencesForRole(role: ShotRole, screenshots: GenerateInput["screenshots"]): string[] {
-  switch (role) {
-    case "title":
-      return [];
-    case "hero_feature":
-      return [screenshots[0]];
-    case "differentiator":
-      return [screenshots[1]];
-    case "another_feature":
-      return [screenshots[2]];
-  }
+function referencesForRole(
+  role: ShotRole,
+  screenshots: GenerateInput["screenshots"],
+): string[] {
+  const refIndex: Record<ShotRole, number | null> = {
+    title: null,
+    hero_feature: 0,
+    differentiator: 1,
+    another_feature: 2,
+  };
+  const idx = refIndex[role];
+  return idx === null ? [] : [screenshots[idx]];
 }
 
 async function runShot(input: GenerateInput, role: ShotRole) {

@@ -1,8 +1,10 @@
+import type { StylePresetId } from "../generation/presets";
+
 export type ShowcaseSet = {
   id: string;
   app: string;
   category: string;
-  preset: "soft_bright" | "dark_premium" | "clean_minimal" | "bold_playful";
+  preset: StylePresetId;
   /** Tagline used as the headline on Shot 1 */
   tagline: string;
   /** Short headlines for shots 2/3/4 */
