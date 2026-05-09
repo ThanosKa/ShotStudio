@@ -6,11 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # ShotStudio
 
-One-time-pay AI App Store screenshot generator: 3 mobile screenshots → polished 4-image set via `gpt-image-2` (OpenRouter). Single-tenant, credit-pack billing, privacy-first (no image persistence).
-
-## Stack
-
-Next.js 16 (App Router) · TypeScript strict · Tailwind v4 + shadcn/ui · Drizzle + Supabase Postgres · Clerk · Stripe · Resend + React Email · Upstash Redis · `sharp` · Vercel.
+One-time-pay AI App Store screenshot generator: 3 mobile screenshots → polished 4-image set via OpenRouter. Single-tenant, credit-pack billing, privacy-first (no image persistence).
 
 ## Tooling
 
@@ -19,18 +15,11 @@ Next.js 16 (App Router) · TypeScript strict · Tailwind v4 + shadcn/ui · Drizz
 - Email preview server: `pnpm email` (port 3001 — `next dev` owns 3000).
 - Typecheck before declaring done: `pnpm exec tsc --noEmit`.
 
-## Layout
-
-- `src/app/` — App Router routes, including `api/webhooks/{clerk,stripe}/route.ts`
-- `src/lib/` — `db/`, `emails/`, `generation/`, plus `credits.ts`, `stripe.ts`, `resend.ts`, `redis.ts`, `ratelimit.ts`, `openrouter.ts`
-- `emails/` — React Email templates (rendered server-side, sent via Resend)
-
 ## Non-obvious rules
 
 - **Credit accounting is debit-before-AI, refund-on-failure.** Use `debit/refund/grant` from `src/lib/credits.ts`; do not bypass the transaction.
 - **Webhooks are idempotent.** Stripe events are deduped via Upstash Redis (event ID + TTL); Resend sends use idempotency keys (`welcome-email/<userId>`, `credits-purchased/<stripeEventId>`). Preserve these on any change.
-- **Resend SDK does not throw** — destructure `{ data, error }` and check `error` explicitly.
-- **Generation route declares `export const maxDuration = 300`** for the long-running `gpt-image-2` calls. Don't remove it.
+- **Generation route declares `export const maxDuration = 300`** for the long-running image-generation calls. Don't remove it.
 - **Logging.** Use `@/lib/logger` (pino) on the server — never `console.*`. First arg is a structured context object, second is the message string; never interpolate values into the message. Errors go under the `err` key. At the top of any handler/action create a child logger (`logger.child({ action, ...ids })`) and reuse it.
 - **Error handling.** Webhook routes wrap handler bodies in try/catch and return 500 on unexpected failure so the upstream (Stripe/Clerk) retries. For Stripe, on handler error we also `redis.del(idemKey)` to release the idempotency claim — preserve this when editing.
 
