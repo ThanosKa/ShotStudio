@@ -20,6 +20,7 @@ import {
   formatCategory,
   type StylePresetId,
 } from "@/lib/generation/presets";
+import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 import { ResultPanel } from "@/components/result-panel";
 import { WizardStepper, WIZARD_STEPS } from "@/components/wizard-stepper";
 import { parseApiError } from "@/lib/http";
@@ -66,6 +67,7 @@ export function Wizard() {
   const [preset, setPreset] = useState<StylePresetId | "">("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [images, setImages] = useState<string[] | null>(null);
 
   const effectivePreset =
@@ -118,6 +120,28 @@ export function Wizard() {
     void compressIntoSlot(idx, file);
   }
 
+  function fillEmptySlots(files: File[]) {
+    const emptyIndices: number[] = [];
+    shots.forEach((s, i) => {
+      if (!s.file && !s.compressing) emptyIndices.push(i);
+    });
+    const used = files.slice(0, emptyIndices.length);
+    used.forEach((f, j) => {
+      void compressIntoSlot(emptyIndices[j], f);
+    });
+    if (used.length === 0) {
+      setNotice(
+        `All 3 slots are full. Remove a screenshot to add more — none of the ${files.length} picked were used.`,
+      );
+    } else if (files.length > used.length) {
+      setNotice(
+        `Picked ${files.length} — used the first ${used.length}. Remove a screenshot to add more.`,
+      );
+    } else {
+      setNotice(null);
+    }
+  }
+
   function validateStep(s: Step): string | null {
     if (s === 0) {
       if (!appName.trim()) return "Please enter an app name.";
@@ -151,11 +175,13 @@ export function Wizard() {
       setError(v);
       return;
     }
+    setNotice(null);
     if (step < LAST_STEP) setStep((step + 1) as Step);
   }
 
   function prev() {
     setError(null);
+    setNotice(null);
     if (step > 0) setStep((step - 1) as Step);
   }
 
@@ -204,6 +230,7 @@ export function Wizard() {
     setStatus("idle");
     setImages(null);
     setError(null);
+    setNotice(null);
     setStep(0);
   }
 
@@ -247,7 +274,11 @@ export function Wizard() {
               />
             )}
             {step === 1 && (
-              <StepScreenshots shots={shots} setShotFile={setShotFile} />
+              <StepScreenshots
+                shots={shots}
+                setShotFile={setShotFile}
+                fillEmptySlots={fillEmptySlots}
+              />
             )}
             {step === 2 && (
               <StepStyle
@@ -261,6 +292,12 @@ export function Wizard() {
           {error && (
             <p className="text-sm text-red-400" role="alert">
               {error}
+            </p>
+          )}
+
+          {!error && notice && (
+            <p className="text-sm text-muted-foreground" role="status">
+              {notice}
             </p>
           )}
 
@@ -408,22 +445,43 @@ function StepApp({
 function StepScreenshots({
   shots,
   setShotFile,
+  fillEmptySlots,
 }: {
   shots: ShotState[];
   setShotFile: (idx: number, file: File | null) => void;
+  fillEmptySlots: (files: File[]) => void;
 }) {
   const filled = shots.filter((s) => s.file).length;
+  const allFilled = filled === 3;
   return (
     <div className="space-y-6">
-      <div>
-        <div className="text-3xl font-semibold tracking-tight">
-          {filled}
-          <span className="text-muted-foreground"> / 3</span>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <div className="text-3xl font-semibold tracking-tight">
+            {filled}
+            <span className="text-muted-foreground"> / 3</span>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            PNG or JPEG · max 10 MB each. Each role tells the AI which feature
+            to highlight.
+          </p>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          PNG or JPEG · max 10 MB each. Each role tells the AI which feature
-          to highlight.
-        </p>
+        <Button asChild variant="outline" disabled={allFilled}>
+          <label className={cn(allFilled && "cursor-not-allowed opacity-50")}>
+            Browse
+            <input
+              type="file"
+              accept="image/png,image/jpeg"
+              multiple
+              className="sr-only"
+              onChange={(e) => {
+                const files = Array.from(e.target.files ?? []);
+                if (files.length) fillEmptySlots(files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </Button>
       </div>
       <div className="grid gap-5 sm:grid-cols-3">
         {SHOT_LABELS.map((label, idx) => (
@@ -560,6 +618,13 @@ function StepStyle({
   );
 }
 
+const SHOT_OUTPUT_LABELS = [
+  "Title",
+  "Hero feature",
+  "Differentiator",
+  "Another feature",
+] as const;
+
 function GeneratingPanel() {
   return (
     <div className="mx-auto w-full max-w-5xl">
@@ -576,18 +641,40 @@ function GeneratingPanel() {
         </div>
       </div>
       <div className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-4">
-        {[1, 2, 3, 4].map((n) => (
-          <div
-            key={n}
-            className="relative aspect-[1290/2796] overflow-hidden rounded-2xl border border-border bg-foreground/[0.03]"
-          >
-            <div className="absolute inset-0 animate-pulse bg-gradient-to-b from-foreground/10 via-transparent to-foreground/5" />
-            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-3 py-1 font-mono text-[10px] text-background">
-              {String(n).padStart(2, "0")}
-            </span>
-          </div>
+        {SHOT_OUTPUT_LABELS.map((label, i) => (
+          <GeneratingTile key={i} index={i} label={label} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function GeneratingTile({ index, label }: { index: number; label: string }) {
+  return (
+    <div className="relative aspect-[1290/2796] overflow-hidden rounded-2xl border border-border bg-[#1a1a1a]">
+      <DottedGlowBackground
+        className="pointer-events-none"
+        gap={14}
+        radius={1.4}
+        colorDarkVar="--color-muted-foreground"
+        glowColorDarkVar="--color-muted-foreground"
+        colorLightVar="--color-muted-foreground"
+        glowColorLightVar="--color-muted-foreground"
+        opacity={0.6}
+        speedMin={0.3}
+        speedMax={1.1}
+        speedScale={0.85}
+      />
+      <div className="absolute left-4 top-4 z-10 flex items-center gap-2 text-xs text-foreground/80">
+        <span className="relative inline-flex h-2 w-2">
+          <span className="absolute inset-0 animate-ping rounded-full bg-foreground/60" />
+          <span className="relative inline-block h-2 w-2 rounded-full bg-foreground" />
+        </span>
+        <span>Creating {label.toLowerCase()}</span>
+      </div>
+      <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-foreground/10 px-3 py-1 font-mono text-[10px] text-muted-foreground">
+        {String(index + 1).padStart(2, "0")}
+      </span>
     </div>
   );
 }
