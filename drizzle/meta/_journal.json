@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1778090262259,
+      "tag": "0000_chilly_photon",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778266165350,
+      "tag": "0001_mature_betty_brant",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778271677974,
+      "tag": "0002_plain_shocker",
+      "breakpoints": true
+    }
+  ]
+}

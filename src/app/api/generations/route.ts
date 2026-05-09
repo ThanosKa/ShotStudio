@@ -1,14 +1,19 @@
-import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { debit, InsufficientCreditsError, refund } from "@/lib/credits";
-import { db } from "@/lib/db";
-import { generations } from "@/lib/db/schema";
+import { InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
+import {
+  debitAndStartGeneration,
+  ensureUser,
+  markGenerationComplete,
+  markGenerationFailed,
+} from "@/lib/db/queries";
 import { generate } from "@/lib/generation";
 import { logger } from "@/lib/logger";
-import { generationRateLimit } from "@/lib/ratelimit";
+import { generationRateLimit, rateLimitHeaders } from "@/lib/ratelimit";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 const Body = z.object({
@@ -40,7 +45,8 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return jsonError(401, "Unauthorized");
 
-  const log = logger.child({ action: "generations.create", userId });
+  const requestId = crypto.randomUUID();
+  const log = logger.child({ action: "generations.create", requestId, userId });
 
   let formData: FormData;
   try {
@@ -78,31 +84,38 @@ export async function POST(req: NextRequest) {
   const rl = await generationRateLimit.limit(userId);
   if (!rl.success) {
     return jsonError(429, "Too many generations — try again later.", {
-      headers: { "Retry-After": String(Math.ceil((rl.reset - Date.now()) / 1000)) },
+      headers: {
+        ...rateLimitHeaders(rl),
+        "Retry-After": String(Math.max(0, Math.ceil((rl.reset - Date.now()) / 1000))),
+      },
     });
   }
 
-  try {
-    await debit(userId, 1, { reason: "generation" });
-  } catch (err) {
-    if (err instanceof InsufficientCreditsError) {
-      return jsonError(402, "Insufficient credits.");
-    }
-    log.error({ err }, "debit failed");
-    return jsonError(500, "Server error");
-  }
+  // JIT user sync — closes the Clerk-vs-Stripe webhook race.
+  const clerkUser = await currentUser();
+  const email = clerkUser?.emailAddresses[0]?.emailAddress;
+  if (email) await ensureUser(userId, email);
 
-  const [row] = await db
-    .insert(generations)
-    .values({
+  let generationId: string;
+  try {
+    const started = await debitAndStartGeneration({
       userId,
       appName: input.appName,
       stylePreset: input.stylePreset,
       category: input.category,
-      status: "pending",
-    })
-    .returning({ id: generations.id });
-  const generationId = row.id;
+    });
+    generationId = started.generationId;
+  } catch (err) {
+    if (err instanceof InsufficientCreditsError) {
+      return jsonError(402, "Insufficient credits.");
+    }
+    if (err instanceof UserNotFoundError) {
+      log.error({ err }, "user not found at debit");
+      return jsonError(409, "Account not ready — please retry in a moment.");
+    }
+    log.error({ err }, "debit/start failed");
+    return jsonError(500, "Server error");
+  }
 
   const screenshotDataUrls = (await Promise.all(
     screenshotFiles.map(async (f) => {
@@ -120,24 +133,21 @@ export async function POST(req: NextRequest) {
       screenshots: screenshotDataUrls,
     });
 
-    await db
-      .update(generations)
-      .set({ status: "complete", completedAt: new Date() })
-      .where(eq(generations.id, generationId));
+    await markGenerationComplete(generationId);
 
     log.info({ generationId }, "generation complete");
     return Response.json({ generationId, imageUrls });
   } catch (err) {
     log.error({ err, generationId }, "generation failed");
-    await db
-      .update(generations)
-      .set({
-        status: "failed",
-        failureReason: err instanceof Error ? err.message : "unknown",
-        completedAt: new Date(),
-      })
-      .where(eq(generations.id, generationId));
-    await refund(userId, 1, { reason: "generation_failed", generationId });
+    await markGenerationFailed(
+      generationId,
+      err instanceof Error ? err.message : "unknown",
+    );
+    try {
+      await refund(userId, 1, { reason: "generation_failed", generationId });
+    } catch (refundErr) {
+      log.error({ err: refundErr, generationId }, "refund failed");
+    }
     return jsonError(502, "Generation failed. Your credit has been refunded.");
   }
 }

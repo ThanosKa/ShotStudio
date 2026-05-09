@@ -14,6 +14,8 @@ export type ImageGenerationInput = {
   referenceImages?: string[];
   aspectRatio?: string;
   imageSize?: "0.5K" | "1K" | "2K" | "4K";
+  /** Per-call timeout in ms. Defaults to 120s so a single slow shot can't starve the route. */
+  timeoutMs?: number;
 };
 
 type ContentPart =
@@ -43,25 +45,40 @@ export async function generateImage(input: ImageGenerationInput): Promise<string
     }
   }
 
-  const res = await fetch(`${ENDPOINT}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": HTTP_REFERER,
-      "X-Title": "ShotStudio",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      modalities: ["image", "text"],
-      messages: [{ role: "user", content }],
-      image_config: {
-        aspect_ratio: input.aspectRatio ?? "9:16",
-        image_size: input.imageSize ?? "2K",
+  const controller = new AbortController();
+  const timeoutMs = input.timeoutMs ?? 120_000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  let res: Response;
+  try {
+    res = await fetch(`${ENDPOINT}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": HTTP_REFERER,
+        "X-Title": "ShotStudio",
       },
-      stream: false,
-    }),
-  });
+      body: JSON.stringify({
+        model: MODEL,
+        modalities: ["image", "text"],
+        messages: [{ role: "user", content }],
+        image_config: {
+          aspect_ratio: input.aspectRatio ?? "9:16",
+          image_size: input.imageSize ?? "2K",
+        },
+        stream: false,
+      }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if ((err as { name?: string }).name === "AbortError") {
+      throw new Error(`OpenRouter timed out after ${timeoutMs}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!res.ok) {
     throw new Error(`OpenRouter ${res.status}: ${await res.text()}`);

@@ -3,12 +3,16 @@ import type { NextRequest } from "next/server";
 import Stripe from "stripe";
 import { grant } from "@/lib/credits";
 import { db } from "@/lib/db";
+import { ensureUser } from "@/lib/db/queries";
 import { users } from "@/lib/db/schema";
 import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
 import { logger } from "@/lib/logger";
 import { getCreditPackage } from "@/lib/packages";
 import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const WEBHOOK_SECRET: string = (() => {
   const v = process.env.STRIPE_WEBHOOK_SECRET;
@@ -24,7 +28,8 @@ function formatAmount(amountCents: number, currency: string) {
 }
 
 export async function POST(req: NextRequest) {
-  const log = logger.child({ action: "stripe_webhook" });
+  const requestId = crypto.randomUUID();
+  const log = logger.child({ action: "stripe_webhook", requestId });
 
   const sig = req.headers.get("stripe-signature");
   if (!sig) {
@@ -71,11 +76,21 @@ export async function POST(req: NextRequest) {
         return new Response("OK", { status: 200 });
       }
 
+      // Close the Clerk-vs-Stripe webhook race: if the Clerk user.created event
+      // hasn't been processed yet, ensureUser() upserts a row so grant() can
+      // attach credits. Email comes from Stripe customer details as a fallback.
+      const checkoutEmail = session.customer_details?.email ?? null;
+      if (checkoutEmail) await ensureUser(userId, checkoutEmail);
+
       const newBalance = await grant(userId, pack.credits, session.id);
       handler.info({ creditsAdded: pack.credits, newBalance }, "credits granted");
 
-      const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-      const email = user?.email ?? session.customer_details?.email ?? null;
+      const [user] = await db
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      const email = user?.email ?? checkoutEmail;
 
       let receiptUrl: string | null = null;
       if (typeof session.payment_intent === "string") {

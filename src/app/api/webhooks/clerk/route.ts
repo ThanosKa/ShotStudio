@@ -1,13 +1,18 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
+import { ensureUser } from "@/lib/db/queries";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { sendWelcomeEmail } from "@/lib/emails/welcome";
 import { logger } from "@/lib/logger";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
-  const log = logger.child({ action: "clerk_webhook" });
+  const requestId = crypto.randomUUID();
+  const log = logger.child({ action: "clerk_webhook", requestId });
 
   let evt;
   try {
@@ -53,9 +58,38 @@ export async function POST(req: NextRequest) {
       const { id, email_addresses } = evt.data;
       const email = email_addresses[0]?.email_address;
       if (email) {
-        await db.update(users).set({ email }).where(eq(users.id, id));
-        scoped.info({ userId: id }, "user email updated");
+        // Upsert: an "updated" event can arrive before "created" if the
+        // Stripe webhook (which calls ensureUser) hasn't yet run either.
+        await ensureUser(id, email);
+        scoped.info({ userId: id }, "user upserted from update");
       }
+    } else if (evt.type === "user.deleted") {
+      // Anonymize rather than DELETE: transactions.user_id has ON DELETE
+      // RESTRICT to preserve financial records. Cascading generations are
+      // removed automatically by the FK on generations.user_id. This pattern
+      // is GDPR-compliant — PII is removed but the audit trail survives.
+      const { id, deleted } = evt.data;
+      if (!id) {
+        scoped.warn("user.deleted without id — skipping");
+        return new Response("OK", { status: 200 });
+      }
+      if (deleted === false) {
+        scoped.debug({ userId: id }, "user.deleted with deleted=false — skipping");
+        return new Response("OK", { status: 200 });
+      }
+      const anonymized = `deleted+${id}@anonymized.local`;
+      const result = await db
+        .update(users)
+        .set({
+          email: anonymized,
+          stripeCustomerId: sql`null`,
+        })
+        .where(eq(users.id, id))
+        .returning({ id: users.id });
+      scoped.info(
+        { userId: id, anonymized: result.length > 0 },
+        "user anonymized after deletion",
+      );
     }
   } catch (err) {
     scoped.error({ err }, "clerk webhook handler failed");

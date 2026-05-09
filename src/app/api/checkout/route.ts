@@ -3,6 +3,10 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { CREDIT_PACKAGE_IDS, getCreditPackage } from "@/lib/packages";
+import { checkoutRateLimit, rateLimitHeaders } from "@/lib/ratelimit";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const Body = z.object({
   packageId: z.enum(CREDIT_PACKAGE_IDS),
@@ -10,15 +14,26 @@ const Body = z.object({
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-function jsonError(status: number, error: string) {
-  return Response.json({ error }, { status });
+function jsonError(status: number, error: string, init?: ResponseInit) {
+  return Response.json({ error }, { status, ...init });
 }
 
 export async function POST(req: NextRequest) {
-  const log = logger.child({ action: "checkout" });
+  const requestId = crypto.randomUUID();
+  const log = logger.child({ action: "checkout", requestId });
 
   const { userId } = await auth();
   if (!userId) return jsonError(401, "Unauthorized");
+
+  const rl = await checkoutRateLimit.limit(userId);
+  if (!rl.success) {
+    return jsonError(429, "Too many checkout attempts — please wait a moment.", {
+      headers: {
+        ...rateLimitHeaders(rl),
+        "Retry-After": String(Math.max(0, Math.ceil((rl.reset - Date.now()) / 1000))),
+      },
+    });
+  }
 
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return jsonError(400, "Invalid request body");
