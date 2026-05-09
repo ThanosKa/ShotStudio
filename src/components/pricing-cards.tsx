@@ -70,7 +70,7 @@ export function PricingCards() {
                 onClick={() => buy(p.id)}
                 disabled={busy !== null}
               >
-                {busy === p.id ? "Redirecting…" : "Buy"}
+                {busy === p.id ? "Redirecting" : "Buy"}
               </Button>
             </CardContent>
           </Card>

@@ -46,6 +46,10 @@ export const STYLE_PRESETS: Record<StylePresetId, StylePreset> = {
   },
 };
 
+export function formatCategory(value: string): string {
+  return value.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export const CATEGORY_DEFAULT_PRESET: Record<string, StylePresetId> = {
   productivity: "clean_minimal",
   wellness: "soft_bright",

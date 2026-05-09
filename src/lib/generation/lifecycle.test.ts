@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/db/queries";
 import { generations, transactions, users } from "@/lib/db/schema";
-import { generateImage } from "@/lib/openrouter";
+import { generateImage, generateText } from "@/lib/openrouter";
 import { runGeneration } from "./lifecycle";
 
 function makeFile(name = "shot.png", type = "image/png", size = 1024): File {
@@ -14,7 +14,8 @@ function inputFor(userId: string) {
   return {
     userId,
     appName: "Acme",
-    tagline: "Get things done fast",
+    pitch: "Track calories from a meal photo, no manual logging.",
+    audience: "Busy parents",
     category: "productivity",
     stylePreset: "soft_bright" as const,
     screenshots: [makeFile(), makeFile(), makeFile()] as [File, File, File],
@@ -163,6 +164,32 @@ describe("runGeneration", () => {
       .from(transactions)
       .where(eq(transactions.userId, "u_big"));
     expect(txs).toHaveLength(0);
+  });
+
+  test("succeeds even when headline synthesis throws (falls back to appName)", async () => {
+    await ensureUser("u_no_headline", "u_no_headline@test");
+    await db
+      .update(users)
+      .set({ credits: 3 })
+      .where(eq(users.id, "u_no_headline"));
+
+    // 1×1 transparent PNG; restore image mock in case a prior test left it rejecting.
+    const ONE_PX_PNG_B64 =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+    vi.mocked(generateImage).mockResolvedValue(ONE_PX_PNG_B64);
+    vi.mocked(generateText).mockRejectedValueOnce(new Error("haiku down"));
+
+    const outcome = await runGeneration(inputFor("u_no_headline"));
+
+    expect(outcome.kind).toBe("ok");
+    if (outcome.kind !== "ok") return;
+    expect(outcome.imageUrls).toHaveLength(4);
+
+    const [u] = await db
+      .select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, "u_no_headline"));
+    expect(u.credits).toBe(2);
   });
 
   test("rejects screenshot with disallowed MIME before any debit", async () => {

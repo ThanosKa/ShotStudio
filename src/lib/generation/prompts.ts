@@ -4,23 +4,30 @@ export type ShotRole = "title" | "hero_feature" | "differentiator" | "another_fe
 
 export type ShotInput = {
   appName: string;
-  tagline: string;
+  headline: string;
+  pitch: string;
+  audience?: string;
   category: string;
   role: ShotRole;
   preset: StylePreset;
 };
 
 export function buildPrompt(input: ShotInput): string {
-  const referenceLine =
+  const lines = [
+    `App Store screenshot, ${input.preset.toneModifier}.`,
+    `Typography: ${input.preset.typography}.`,
+    `Palette: ${input.preset.palette.join(", ")}.`,
+    `App: ${input.appName} (${input.category}).`,
+    `What it does: ${input.pitch}.`,
+    input.audience ? `For: ${input.audience}.` : null,
+    `Role: ${input.role}.`,
+    input.role === "title"
+      ? `Headline: ${input.headline}`
+      : "A reference screenshot is attached — frame the app's UI inside a stylised device mockup.",
     input.role === "title"
       ? "No reference image provided — invent a hero composition."
-      : "A reference screenshot is attached — frame the app's UI inside a stylised device mockup.";
-  return `App Store screenshot, ${input.preset.toneModifier}.
-Typography: ${input.preset.typography}.
-Palette: ${input.preset.palette.join(", ")}.
-App: ${input.appName} (${input.category}).
-Role: ${input.role}.
-${input.role === "title" ? `Headline: ${input.tagline}` : ""}
-${referenceLine}
-Portrait orientation, no watermarks.`;
+      : null,
+    "Portrait orientation, no watermarks.",
+  ];
+  return lines.filter(Boolean).join("\n");
 }

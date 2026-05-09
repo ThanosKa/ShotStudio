@@ -7,7 +7,7 @@ const STEPS = [
   {
     n: "02",
     title: "Tell us the basics",
-    body: "App name, a 5–10 word tagline, and a category. We auto-pick the right style preset; you can override it.",
+    body: "App name, a one-sentence pitch, and a category. We write the headline and auto-pick the style preset; you can override it.",
   },
   {
     n: "03",

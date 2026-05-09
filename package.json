@@ -18,6 +18,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@base-ui/react": "^1.4.1",
     "@clerk/nextjs": "^7.3.1",
     "@clerk/themes": "^2.4.57",
     "@clerk/ui": "^1.8.0",

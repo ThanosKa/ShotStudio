@@ -5,35 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import {
   CATEGORY_DEFAULT_PRESET,
   STYLE_PRESETS,
+  formatCategory,
   type StylePresetId,
 } from "@/lib/generation/presets";
 import { ResultPanel } from "@/components/result-panel";
-import { WizardStepper } from "@/components/wizard-stepper";
+import { WizardStepper, WIZARD_STEPS } from "@/components/wizard-stepper";
 import { parseApiError } from "@/lib/http";
 import { compressImage } from "@/lib/image/compress";
 import { cn } from "@/lib/utils";
 import {
-  TAGLINE_MAX_WORDS,
-  TAGLINE_MIN_WORDS,
-  wordCount,
-} from "@/lib/validation/tagline";
+  AUDIENCE_MAX_CHARS,
+  PITCH_MAX_CHARS,
+  PITCH_MIN_CHARS,
+} from "@/lib/validation/pitch";
 
 const CATEGORIES = Object.keys(CATEGORY_DEFAULT_PRESET);
 
 const SHOT_LABELS = ["Hero feature", "Differentiator", "Another feature"] as const;
 
-const STEP_TITLES = ["App details", "Screenshots", "Style"] as const;
-const LAST_STEP = (STEP_TITLES.length - 1) as Step;
+const LAST_STEP = (WIZARD_STEPS.length - 1) as Step;
 
 type Status = "idle" | "submitting" | "done" | "error";
 type Step = 0 | 1 | 2;
@@ -53,7 +55,8 @@ const EMPTY_SHOT: ShotState = {
 export function Wizard() {
   const [step, setStep] = useState<Step>(0);
   const [appName, setAppName] = useState("");
-  const [tagline, setTagline] = useState("");
+  const [pitch, setPitch] = useState("");
+  const [audience, setAudience] = useState("");
   const [category, setCategory] = useState<string>("");
   const [shots, setShots] = useState<ShotState[]>([
     EMPTY_SHOT,
@@ -67,7 +70,8 @@ export function Wizard() {
 
   const effectivePreset =
     preset || (category ? CATEGORY_DEFAULT_PRESET[category] : "");
-  const taglineWords = wordCount(tagline);
+  const pitchChars = pitch.trim().length;
+  const audienceChars = audience.trim().length;
 
   const shotsRef = useRef(shots);
   shotsRef.current = shots;
@@ -99,7 +103,7 @@ export function Wizard() {
       }));
     } catch {
       updateShot(idx, () => EMPTY_SHOT);
-      setError("Couldn't process that image. Try another file.");
+      setError("Couldn't process that image. Please try a PNG or JPEG file.");
     }
   }
 
@@ -114,33 +118,27 @@ export function Wizard() {
     void compressIntoSlot(idx, file);
   }
 
-  function fillEmptySlots(files: File[]) {
-    const emptyIndices: number[] = [];
-    shots.forEach((s, i) => {
-      if (!s.file && !s.compressing) emptyIndices.push(i);
-    });
-    files.slice(0, emptyIndices.length).forEach((f, j) => {
-      void compressIntoSlot(emptyIndices[j], f);
-    });
-  }
-
   function validateStep(s: Step): string | null {
     if (s === 0) {
-      if (!appName.trim()) return "App name is required.";
-      if (taglineWords < TAGLINE_MIN_WORDS || taglineWords > TAGLINE_MAX_WORDS)
-        return `Tagline must be ${TAGLINE_MIN_WORDS}–${TAGLINE_MAX_WORDS} words.`;
-      if (!category) return "Pick a category.";
+      if (!appName.trim()) return "Please enter an app name.";
+      if (pitchChars < PITCH_MIN_CHARS)
+        return `Pitch must be at least ${PITCH_MIN_CHARS} characters.`;
+      if (pitchChars > PITCH_MAX_CHARS)
+        return `Pitch must be ${PITCH_MAX_CHARS} characters or fewer.`;
+      if (audienceChars > AUDIENCE_MAX_CHARS)
+        return `Audience must be ${AUDIENCE_MAX_CHARS} characters or fewer.`;
+      if (!category) return "Please select a category.";
       return null;
     }
     if (s === 1) {
       for (let i = 0; i < 3; i++) {
-        if (shots[i].compressing) return `Screenshot ${i + 1} is still processing — wait a moment.`;
-        if (!shots[i].file) return `Upload screenshot ${i + 1}.`;
+        if (shots[i].compressing) return `Screenshot ${i + 1} is processing. Please wait.`;
+        if (!shots[i].file) return `Please upload screenshot ${i + 1}.`;
       }
       return null;
     }
     if (s === 2) {
-      if (!effectivePreset) return "Pick a style preset.";
+      if (!effectivePreset) return "Please select a style preset.";
       return null;
     }
     return null;
@@ -175,7 +173,8 @@ export function Wizard() {
     try {
       const fd = new FormData();
       fd.append("appName", appName.trim());
-      fd.append("tagline", tagline.trim());
+      fd.append("pitch", pitch.trim());
+      if (audience.trim()) fd.append("audience", audience.trim());
       fd.append("category", category);
       fd.append("stylePreset", effectivePreset);
       shots.forEach((s, i) => {
@@ -217,14 +216,14 @@ export function Wizard() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="mx-auto w-full max-w-4xl">
       <WizardStepper current={step} />
 
       <div className="mt-12 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-        Step {step + 1} of 4
+        Step {step + 1} of {WIZARD_STEPS.length}
       </div>
       <h2 className="mt-2 text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-        {STEP_TITLES[step]}
+        {WIZARD_STEPS[step]}
       </h2>
 
       <Card className="mt-10 border-border/60">
@@ -234,9 +233,12 @@ export function Wizard() {
               <StepApp
                 appName={appName}
                 setAppName={setAppName}
-                tagline={tagline}
-                setTagline={setTagline}
-                taglineWords={taglineWords}
+                pitch={pitch}
+                setPitch={setPitch}
+                pitchChars={pitchChars}
+                audience={audience}
+                setAudience={setAudience}
+                audienceChars={audienceChars}
                 category={category}
                 setCategory={(v) => {
                   setCategory(v);
@@ -245,11 +247,7 @@ export function Wizard() {
               />
             )}
             {step === 1 && (
-              <StepScreenshots
-                shots={shots}
-                setShotFile={setShotFile}
-                fillEmptySlots={fillEmptySlots}
-              />
+              <StepScreenshots shots={shots} setShotFile={setShotFile} />
             )}
             {step === 2 && (
               <StepStyle
@@ -291,20 +289,30 @@ export function Wizard() {
 function StepApp({
   appName,
   setAppName,
-  tagline,
-  setTagline,
-  taglineWords,
+  pitch,
+  setPitch,
+  pitchChars,
+  audience,
+  setAudience,
+  audienceChars,
   category,
   setCategory,
 }: {
   appName: string;
   setAppName: (v: string) => void;
-  tagline: string;
-  setTagline: (v: string) => void;
-  taglineWords: number;
+  pitch: string;
+  setPitch: (v: string) => void;
+  pitchChars: number;
+  audience: string;
+  setAudience: (v: string) => void;
+  audienceChars: number;
   category: string;
   setCategory: (v: string) => void;
 }) {
+  const pitchInvalid =
+    pitchChars > 0 &&
+    (pitchChars < PITCH_MIN_CHARS || pitchChars > PITCH_MAX_CHARS);
+  const audienceInvalid = audienceChars > AUDIENCE_MAX_CHARS;
   return (
     <div className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2">
@@ -320,49 +328,78 @@ function StepApp({
         </div>
         <div className="grid gap-2">
           <Label htmlFor="category">Category</Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger id="category" className="w-full">
-              <SelectValue placeholder="Pick one" />
-            </SelectTrigger>
-            <SelectContent className="dark">
-              {CATEGORIES.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Combobox
+            items={CATEGORIES}
+            value={category}
+            onValueChange={(v) => setCategory(v ?? "")}
+            itemToStringLabel={formatCategory}
+          >
+            <ComboboxInput id="category" placeholder="Select a category" />
+            <ComboboxContent className="dark">
+              <ComboboxEmpty>No matching categories. Try a different search.</ComboboxEmpty>
+              <ComboboxList>
+                {(item) => (
+                  <ComboboxItem key={item} value={item}>
+                    {formatCategory(item)}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         </div>
       </div>
 
       <div className="grid gap-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="tagline">Tagline</Label>
+          <Label htmlFor="pitch">Pitch</Label>
           <span
             className={cn(
               "font-mono text-[10px] uppercase tracking-widest",
-              taglineWords === 0 && "text-muted-foreground",
-              taglineWords > 0 &&
-                (taglineWords < TAGLINE_MIN_WORDS ||
-                  taglineWords > TAGLINE_MAX_WORDS) &&
-                "text-red-400",
-              taglineWords >= TAGLINE_MIN_WORDS &&
-                taglineWords <= TAGLINE_MAX_WORDS &&
-                "text-emerald-400",
+              pitchChars === 0 && "text-muted-foreground",
+              pitchInvalid && "text-red-400",
+              !pitchInvalid && pitchChars >= PITCH_MIN_CHARS && "text-emerald-400",
             )}
           >
-            {taglineWords}/{TAGLINE_MIN_WORDS}–{TAGLINE_MAX_WORDS} words
+            {pitchChars}/{PITCH_MAX_CHARS}
+          </span>
+        </div>
+        <Textarea
+          id="pitch"
+          value={pitch}
+          onChange={(e) => setPitch(e.target.value)}
+          placeholder="Track calories by snapping a photo of your meal."
+          rows={3}
+          maxLength={PITCH_MAX_CHARS + 50}
+        />
+        <p className="text-xs text-muted-foreground">
+          What problem does it solve? One sentence is plenty — we&apos;ll write the headline for you.
+        </p>
+      </div>
+
+      <div className="grid gap-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="audience">
+            Who is it for?{" "}
+            <span className="text-muted-foreground">(optional)</span>
+          </Label>
+          <span
+            className={cn(
+              "font-mono text-[10px] uppercase tracking-widest",
+              audienceChars === 0 && "text-muted-foreground",
+              audienceInvalid && "text-red-400",
+              !audienceInvalid && audienceChars > 0 && "text-emerald-400",
+            )}
+          >
+            {audienceChars}/{AUDIENCE_MAX_CHARS}
           </span>
         </div>
         <Input
-          id="tagline"
-          value={tagline}
-          onChange={(e) => setTagline(e.target.value)}
-          placeholder="The fastest way to journal on the go"
+          id="audience"
+          value={audience}
+          onChange={(e) => setAudience(e.target.value)}
+          placeholder="Busy parents, fitness coaches, college students"
+          maxLength={AUDIENCE_MAX_CHARS + 30}
         />
-        <p className="text-xs text-muted-foreground">
-          Becomes the hero headline on Shot 1.
-        </p>
       </div>
     </div>
   );
@@ -371,43 +408,22 @@ function StepApp({
 function StepScreenshots({
   shots,
   setShotFile,
-  fillEmptySlots,
 }: {
   shots: ShotState[];
   setShotFile: (idx: number, file: File | null) => void;
-  fillEmptySlots: (files: File[]) => void;
 }) {
   const filled = shots.filter((s) => s.file).length;
-  const allFilled = filled === 3;
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <div className="text-3xl font-semibold tracking-tight">
-            {filled}
-            <span className="text-muted-foreground"> / 3</span>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            PNG or JPEG · max 10 MB each. Each role tells the AI which feature
-            to highlight.
-          </p>
+      <div>
+        <div className="text-3xl font-semibold tracking-tight">
+          {filled}
+          <span className="text-muted-foreground"> / 3</span>
         </div>
-        <Button asChild variant="outline" disabled={allFilled}>
-          <label className={cn(allFilled && "cursor-not-allowed opacity-50")}>
-            Browse
-            <input
-              type="file"
-              accept="image/png,image/jpeg"
-              multiple
-              className="sr-only"
-              onChange={(e) => {
-                const files = Array.from(e.target.files ?? []);
-                if (files.length) fillEmptySlots(files);
-                e.target.value = "";
-              }}
-            />
-          </label>
-        </Button>
+        <p className="mt-1 text-sm text-muted-foreground">
+          PNG or JPEG · max 10 MB each. Each role tells the AI which feature
+          to highlight.
+        </p>
       </div>
       <div className="grid gap-5 sm:grid-cols-3">
         {SHOT_LABELS.map((label, idx) => (
@@ -445,7 +461,7 @@ function ScreenshotTile({
         <label
           htmlFor={inputId}
           className={cn(
-            "relative flex aspect-[9/19] cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-foreground/[0.02] transition hover:border-foreground/40 hover:bg-foreground/[0.04]",
+            "relative flex aspect-[1290/2796] cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-foreground/[0.02] transition hover:border-foreground/40 hover:bg-foreground/[0.04]",
             shot.previewUrl && "border-solid",
           )}
         >
@@ -459,7 +475,7 @@ function ScreenshotTile({
           ) : shot.compressing ? (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground" />
-              <span className="text-xs">Processing…</span>
+              <span className="text-xs">Processing</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -504,8 +520,8 @@ function StepStyle({
       {category && (
         <p className="text-sm text-muted-foreground">
           Auto-picked for{" "}
-          <span className="text-foreground">{category}</span>. Override if
-          you&apos;d rather.
+          <span className="text-foreground">{formatCategory(category)}</span>.
+          Override if you&apos;d rather.
         </p>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -563,7 +579,7 @@ function GeneratingPanel() {
         {[1, 2, 3, 4].map((n) => (
           <div
             key={n}
-            className="relative aspect-[9/19] overflow-hidden rounded-2xl border border-border bg-foreground/[0.03]"
+            className="relative aspect-[1290/2796] overflow-hidden rounded-2xl border border-border bg-foreground/[0.03]"
           >
             <div className="absolute inset-0 animate-pulse bg-gradient-to-b from-foreground/10 via-transparent to-foreground/5" />
             <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-3 py-1 font-mono text-[10px] text-background">

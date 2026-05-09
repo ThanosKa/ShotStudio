@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-export const WIZARD_STEPS = ["App", "Screenshots", "Style"] as const;
+export const WIZARD_STEPS = ["App details", "Screenshots", "Style"] as const;
 
 export function WizardStepper({ current }: { current: number }) {
   return (

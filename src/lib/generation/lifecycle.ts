@@ -9,6 +9,7 @@ import {
 import { generations, transactions, users } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { generateImage } from "@/lib/openrouter";
+import { synthesizeHeadline } from "./headline";
 import { STYLE_PRESETS, type StylePresetId } from "./presets";
 import { buildPrompt, type ShotRole } from "./prompts";
 import { upscaleToAppStore } from "./upscale";
@@ -16,7 +17,8 @@ import { upscaleToAppStore } from "./upscale";
 export type RunGenerationInput = {
   userId: string;
   appName: string;
-  tagline: string;
+  pitch: string;
+  audience?: string;
   category: string;
   stylePreset: StylePresetId;
   screenshots: [File, File, File];
@@ -56,7 +58,7 @@ function validateScreenshots(
  * InsufficientCreditsError or UserNotFoundError; never partially applied.
  */
 async function debitAndStartGeneration(
-  input: Omit<RunGenerationInput, "tagline" | "screenshots">,
+  input: Omit<RunGenerationInput, "pitch" | "audience" | "screenshots">,
 ): Promise<{ generationId: string }> {
   return db.transaction(async (tx) => {
     const updated = await tx
@@ -115,7 +117,9 @@ async function runShot(
   role: ShotRole,
   ctx: {
     appName: string;
-    tagline: string;
+    headline: string;
+    pitch: string;
+    audience?: string;
     category: string;
     stylePreset: StylePresetId;
     screenshotDataUrls: [string, string, string];
@@ -125,7 +129,9 @@ async function runShot(
   const preset = STYLE_PRESETS[ctx.stylePreset];
   const prompt = buildPrompt({
     appName: ctx.appName,
-    tagline: ctx.tagline,
+    headline: ctx.headline,
+    pitch: ctx.pitch,
+    audience: ctx.audience,
     category: ctx.category,
     role,
     preset,
@@ -187,13 +193,25 @@ export async function runGeneration(
   // Release ~5MB-per-file File handles before the long-running shot calls.
   (input.screenshots as File[]).length = 0;
 
+  const headline = await synthesizeHeadline(
+    {
+      appName: input.appName,
+      pitch: input.pitch,
+      audience: input.audience,
+      category: input.category,
+    },
+    shotLog,
+  );
+
   const results = await Promise.allSettled(
     ROLES.map((role) =>
       runShot(
         role,
         {
           appName: input.appName,
-          tagline: input.tagline,
+          headline,
+          pitch: input.pitch,
+          audience: input.audience,
           category: input.category,
           stylePreset: input.stylePreset,
           screenshotDataUrls,
