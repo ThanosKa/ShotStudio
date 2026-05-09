@@ -8,3 +8,6 @@ export function cn(...inputs: ClassValue[]) {
 export function pluralize(n: number, singular: string, plural?: string): string {
   return n === 1 ? singular : plural ?? `${singular}s`;
 }
+
+export const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";

@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { BuyCreditsPanel } from "@/components/buy-credits-panel";
 import { Wizard } from "@/components/wizard";
-import { getEmailAndEnsureUser } from "@/lib/auth";
-import { getUserCredits } from "@/lib/db/queries";
+import { getEmailAndEnsureUser, getUserCredits } from "@/lib/db/queries";
 
 export default async function HomePage() {
   const { userId } = await auth();

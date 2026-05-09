@@ -1,5 +1,5 @@
 import WelcomeEmail from "../../../emails/welcome";
-import { APP_URL } from "../env";
+import { APP_URL } from "../utils";
 import { sendTransactional } from "./send";
 
 export async function sendWelcomeEmail(params: {

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { currentUser } from "@clerk/nextjs/server";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -25,4 +26,13 @@ export async function ensureUser(userId: string, email: string) {
       target: users.id,
       set: { email: sql`excluded.email` },
     });
+}
+
+export async function getEmailAndEnsureUser(
+  userId: string,
+): Promise<string | null> {
+  const user = await currentUser();
+  const email = user?.emailAddresses[0]?.emailAddress ?? null;
+  if (email) await ensureUser(userId, email);
+  return email;
 }

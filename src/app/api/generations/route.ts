@@ -1,10 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { getEmailAndEnsureUser } from "@/lib/auth";
 import { InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
 import {
   debitAndStartGeneration,
+  getEmailAndEnsureUser,
   markGenerationComplete,
   markGenerationFailed,
 } from "@/lib/db/queries";

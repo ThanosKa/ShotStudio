@@ -1,6 +1,5 @@
 import CreditsPurchasedEmail from "../../../emails/credits-purchased";
-import { APP_URL } from "../env";
-import { pluralize } from "../utils";
+import { APP_URL, pluralize } from "../utils";
 import { sendTransactional } from "./send";
 
 export async function sendCreditsPurchasedEmail(params: {

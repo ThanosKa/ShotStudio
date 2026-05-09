@@ -1,8 +1,8 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { APP_URL } from "@/lib/env";
 import { jsonError } from "@/lib/http";
+import { APP_URL } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 import { CREDIT_PACKAGE_IDS, getCreditPackage } from "@/lib/packages";
 import { checkoutRateLimit, rateLimitHeaders } from "@/lib/ratelimit";

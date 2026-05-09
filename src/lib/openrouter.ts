@@ -1,4 +1,4 @@
-import { APP_URL } from "@/lib/env";
+import { APP_URL } from "@/lib/utils";
 
 const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey) throw new Error("OPENROUTER_API_KEY is not set");
