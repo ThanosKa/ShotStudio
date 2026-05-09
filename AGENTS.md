@@ -14,10 +14,12 @@ One-time-pay AI App Store screenshot generator: 3 mobile screenshots → polishe
 - DB scripts load env from `.env.local` via `dotenv-cli`: `pnpm db:generate | db:migrate | db:push | db:studio`.
 - Email preview server: `pnpm email` (port 3001 — `next dev` owns 3000).
 - Typecheck before declaring done: `pnpm exec tsc --noEmit`.
+- Tests: `pnpm test` (run once) / `pnpm test:watch`. Uses **vitest** + **PGlite** (in-memory Postgres) — no real DB required. `vitest.setup.ts` mocks `@/lib/db` so anything importing it gets a fresh PGlite instance per test, with all `drizzle/*.sql` migrations applied. Always add tests for changes to credit accounting (`src/lib/credits.ts`, `src/lib/db/queries/`) — silent bugs there cost real money.
 
 ## Non-obvious rules
 
-- **Credit accounting is debit-before-AI, refund-on-failure.** Use `debit/refund/grant` from `src/lib/credits.ts`; do not bypass the transaction.
+- **Credit accounting is debit-before-AI, refund-on-failure.** For generations use `debitAndStartGeneration` (atomic debit + pending row insert) from `src/lib/db/queries`. For purchases use `grant`, for failures `refund`, both from `src/lib/credits.ts`. All three are wrapped in `db.transaction()`; do not bypass.
+- **`grant()` ON CONFLICT requires the partial-index `WHERE`.** The `transactions.stripePaymentId` unique index is partial (`WHERE ... is not null`). Postgres' arbiter inference can't match a partial index without an explicit `where:` on `onConflictDoNothing`. Removing the `where:` re-introduces a 100%-fail bug on every Stripe webhook.
 - **Webhooks are idempotent.** Stripe events are deduped via Upstash Redis (event ID + TTL); Resend sends use idempotency keys (`welcome-email/<userId>`, `credits-purchased/<stripeEventId>`). Preserve these on any change.
 - **Generation route declares `export const maxDuration = 300`** for the long-running image-generation calls. Don't remove it.
 - **Logging.** Use `@/lib/logger` (pino) on the server — never `console.*`. First arg is a structured context object, second is the message string; never interpolate values into the message. Errors go under the `err` key. At the top of any handler/action create a child logger (`logger.child({ action, ...ids })`) and reuse it.
