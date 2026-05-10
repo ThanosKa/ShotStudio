@@ -1,6 +1,6 @@
 # ShotStudio
 
-> ShotStudio turns three raw mobile screenshots into a polished four-shot App Store set in under a minute. One-time pay, no subscription, never stored. Built for indie iOS developers who don't want to spend a weekend in Figma the night before submission.
+> ShotStudio turns three raw mobile screenshots into a polished three-shot App Store set in under a minute. One-time pay, no subscription, never stored. Built for indie iOS developers who don't want to spend a weekend in Figma the night before submission.
 
 ## What it does
 - Input: 3 raw mobile screenshots (PNG/JPEG, up to 10 MB each), an app name, a one-sentence pitch, and an iOS App Store category.

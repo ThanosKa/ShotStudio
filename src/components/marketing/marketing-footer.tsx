@@ -8,6 +8,7 @@ const PRODUCT_LINKS = [
 ];
 
 const EXPLORE_LINKS = [
+  { label: "Blog", href: "/blog" },
   { label: "By category", href: "/screenshots-for" },
   { label: "Alternatives", href: "/alternatives" },
 ];

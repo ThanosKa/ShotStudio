@@ -30,6 +30,18 @@ export default function AlternativesHubPage() {
               { name: "Home", url: APP_URL },
               { name: "Alternatives", url: `${APP_URL}/alternatives` },
             ]),
+            {
+              "@type": "ItemList",
+              "@id": `${APP_URL}/alternatives#list`,
+              name: "App Store screenshot tool alternatives",
+              numberOfItems: COMPETITORS.length,
+              itemListElement: COMPETITORS.map((c, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                name: `${c.name} alternatives`,
+                url: `${APP_URL}/alternatives/${c.slug}`,
+              })),
+            },
           ],
         }}
       />

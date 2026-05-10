@@ -34,6 +34,18 @@ export default function CategoriesHubPage() {
                 url: `${APP_URL}/screenshots-for`,
               },
             ]),
+            {
+              "@type": "ItemList",
+              "@id": `${APP_URL}/screenshots-for#list`,
+              name: "App Store screenshots by app category",
+              numberOfItems: CATEGORIES.length,
+              itemListElement: CATEGORIES.map((c, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                name: c.name,
+                url: `${APP_URL}/screenshots-for/${c.slug}`,
+              })),
+            },
           ],
         }}
       />

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { APP_URL } from "@/lib/utils";
 import { CATEGORIES } from "@/data/categories";
 import { COMPETITORS } from "@/data/competitors";
+import { getAllPostMetas } from "@/lib/blog";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
@@ -32,6 +33,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${APP_URL}/blog`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
       url: `${APP_URL}/privacy`,
       lastModified,
       changeFrequency: "yearly",
@@ -59,5 +66,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...categoryPages, ...competitorPages];
+  const blogPages: MetadataRoute.Sitemap = getAllPostMetas().map((p) => ({
+    url: `${APP_URL}/blog/${p.slug}`,
+    lastModified: p.publishedAt ? new Date(p.publishedAt) : lastModified,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [
+    ...staticPages,
+    ...categoryPages,
+    ...competitorPages,
+    ...blogPages,
+  ];
 }
