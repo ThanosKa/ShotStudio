@@ -136,7 +136,7 @@ export default async function CategoryPage({
           {data.whatHurts.map((point, i) => (
             <div key={i} className="bg-background p-7">
               <div className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
-                Don't {String(i + 1).padStart(2, "0")}
+                Don&rsquo;t {String(i + 1).padStart(2, "0")}
               </div>
               <p className="mt-4 text-body-lg text-muted-foreground">{point}</p>
             </div>

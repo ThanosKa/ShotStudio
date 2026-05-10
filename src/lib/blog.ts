@@ -53,7 +53,25 @@ export function getAllPosts(): Post[] {
 }
 
 export function getAllPostMetas(): PostMeta[] {
-  return getAllPosts().map(({ content: _content, ...meta }) => meta);
+  return getAllPosts().map(
+    ({
+      slug,
+      title,
+      description,
+      publishedAt,
+      updatedAt,
+      readingTime,
+      heroImage,
+    }) => ({
+      slug,
+      title,
+      description,
+      publishedAt,
+      updatedAt,
+      readingTime,
+      heroImage,
+    }),
+  );
 }
 
 export function getPostBySlug(slug: string): Post | undefined {

@@ -10,7 +10,6 @@ export default function GlobalError({
   unstable_retry: () => void;
 }) {
   useEffect(() => {
-    // eslint-disable-next-line no-console
     console.error(error);
   }, [error]);
 

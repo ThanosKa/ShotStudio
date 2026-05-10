@@ -76,7 +76,10 @@ export function Wizard() {
   const audienceChars = audience.trim().length;
 
   const shotsRef = useRef(shots);
-  shotsRef.current = shots;
+
+  useEffect(() => {
+    shotsRef.current = shots;
+  }, [shots]);
 
   useEffect(() => {
     return () => {

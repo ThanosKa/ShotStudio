@@ -58,7 +58,7 @@ export function LandingPricing() {
         setBusy(null);
         return;
       }
-      window.location.href = (data as { checkoutUrl: string }).checkoutUrl;
+      window.location.assign((data as { checkoutUrl: string }).checkoutUrl);
     } catch {
       setBusy(null);
     }

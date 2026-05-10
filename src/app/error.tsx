@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function ErrorBoundary({
@@ -11,7 +12,6 @@ export default function ErrorBoundary({
   unstable_retry: () => void;
 }) {
   useEffect(() => {
-    // eslint-disable-next-line no-console
     console.error(error);
   }, [error]);
 
@@ -25,7 +25,7 @@ export default function ErrorBoundary({
         <div className="flex justify-center gap-3">
           <Button onClick={() => unstable_retry()}>Try again</Button>
           <Button variant="outline" asChild>
-            <a href="/">Go home</a>
+            <Link href="/">Go home</Link>
           </Button>
         </div>
       </div>
