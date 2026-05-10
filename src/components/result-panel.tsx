@@ -39,10 +39,10 @@ export function ResultPanel({
         <CardTitle>Your screenshot set is ready</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm">
-          Download before closing — we don&apos;t store your images.
-        </div>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          Privacy-first · nothing is stored on our side
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {images.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img

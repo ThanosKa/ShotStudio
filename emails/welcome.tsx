@@ -44,8 +44,8 @@ export default function WelcomeEmail({ firstName, appUrl }: WelcomeEmailProps) {
           <Preview>Welcome to ShotStudio — App Store screenshots in a minute.</Preview>
           <Container className="max-w-[560px] mx-auto px-6 py-10">
             <Section>
-              <Text className="text-base font-semibold tracking-tight m-0">
-                ShotStudio
+              <Text className="text-base font-bold tracking-tight m-0">
+                <span style={{ color: "#fb923c" }}>Shot</span>Studio
               </Text>
             </Section>
 
@@ -58,7 +58,7 @@ export default function WelcomeEmail({ firstName, appUrl }: WelcomeEmailProps) {
               </Text>
               <Text className="text-base leading-6 text-ink mt-3 mb-0">
                 Upload three mobile screenshots, give us your app name and tagline,
-                and you&apos;ll have a polished four-image App Store set in under a minute.
+                and you&apos;ll have three polished App Store shots in under a minute.
                 No subscriptions, no design tools.
               </Text>
             </Section>

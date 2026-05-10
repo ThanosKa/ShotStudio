@@ -1,0 +1,46 @@
+# ShotStudio
+
+> ShotStudio turns three raw mobile screenshots into a polished four-shot App Store set in under a minute. One-time pay, no subscription, never stored. Built for indie iOS developers who don't want to spend a weekend in Figma the night before submission.
+
+## What it does
+- Input: 3 raw mobile screenshots (PNG/JPEG, up to 10 MB each), an app name, a one-sentence pitch, and an iOS App Store category.
+- Output: 3 PNGs at 1290×2796 (iPhone 6.7" portrait spec) — sRGB, no transparency, no watermark. One polished device-framed shot per uploaded source screen.
+- Time: ~1 minute per set.
+- Headline copy is AI-written from the user's pitch and audience.
+- Style: 4 curated presets (soft bright, dark premium, clean minimal, bold playful), auto-picked from the chosen category.
+
+## Pricing (one-time, no subscription)
+- Starter — $7 USD for 2 generation sets.
+- Growth — $17 USD for 5 generation sets (most chosen).
+- Studio — $37 USD for 12 generation sets.
+- 1 credit = 1 set = 3 polished images (one per user-uploaded source screen). Credits never expire.
+- Credits are refunded automatically only when image generation fails after our retry/fallback path is exhausted.
+- Tax calculated at checkout via Stripe Tax.
+
+See full structured pricing: /pricing.md
+Public pricing page: /pricing
+
+## Privacy
+- Zero image persistence: uploads pass through memory to the AI model, then are dropped. No images table, no S3 bucket, no thumbnail cache.
+- Generated images are returned to the user's browser only and are unrecoverable once the tab closes.
+- No third-party analytics or advertising cookies.
+- Sub-processors: Clerk (auth), Stripe (payments), Supabase Postgres (account/transaction data only — never images), Upstash Redis (idempotency), OpenRouter / OpenAI (image generation), Resend (email), Vercel (hosting).
+- Privacy policy: /privacy
+
+## Who it's for
+- Solo iOS developers, indie hackers, two-person studios, freelancers shipping client apps.
+- First-time App Store submitters and existing apps refreshing screenshots after a feature launch.
+
+## Who it's NOT for (v1)
+- Android / Google Play developers (no Play export in v1).
+- Large brands or agencies needing pixel-precise brand-guideline compliance.
+- Teams (no team accounts, no shared credits).
+- Anyone wanting persistent generation history (intentionally not built).
+
+## Key links
+- Home: /
+- Pricing: /pricing
+- Privacy: /privacy
+- Terms: /terms
+- Sign up: /sign-up
+- Contact: hello@shotstudio.app

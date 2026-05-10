@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
-import { cn } from "@/lib/utils";
+import { APP_URL, cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -17,8 +17,56 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ShotStudio",
-  description: "Polished App Store screenshots in under a minute. One-time pay.",
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: "ShotStudio — App Store screenshots in under a minute",
+    template: "%s — ShotStudio",
+  },
+  description:
+    "Drop in three raw mobile screenshots. Get a polished four-shot App Store set back in under a minute. One-time pay.",
+  applicationName: "ShotStudio",
+  keywords: [
+    "App Store screenshots",
+    "App Store screenshot generator",
+    "App Store Connect",
+    "iOS screenshots",
+    "App Store Optimization",
+    "ASO",
+    "indie iOS",
+  ],
+  authors: [{ name: "ShotStudio" }],
+  creator: "ShotStudio",
+  publisher: "ShotStudio",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "ShotStudio",
+    title: "ShotStudio — App Store screenshots in under a minute",
+    description:
+      "Three raw screenshots in, three polished App Store shots out. One-time pay, never stored.",
+    url: APP_URL,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ShotStudio — App Store screenshots in under a minute",
+    description:
+      "Three raw screenshots in, three polished App Store shots out. One-time pay, never stored.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  category: "technology",
 };
 
 export default function RootLayout({

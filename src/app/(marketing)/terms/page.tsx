@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/marketing/legal-page";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — ShotStudio",
+  title: "Terms of Service",
   description: "The terms governing your use of ShotStudio.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {
@@ -32,24 +33,26 @@ export default function TermsPage() {
           VAT/sales tax is added at checkout via Stripe Tax.
         </li>
         <li>
-          One credit covers one full generation set (four images). Regenerating
-          an individual shot in an existing set is free.
+          One credit covers one full generation set (three images, one per
+          uploaded source screen).
         </li>
         <li>
           Credits do not expire while your account is active. Credits have no
           cash value and cannot be transferred between accounts.
         </li>
         <li>
-          If a generation fails after our automatic retry, the credit is
-          refunded to your balance automatically.
+          If image generation fails after our automatic retry and fallback
+          path is exhausted, the credit is returned to your balance
+          automatically. No money is refunded.
         </li>
       </ul>
 
       <h2>All sales final</h2>
       <p>
-        Credit purchases are non-refundable except where required by law or as
-        explicitly described above (automatic refund on failed generation).
-        Disputes are handled directly through Stripe&apos;s dispute mechanism.
+        Credit purchases are non-refundable. The only thing we refund is
+        credits, and only when image generation fails after our retry and
+        fallback path is exhausted (described above). Disputes are handled
+        directly through Stripe&apos;s dispute mechanism.
       </p>
 
       <h2>Acceptable use</h2>
@@ -76,7 +79,7 @@ export default function TermsPage() {
       <h2>Ownership of output</h2>
       <p>
         Subject to your compliance with these Terms and to applicable law, you
-        own the four images returned by a successful generation and may use
+        own the three images returned by a successful generation and may use
         them for any purpose, including commercial App Store and Play Store
         listings. You are responsible for ensuring the inputs you provide
         (screenshots, logos, taglines) are yours to use.

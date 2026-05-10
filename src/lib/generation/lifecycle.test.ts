@@ -43,7 +43,7 @@ describe("runGeneration", () => {
     expect(txs).toHaveLength(0);
   });
 
-  test("happy path: balance −1, one usage row, generation complete, four image URLs", async () => {
+  test("happy path: balance −1, one usage row, generation complete, three image URLs", async () => {
     await ensureUser("u_ok", "u_ok@test");
     await db
       .update(users)
@@ -54,7 +54,7 @@ describe("runGeneration", () => {
 
     expect(outcome.kind).toBe("ok");
     if (outcome.kind !== "ok") return;
-    expect(outcome.imageUrls).toHaveLength(4);
+    expect(outcome.imageUrls).toHaveLength(3);
     for (const url of outcome.imageUrls) {
       expect(url.startsWith("data:image/png;base64,")).toBe(true);
     }
@@ -183,7 +183,7 @@ describe("runGeneration", () => {
 
     expect(outcome.kind).toBe("ok");
     if (outcome.kind !== "ok") return;
-    expect(outcome.imageUrls).toHaveLength(4);
+    expect(outcome.imageUrls).toHaveLength(3);
 
     const [u] = await db
       .select({ credits: users.credits })

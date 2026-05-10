@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { BuyCreditsPanel } from "@/components/buy-credits-panel";
 import { Wizard } from "@/components/wizard";
 import { getEmailAndEnsureUser, getUserCredits } from "@/lib/db/queries";
+
+export const metadata: Metadata = {
+  title: "Studio",
+  robots: { index: false, follow: false },
+};
 
 export default async function HomePage() {
   const { userId } = await auth();

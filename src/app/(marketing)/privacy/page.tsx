@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/marketing/legal-page";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — ShotStudio",
+  title: "Privacy Policy",
   description:
     "How ShotStudio handles screenshots, generated images, and account data.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

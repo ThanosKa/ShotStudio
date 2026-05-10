@@ -63,8 +63,8 @@ export default function CreditsPurchasedEmail({
           </Preview>
           <Container className="max-w-[560px] mx-auto px-6 py-10">
             <Section>
-              <Text className="text-base font-semibold tracking-tight m-0">
-                ShotStudio
+              <Text className="text-base font-bold tracking-tight m-0">
+                <span style={{ color: "#fb923c" }}>Shot</span>Studio
               </Text>
             </Section>
 
@@ -167,9 +167,9 @@ export default function CreditsPurchasedEmail({
 
 CreditsPurchasedEmail.PreviewProps = {
   firstName: "Alex",
-  packageName: "Growth — 4 sets",
-  creditsAdded: 4,
-  newBalance: 4,
+  packageName: "Growth — 5 sets",
+  creditsAdded: 5,
+  newBalance: 5,
   amountFormatted: "$17.00",
   receiptUrl: "https://pay.stripe.com/receipts/example",
   appUrl: "https://shotstudio.app",
