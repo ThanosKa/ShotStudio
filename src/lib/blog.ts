@@ -13,6 +13,8 @@ export type PostMeta = {
   updatedAt: string;
   /** Plain-language reading-time hint, e.g. "6 min read" */
   readingTime: string;
+  /** Optional landscape hero image, served from /public. */
+  heroImage?: string;
 };
 
 export type Post = PostMeta & {
@@ -36,6 +38,7 @@ function readPostFile(filename: string): Post {
     publishedAt,
     updatedAt: String(data.updatedAt ?? publishedAt),
     readingTime,
+    heroImage: data.heroImage ? String(data.heroImage) : undefined,
     content,
   };
 }

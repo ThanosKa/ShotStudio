@@ -212,17 +212,27 @@ export function Wizard() {
       });
       const data: unknown = await res.json().catch(() => null);
       if (!res.ok || !data || typeof data !== "object") {
-        throw new Error(parseApiError(res.status, data, "Generation failed"));
+        throw new Error(
+          parseApiError(
+            res.status,
+            data,
+            "Couldn't generate your screenshots. Please try again.",
+          ),
+        );
       }
       const ok = data as { imageUrls?: string[] };
-      if (!ok.imageUrls || ok.imageUrls.length !== 4) {
-        throw new Error("Generation returned no images.");
+      if (!ok.imageUrls || ok.imageUrls.length !== 3) {
+        throw new Error("Couldn't generate your screenshots. Please try again.");
       }
       setImages(ok.imageUrls);
       setStatus("done");
     } catch (err) {
       setStatus("error");
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Couldn't generate your screenshots. Please try again.",
+      );
     }
   }
 
@@ -313,7 +323,7 @@ export function Wizard() {
               <Button onClick={next}>Continue</Button>
             ) : (
               <Button onClick={onSubmit} size="lg">
-                Generate (1 credit)
+                Generate
               </Button>
             )}
           </div>
@@ -597,18 +607,12 @@ function StepStyle({
                   : "border-border hover:border-foreground/40",
               )}
             >
-              <div className="mb-3 flex gap-1.5">
-                {p.palette.map((c) => (
-                  <span
-                    key={c}
-                    className="h-5 w-5 rounded-full border border-foreground/10"
-                    style={{ background: c }}
-                  />
-                ))}
-              </div>
               <div className="font-medium">{p.label}</div>
               <p className="mt-1 text-sm text-muted-foreground">
-                {p.toneModifier}
+                {p.voice}
+              </p>
+              <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                {p.typography}
               </p>
             </button>
           );
@@ -619,7 +623,6 @@ function StepStyle({
 }
 
 const SHOT_OUTPUT_LABELS = [
-  "Title",
   "Hero feature",
   "Differentiator",
   "Another feature",
@@ -634,13 +637,13 @@ function GeneratingPanel() {
           <span className="font-medium">Generating your set</span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Running 4 parallel jobs · 30–90 seconds.
+          Running 3 parallel jobs · 30–90 seconds.
         </p>
         <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-foreground/10">
           <span className="block h-full w-1/3 animate-pulse rounded-full bg-foreground" />
         </div>
       </div>
-      <div className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-4">
+      <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
         {SHOT_OUTPUT_LABELS.map((label, i) => (
           <GeneratingTile key={i} index={i} label={label} />
         ))}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Show, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight } from "lucide-react";
 import { Section } from "@/components/marketing/section";
 import { ShowcaseCard } from "@/components/marketing/showcase-card";
@@ -86,13 +87,28 @@ export default async function CategoryPage({
         className="border-t-0"
       >
         <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href="/sign-up"
-            className="group inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+          <Show
+            when="signed-in"
+            fallback={
+              <SignUpButton mode="modal">
+                <button
+                  type="button"
+                  className="group inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+                >
+                  Generate my screenshots
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </button>
+              </SignUpButton>
+            }
           >
-            Generate my screenshots
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+            <Link
+              href="/home"
+              className="group inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+            >
+              Generate my screenshots
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </Show>
           <Link
             href="/pricing"
             className="text-sm text-muted-foreground hover:text-foreground"
@@ -132,7 +148,7 @@ export default async function CategoryPage({
         <Section
           eyebrow={`Preset · ${preset.label}`}
           title={`The ${preset.label.toLowerCase()} preset, applied`}
-          description={`ShotStudio defaults ${data.noun} to the ${preset.label} preset. ${preset.toneModifier}, with ${preset.typography}. Override on the wizard step if you want a different vibe.`}
+          description={`ShotStudio defaults ${data.noun} to the ${preset.label} personality preset. Voice: ${preset.voice}. Typography: ${preset.typography}. Theme and palette are sampled from your uploads, so the marketing matches your actual app — override the personality on the wizard step if you want a different one.`}
         >
           <div className="max-w-xl">
             <ShowcaseCard set={example} />

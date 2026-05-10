@@ -83,7 +83,10 @@ export async function POST(req: NextRequest) {
           return jsonError(409, "We're setting up your account. Please try again in a few seconds.");
         case "failed_and_refunded":
           log.error({ reason: outcome.reason, durationMs }, "generation failed");
-          return jsonError(502, "Generation failed. Your credit has been refunded.");
+          return jsonError(
+            502,
+            "Couldn't generate your screenshots. Your credit was refunded — please try again.",
+          );
       }
     },
   );

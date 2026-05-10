@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Show, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight } from "lucide-react";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { MdxContent } from "@/components/marketing/mdx-content";
@@ -27,6 +29,9 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) return {};
+  const ogImage = post.heroImage
+    ? `${APP_URL}${post.heroImage}`
+    : `${APP_URL}/og-default.png`;
   return {
     title: post.title,
     description: post.description,
@@ -37,6 +42,13 @@ export async function generateMetadata({
       type: "article",
       publishedTime: post.publishedAt,
       url: `${APP_URL}/blog/${post.slug}`,
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${post.title} — ShotStudio`,
+      description: post.description,
+      images: [ogImage],
     },
   };
 }
@@ -154,6 +166,20 @@ export default async function BlogPostPage({
             <span>{post.readingTime}</span>
           </div>
 
+          {post.heroImage && (
+            <div className="mt-10 overflow-hidden rounded-2xl border bg-background">
+              <Image
+                src={post.heroImage}
+                alt={post.title}
+                width={1672}
+                height={941}
+                priority
+                unoptimized
+                className="block h-auto w-full"
+              />
+            </div>
+          )}
+
           <div className="mt-10">
             <MdxContent source={post.content} />
           </div>
@@ -167,13 +193,28 @@ export default async function BlogPostPage({
               one-time, AI-picked preset, ready for App Store Connect in under
               a minute.
             </p>
-            <Link
-              href="/sign-up"
-              className="group mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+            <Show
+              when="signed-in"
+              fallback={
+                <SignUpButton mode="modal">
+                  <button
+                    type="button"
+                    className="group mt-5 inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+                  >
+                    Generate my screenshots
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                </SignUpButton>
+              }
             >
-              Generate my screenshots
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+              <Link
+                href="/home"
+                className="group mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+              >
+                Generate my screenshots
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </Show>
           </div>
         </div>
       </article>

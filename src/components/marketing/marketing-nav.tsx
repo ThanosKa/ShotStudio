@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Show, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
 
@@ -21,12 +22,25 @@ export function MarketingNav() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-            <Link href="/sign-in">Sign in</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/sign-up">Get started</Link>
-          </Button>
+          <Show
+            when="signed-in"
+            fallback={
+              <>
+                <SignInButton mode="modal">
+                  <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                    Sign in
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button size="sm">Get started</Button>
+                </SignUpButton>
+              </>
+            }
+          >
+            <Button asChild size="sm">
+              <Link href="/home">Go to app</Link>
+            </Button>
+          </Show>
         </div>
       </div>
     </header>

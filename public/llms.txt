@@ -7,7 +7,8 @@
 - Output: 3 PNGs at 1290×2796 (iPhone 6.7" portrait spec) — sRGB, no transparency, no watermark. One polished device-framed shot per uploaded source screen.
 - Time: ~1 minute per set.
 - Headline copy is AI-written from the user's pitch and audience.
-- Style: 4 curated presets (soft bright, dark premium, clean minimal, bold playful), auto-picked from the chosen category.
+- Style: 4 personality presets (Friendly, Professional, Minimal, Bold) — these control typography and headline voice only. Auto-picked from category, user can override.
+- Theme + palette: derived from the user's uploaded screenshots, not from the preset. A light app gets a light marketing backdrop; a dark app gets a dark one. The output always harmonizes with the actual app.
 
 ## Pricing (one-time, no subscription)
 - Starter — $7 USD for 2 generation sets.

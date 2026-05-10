@@ -24,7 +24,7 @@ export const CATEGORIES: Category[] = [
     slug: "fitness-apps",
     name: "Fitness apps",
     noun: "fitness apps",
-    presetId: "soft_bright",
+    presetId: "friendly",
     lead: "Fitness apps live or die on the feeling someone gets in the first three seconds. The screenshot has to imply progress — a streak, a chart climbing, a body in motion — without showing a wall of numbers nobody wants to read on a Tuesday morning. Most indie fitness screenshots fail because they over-explain the feature instead of selling the outcome. The hero shot should answer one question: what does my next workout look like if I download this?",
     whatConverts: [
       "Show one personal-record moment, not the entire workout history dashboard.",
@@ -48,7 +48,7 @@ export const CATEGORIES: Category[] = [
       },
       {
         q: "What preset does ShotStudio pick for fitness apps?",
-        a: "Soft & Bright by default — warm gradients and rounded type that feel motivating without shouting. Override to Bold & Playful for gamified or social fitness apps where the energy needs to be louder.",
+        a: "Friendly by default — rounded sans-serif type and a warm headline voice. The actual color palette comes from your uploaded screenshots, so a pastel app stays pastel and a bold-color app stays bold. Override to Bold if you want oversized display type and punchier copy.",
       },
     ],
   },
@@ -56,7 +56,7 @@ export const CATEGORIES: Category[] = [
     slug: "finance-apps",
     name: "Finance apps",
     noun: "finance apps",
-    presetId: "dark_premium",
+    presetId: "professional",
     lead: "Finance app screenshots have an uphill fight: the actual product is a screen full of numbers, and a screen full of numbers reads as noise in the App Store carousel. The trick is to show one number, large, with one piece of context — and let the rest of the screenshot whisper. Premium finance apps lean dark for a reason: it makes a single accent color (your brand green for gains, your charcoal for the rest) feel deliberate instead of cluttered.",
     whatConverts: [
       "One hero number — net worth, balance, or last-month gain — at a size you can read across the room.",
@@ -79,8 +79,8 @@ export const CATEGORIES: Category[] = [
         a: "Both. Use the App Store conventions for any data visualization (green up, red down) — users read these in 200ms — and let your brand color be the accent for headlines and CTAs.",
       },
       {
-        q: "Why does ShotStudio default finance apps to Dark & Premium?",
-        a: "Because finance buyers are pattern-matched to expect it. Robinhood, Wealthfront, Mercury, Stripe — every premium finance product leans dark. Going light feels like a budgeting app for college students, even when you don't mean it to.",
+        q: "Why does ShotStudio default finance apps to Professional?",
+        a: "Because finance buyers expect Inter-style typography and confident-not-cute copy. Professional gives you that — restrained type, declarative headline voice. The light-vs-dark theme is sampled from your uploaded screenshots, so the output matches your actual app. Light brand stays light, dark brand stays dark.",
       },
     ],
   },
@@ -88,7 +88,7 @@ export const CATEGORIES: Category[] = [
     slug: "productivity-apps",
     name: "Productivity apps",
     noun: "productivity apps",
-    presetId: "clean_minimal",
+    presetId: "minimal",
     lead: "Productivity is the most crowded category on the App Store. Anything generic disappears. The winning shots are obsessively specific — one feature, one workflow, one obvious win — rendered with so much whitespace that the user understands the app is calm. The instinct to show \"everything the app can do\" is the single biggest reason indie productivity apps fail in the carousel.",
     whatConverts: [
       "One workflow rendered in detail — a single list, a single capture flow, a single review screen.",
@@ -111,7 +111,7 @@ export const CATEGORIES: Category[] = [
         a: "Only as a secondary shot. Lead light — your hero shot has to read at thumbnail size in any App Store carousel, and dark mode loses contrast at small sizes for most fonts.",
       },
       {
-        q: "Why is Clean & Minimal the default ShotStudio preset for productivity?",
+        q: "Why is Minimal the default ShotStudio preset for productivity?",
         a: "Because the productivity buyer's pain is overload — the screenshot has to demonstrate, visually, that the app is the opposite of overload. White space is the proof; ornament is the enemy.",
       },
     ],
@@ -120,7 +120,7 @@ export const CATEGORIES: Category[] = [
     slug: "indie-games",
     name: "Indie games",
     noun: "indie games",
-    presetId: "bold_playful",
+    presetId: "bold",
     lead: "Indie game screenshots are a different game (sorry) from utility apps. Players are scrolling fast and scanning for energy, character, and a hook — not a feature list. The hero shot needs to communicate the genre and the vibe in 200ms. Saturated solids, oversized type, and a hint of motion read better than any in-game render at thumbnail size, especially for casual and puzzle titles where the actual gameplay is hard to summarize visually.",
     whatConverts: [
       "Genre + vibe legible at thumbnail size — a player should know it's a puzzle, runner, or RPG without reading anything.",
@@ -143,8 +143,8 @@ export const CATEGORIES: Category[] = [
         a: "Closely, yes. Apple guidelines require screenshots to represent the actual app experience. You can stylize for impact (oversized text, bolder colors) but the core characters and visual style must match.",
       },
       {
-        q: "Why Bold & Playful for games?",
-        a: "Because a muted palette gets eaten in the App Store carousel by every other game next to yours. Saturated solids and high-contrast type cut through. ShotStudio's Bold & Playful preset is built for exactly this fight.",
+        q: "Why Bold for games?",
+        a: "Because games need oversized headlines and punchy verbs to cut through the carousel — Bold gives you that with display type and direct copy voice. Color saturation comes from your actual game screenshots; if your art is muted, the marketing inherits it. Bold brings the typography heat on top.",
       },
     ],
   },
@@ -152,7 +152,7 @@ export const CATEGORIES: Category[] = [
     slug: "dev-tools",
     name: "Developer tools",
     noun: "developer tools",
-    presetId: "dark_premium",
+    presetId: "professional",
     lead: "Developer-tool screenshots are sold to developers, who are the most cynical screenshot audience on the App Store. Stock photography is instant tune-out. Generic productivity tropes (\"Boost your workflow\") are instant tune-out. What works is real-looking code, real-looking UI chrome, and one specific capability that a senior engineer actually wants. Dark mode is table stakes — most dev tools are used in dark mode and the buyer expects to see it.",
     whatConverts: [
       "Real-looking code or UI in the screenshot — syntax highlighting, monospace fonts, plausible variable names.",
@@ -175,8 +175,8 @@ export const CATEGORIES: Category[] = [
         a: "Yes — Working Copy, Termius, Buffer Editor, and a long tail of indie tools rank. The shots that win look like the developer's terminal or editor on a real device, not a marketing render.",
       },
       {
-        q: "Why does ShotStudio pick Dark & Premium for dev tools?",
-        a: "Because developers expect it. Dark backgrounds with a single bright accent (your brand purple, GitHub's green) match the editor and terminal environments developers spend their day in. Light hero shots feel off-genre.",
+        q: "Why does ShotStudio pick Professional for dev tools?",
+        a: "Because developers expect Inter-style type and confident, no-fluff copy. Professional gives you that. The dark backdrop most dev-tool marketing ends up with comes from uploads — most dev tools ship dark UI, so the marketing background follows the app naturally.",
       },
     ],
   },
@@ -184,7 +184,7 @@ export const CATEGORIES: Category[] = [
     slug: "meditation-apps",
     name: "Meditation apps",
     noun: "meditation apps",
-    presetId: "soft_bright",
+    presetId: "friendly",
     lead: "Meditation apps compete on calm, not features. The screenshot has to make someone scrolling at 11pm feel something quieter than the feed they came from. Soft gradients, breathable type, and a single image of stillness do the work. The instinct to list every meditation length, instructor, or category is the killer — meditation apps that lead with a long menu look like work.",
     whatConverts: [
       "One stillness image — a slow breath, a sunrise, a single object — instead of a session list.",
@@ -207,8 +207,8 @@ export const CATEGORIES: Category[] = [
         a: "Yes. The App Store carousel is not your library page. Save the session list for shot 3 or skip it entirely and use that slot for the experience itself.",
       },
       {
-        q: "Why is Soft & Bright the default ShotStudio preset for meditation?",
-        a: "Because the buyer is pattern-matched on softness. Calm, Headspace, Insight Timer — all soft, gradient-heavy, low-contrast. ShotStudio's Soft & Bright preset is purpose-built for this language.",
+        q: "Why is Friendly the default ShotStudio preset for meditation?",
+        a: "Because the meditation buyer expects rounded type and a calm, plainspoken headline voice — that's what Friendly gives you. The soft-pastel palette you associate with the category comes from your actual app's screenshots. Most meditation apps already ship those tones, so the marketing inherits them.",
       },
     ],
   },
@@ -216,7 +216,7 @@ export const CATEGORIES: Category[] = [
     slug: "budgeting-apps",
     name: "Budgeting apps",
     noun: "budgeting apps",
-    presetId: "dark_premium",
+    presetId: "professional",
     lead: "Budgeting apps live in the same world as finance apps but talk to a different buyer. Where finance apps signal premium-and-aspirational, budgeting apps need to signal in-control-and-honest. The screenshot has to feel like the app would tell you the truth about your spending without judging you. One overspend chart, one envelope total, one savings line — that's the entire job.",
     whatConverts: [
       "One specific category overspend (\"Eating out: $312 / $200\") that names the buyer's actual life.",
@@ -248,7 +248,7 @@ export const CATEGORIES: Category[] = [
     slug: "note-taking-apps",
     name: "Note-taking apps",
     noun: "note-taking apps",
-    presetId: "clean_minimal",
+    presetId: "minimal",
     lead: "Note-taking is the most personal category on the App Store. Screenshots have to imply someone's actual brain, not a generic outline of \"how to be organized.\" The winning shots feel like a real person's notes — half-finished, idiosyncratic, with one or two of those personal-formatting ticks (a leftover bullet, a struck-through line, a date written wrong) that signal a human used this for an hour yesterday.",
     whatConverts: [
       "A single, real-feeling note — paragraphs and bullets mixed, not a perfectly clean outline.",
@@ -271,8 +271,8 @@ export const CATEGORIES: Category[] = [
         a: "Once, on a secondary shot. Search is the killer feature for note-takers but it's the third thing they think about, after capture (shot 1) and the writing experience (shot 2).",
       },
       {
-        q: "Why Clean & Minimal for note-taking?",
-        a: "Because note-taking buyers are running from cluttered apps. Whitespace is the visual promise. The ShotStudio Clean & Minimal preset uses restraint as the differentiator — typography over ornament.",
+        q: "Why Minimal for note-taking?",
+        a: "Because note-taking buyers are running from cluttered apps. Whitespace is the visual promise. The ShotStudio Minimal preset uses restraint as the differentiator — typography over ornament.",
       },
     ],
   },
@@ -280,7 +280,7 @@ export const CATEGORIES: Category[] = [
     slug: "language-learning-apps",
     name: "Language-learning apps",
     noun: "language-learning apps",
-    presetId: "clean_minimal",
+    presetId: "minimal",
     lead: "Language-learning screenshots have a specific job: prove that progress is possible without showing a wall of grammar. The category leader (Duolingo) trained the entire App Store on what these screenshots should look like — single lesson card, friendly mascot energy, one word being learned, a streak counter somewhere. Indie apps that try to differentiate by looking academic almost always lose. Lean into the lesson moment, not the linguistics.",
     whatConverts: [
       "One word being learned, one example sentence, one tappable answer — the smallest unit of progress.",
@@ -312,7 +312,7 @@ export const CATEGORIES: Category[] = [
     slug: "social-apps",
     name: "Social apps",
     noun: "social apps",
-    presetId: "soft_bright",
+    presetId: "friendly",
     lead: "Social-app screenshots have to imply community without showing strangers' faces. The hero shot needs warmth and motion — a feeling that someone is online right now, that the app is alive — without either of the two failure modes: stock-photo influencers (instant generic) or empty-state UI (instant lonely). Soft palettes, rounded type, and one micro-interaction (a reaction, a typing indicator, a notification) carry the work.",
     whatConverts: [
       "One micro-interaction visible — a reaction, a typing dots, a new-message badge — that proves the app is in motion.",
@@ -335,8 +335,8 @@ export const CATEGORIES: Category[] = [
         a: "On a secondary shot, yes — push notifications are the load-bearing growth mechanism for social. But never on the hero; lead with the in-app moment, not the lock screen.",
       },
       {
-        q: "Why Soft & Bright for social apps?",
-        a: "Warm rounded type and pastel gradients signal welcoming-not-edgy. Social apps that feel cold lose to social apps that feel like a friend. ShotStudio's Soft & Bright preset is built for that warmth without tipping into childish.",
+        q: "Why Friendly for social apps?",
+        a: "Warm rounded type and a plainspoken voice signal welcoming-not-edgy. Friendly gives you both. The actual color palette comes from your uploaded screenshots, so the marketing inherits your app's actual mood — a pastel app stays pastel, a saturated app stays saturated.",
       },
     ],
   },

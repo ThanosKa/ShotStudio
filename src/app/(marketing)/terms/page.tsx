@@ -18,7 +18,7 @@ export default function TermsPage() {
 
       <h2>The service</h2>
       <p>
-        ShotStudio generates a four-image App Store screenshot set from
+        ShotStudio generates a three-image App Store screenshot set from
         screenshots and context you provide. We use AI (currently OpenAI&apos;s
         gpt-image-2 via OpenRouter) to produce the output. AI output quality
         varies; we make no guarantee that any specific generation will meet

@@ -41,7 +41,7 @@ export default function PricingPage() {
       <Section
         eyebrow="Pricing"
         title="Three packs. Buy what you need."
-        description="One credit = one polished four-shot set. Failed generations refund automatically. Credits never expire."
+        description="1 credit = 1 set = 3 polished shots. Credits never expire, failed generations auto-refund, no subscription."
         className="border-t-0"
       >
         <LandingPricing />

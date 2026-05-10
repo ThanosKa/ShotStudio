@@ -9,76 +9,62 @@ export type ShowcaseSet = {
   tagline: string;
   /** Short headlines for shots 2/3/4 */
   shots: [string, string, string];
+  /** Composite marketing image — landscape PNG showing 1 hero card + 3 feature phones. */
+  image: string;
 };
 
 /**
- * Sample sets shown in the landing-page marquee. Replace with real generated
- * outputs once we have a curated batch — the structure is what each Marquee
- * card renders.
+ * Marquee + persona-page showcase sets. Each entry has a real composite image
+ * generated via openai/gpt-5.4-image-2 sitting in `public/showcase/[id].png`.
  */
 export const SHOWCASE_SETS: ShowcaseSet[] = [
   {
     id: "lumen",
     app: "Lumen",
     category: "wellness",
-    preset: "soft_bright",
+    preset: "friendly",
     tagline: "A calmer morning, every morning",
-    shots: ["Track your mood", "Breathe with us", "Sleep deeper"],
+    shots: ["5 minutes, every morning", "Sleep deeper tonight", "Track how you feel"],
+    image: "/showcase/lumen.png",
   },
   {
-    id: "ledger",
-    app: "Ledger",
-    category: "finance",
-    preset: "dark_premium",
-    tagline: "Money, finally readable",
-    shots: ["Net worth at a glance", "Spending by tag", "Forecast next month"],
+    id: "sprout",
+    app: "Sprout",
+    category: "habits",
+    preset: "friendly",
+    tagline: "Tiny daily habits",
+    shots: [
+      "Build streaks that stick",
+      "Your plant, growing daily",
+      "See your week at a glance",
+    ],
+    image: "/showcase/sprout.png",
   },
   {
-    id: "clear",
-    app: "Clear",
-    category: "productivity",
-    preset: "clean_minimal",
-    tagline: "Plan less. Ship more.",
-    shots: ["One list per day", "Capture in seconds", "Weekly review built-in"],
+    id: "bloom",
+    app: "Bloom",
+    category: "plant ID",
+    preset: "professional",
+    tagline: "Snap a plant. Know it instantly.",
+    shots: ["Snap. Identify. Learn.", "Care, simplified", "Your garden, in your pocket"],
+    image: "/showcase/bloom.png",
   },
   {
-    id: "smash",
-    app: "Smash!",
-    category: "games",
-    preset: "bold_playful",
-    tagline: "Three taps to chaos",
-    shots: ["Match & smash", "Daily tournaments", "Beat your friends"],
+    id: "margins",
+    app: "Margins",
+    category: "reading",
+    preset: "minimal",
+    tagline: "Every page, tracked",
+    shots: ["Currently reading", "Your shelf, in 2026", "Your year, by the page"],
+    image: "/showcase/margins.png",
   },
   {
-    id: "graft",
-    app: "Graft",
-    category: "dev tools",
-    preset: "dark_premium",
-    tagline: "Postgres queries that read themselves",
-    shots: ["Inline EXPLAIN", "Diff two schemas", "Share a query link"],
-  },
-  {
-    id: "pace",
-    app: "Pace",
-    category: "lifestyle",
-    preset: "soft_bright",
-    tagline: "Walk further, somehow",
-    shots: ["Streaks that stick", "Routes near you", "Cheer your group"],
-  },
-  {
-    id: "tutor",
-    app: "Tutor",
-    category: "education",
-    preset: "clean_minimal",
-    tagline: "One-on-one, on demand",
-    shots: ["Match an expert", "Whiteboard built-in", "Recap every session"],
-  },
-  {
-    id: "sticker",
-    app: "Sticker Studio",
-    category: "creator tools",
-    preset: "bold_playful",
-    tagline: "Make it stick",
-    shots: ["AI cut-outs", "Pack templates", "Export anywhere"],
+    id: "made",
+    app: "Made",
+    category: "marketplace",
+    preset: "bold",
+    tagline: "Your stuff, sold",
+    shots: ["Sell what you don't wear", "List in 30 seconds", "Cash out, weekly"],
+    image: "/showcase/made.png",
   },
 ];

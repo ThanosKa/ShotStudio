@@ -31,7 +31,7 @@ describe("reapStalePending", () => {
     await db.insert(generations).values({
       userId: "u_reap",
       appName: "Acme",
-      stylePreset: "soft_bright",
+      stylePreset: "friendly",
       category: "productivity",
       status: "pending",
       createdAt: oldTime,

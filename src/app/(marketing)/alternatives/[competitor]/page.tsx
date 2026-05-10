@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Show, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight, Check, X } from "lucide-react";
 import { Section } from "@/components/marketing/section";
 import { JsonLd } from "@/components/marketing/json-ld";
@@ -73,13 +74,28 @@ export default async function CompetitorAlternativesPage({
         className="border-t-0"
       >
         <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href="/sign-up"
-            className="group inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+          <Show
+            when="signed-in"
+            fallback={
+              <SignUpButton mode="modal">
+                <button
+                  type="button"
+                  className="group inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+                >
+                  Try ShotStudio for $7
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </button>
+              </SignUpButton>
+            }
           >
-            Try ShotStudio for $7
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+            <Link
+              href="/home"
+              className="group inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+            >
+              Try ShotStudio for $7
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </Show>
           <Link
             href="/pricing"
             className="text-sm text-muted-foreground hover:text-foreground"

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Show, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { ShowcaseMarquee } from "@/components/marketing/showcase-marquee";
@@ -57,13 +58,28 @@ export function Hero() {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="mt-8 flex justify-center"
         >
-          <Link
-            href="/sign-up"
-            className="group inline-flex h-12 items-center gap-2 rounded-full bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+          <Show
+            when="signed-in"
+            fallback={
+              <SignUpButton mode="modal">
+                <button
+                  type="button"
+                  className="group inline-flex h-12 cursor-pointer items-center gap-2 rounded-full bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+                >
+                  Generate my screenshots
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </button>
+              </SignUpButton>
+            }
           >
-            Generate my screenshots
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+            <Link
+              href="/home"
+              className="group inline-flex h-12 items-center gap-2 rounded-full bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
+            >
+              Generate my screenshots
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </Show>
         </motion.div>
 
         <motion.p

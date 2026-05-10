@@ -1,5 +1,7 @@
-import Link from "next/link";
-import { Show } from "@clerk/nextjs";
+"use client";
+
+import { useState } from "react";
+import { Show, SignUpButton } from "@clerk/nextjs";
 import { cn, pluralize } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BuyPackButton } from "@/components/marketing/buy-pack-button";
@@ -33,11 +35,35 @@ const COPY: Record<CreditPackageId, Copy> = {
   },
 };
 
-export function LandingPricing({
-  ctaHref = "/sign-up",
-}: {
-  ctaHref?: string;
-}) {
+export function LandingPricing() {
+  const [busy, setBusy] = useState<CreditPackageId | null>(null);
+
+  async function buy(packageId: CreditPackageId) {
+    if (busy !== null) return;
+    setBusy(packageId);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packageId }),
+      });
+      const data: unknown = await res.json().catch(() => null);
+      if (
+        !res.ok ||
+        !data ||
+        typeof data !== "object" ||
+        !("checkoutUrl" in data) ||
+        typeof (data as { checkoutUrl: unknown }).checkoutUrl !== "string"
+      ) {
+        setBusy(null);
+        return;
+      }
+      window.location.href = (data as { checkoutUrl: string }).checkoutUrl;
+    } catch {
+      setBusy(null);
+    }
+  }
+
   return (
     <div className="grid gap-6 md:grid-cols-3">
       {CREDIT_PACKAGE_LIST.map((pack) => {
@@ -78,19 +104,22 @@ export function LandingPricing({
             <Show
               when="signed-in"
               fallback={
-                <Button
-                  asChild
-                  variant={pack.featured ? "default" : "outline"}
-                  className="mt-7 h-10 w-full"
-                >
-                  <Link href={ctaHref}>Get Started</Link>
-                </Button>
+                <SignUpButton mode="modal">
+                  <Button
+                    variant={pack.featured ? "default" : "outline"}
+                    className="mt-7 h-10 w-full"
+                  >
+                    Get Started
+                  </Button>
+                </SignUpButton>
               }
             >
               <BuyPackButton
                 packageId={pack.id}
                 label={`Continue with ${pack.name}`}
                 variant={pack.featured ? "default" : "outline"}
+                busy={busy !== null}
+                onBuy={buy}
               />
             </Show>
           </div>

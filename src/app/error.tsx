@@ -7,7 +7,7 @@ export default function ErrorBoundary({
   error,
   unstable_retry,
 }: {
-  error: Error & { digest?: string };
+  error: Error;
   unstable_retry: () => void;
 }) {
   useEffect(() => {
@@ -20,9 +20,7 @@ export default function ErrorBoundary({
       <div className="max-w-md space-y-4">
         <h1 className="text-2xl font-semibold">Something went wrong</h1>
         <p className="text-sm text-muted-foreground">
-          {error.digest
-            ? `Reference: ${error.digest}`
-            : "An unexpected error occurred."}
+          An unexpected error occurred. Try again, or head back home.
         </p>
         <div className="flex justify-center gap-3">
           <Button onClick={() => unstable_retry()}>Try again</Button>

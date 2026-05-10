@@ -17,7 +17,7 @@ function inputFor(userId: string) {
     pitch: "Track calories from a meal photo, no manual logging.",
     audience: "Busy parents",
     category: "productivity",
-    stylePreset: "soft_bright" as const,
+    stylePreset: "friendly" as const,
     screenshots: [makeFile(), makeFile(), makeFile()] as [File, File, File],
   };
 }

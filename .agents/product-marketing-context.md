@@ -51,17 +51,17 @@ B2C — single persona (the indie developer). Skipping the multi-stakeholder tab
 **Key differentiators:**
 - One-time pay. $7 minimum entry, $37 for 12 sets. No subscription anywhere on the site.
 - Privacy-first by design: zero image persistence — uploads and outputs are never written to disk or storage. (Hard architectural commitment, not a marketing claim.)
-- Opinionated output: fixed 3-shot template, 4 style presets, AI-picked from category. No 5-page style wizard.
+- Opinionated output: fixed 3-shot template, 4 personality presets (Friendly, Professional, Minimal, Bold — typography + headline voice only), AI-picked from category. Theme and palette are derived from the user's uploaded screenshots so the marketing output always matches their actual app. No 5-page style wizard.
 - Failed generations refund credits automatically — no support ticket.
 - AI-written headline from the user's pitch + audience — they don't have to write copywriting.
-**How we do it differently:** We pre-decided the 3-shot template, the 4 presets, and the spec. The user gives us 3 screenshots, an app name, a one-sentence pitch, and a category. We do the rest.
+**How we do it differently:** We pre-decided the 3-shot template, the 4 personality presets, and the spec. The user gives us 3 screenshots, an app name, a one-sentence pitch, and a category. The output's theme and palette are auto-sampled from the uploads (light app stays light, dark app stays dark) so the marketing matches the actual app — we don't force a bundled theme on top of a mismatched product.
 **Why that's better:** A weekend of work collapses to a minute. Cost collapses from $15–$40/mo (subscription) or $50–$200 (designer) to $7 once.
 **Why customers choose us:** They want to ship tonight, not learn Figma. They resent subscriptions for one-shot jobs. They care about privacy.
 
 ## Objections
 | Objection | Response |
 |-----------|----------|
-| "AI-generated screenshots will look generic / off-brand." | Four curated style presets bundle palette/type/backdrop/voice; per-shot regenerate is free; text on the preview is click-to-edit. |
+| "AI-generated screenshots will look generic / off-brand." | Theme + palette sample from the user's uploaded screenshots so the marketing matches their actual app. Four personality presets (Friendly, Professional, Minimal, Bold) layer typography + headline voice on top. Per-shot regenerate is free; text on the preview is click-to-edit. |
 | "What if the generation is bad?" | Failed generations auto-refund credits. Per-shot regenerate is free until you're happy. |
 | "Why not just use a Figma template?" | Templates take hours and still look like templates. ShotStudio is one minute and AI-styled. |
 | "Where do my uploads go?" | Nowhere. Uploads pass through memory to the model and are dropped. No images table, no S3, no thumbnail cache. |
@@ -92,7 +92,7 @@ B2C — single persona (the indie developer). Skipping the multi-stakeholder tab
 |------|---------|
 | Set / generation set | One run = three output images, one polished shot per uploaded source screen. |
 | Credit | One generation set. 1 credit = 1 set. |
-| Preset | A bundled palette + type + backdrop + prompt voice. ShotStudio has four: soft_bright, dark_premium, clean_minimal, bold_playful. |
+| Preset | A personality bundle of typography + headline voice. ShotStudio has four: friendly, professional, minimal, bold. Theme + palette derive from the user's uploaded screenshots, not from the preset. |
 | Per-shot regenerate | Re-roll a single image in a set without consuming a new credit. |
 | 1290×2796 | iPhone 6.7" portrait — the App Store Connect-required hero spec ShotStudio outputs. |
 
@@ -102,7 +102,7 @@ B2C — single persona (the indie developer). Skipping the multi-stakeholder tab
 **Personality:** Opinionated, technical, anti-bloat, indie-friendly, privacy-respecting.
 
 ## Proof Points
-**Metrics:** ~1 minute to three polished shots. $7 floor price. 4 presets. Zero image persistence (architectural).
+**Metrics:** ~1 minute to three polished shots. $7 floor price. 4 personality presets + upload-derived theme/palette. Zero image persistence (architectural).
 **Customers:** None public yet (pre-launch / early traction).
 **Testimonials:** None yet — capture once live; prioritize indie-on-Twitter/X quotes.
 **Value themes:**
@@ -111,7 +111,7 @@ B2C — single persona (the indie developer). Skipping the multi-stakeholder tab
 | One-time pay vs. subscription | $7 starter, credits never expire, no recurring charge anywhere on the site. |
 | Speed to ship | Three inputs → three shots in ~1 minute. |
 | Privacy by design | No images table, no object storage, in-memory pass-through. |
-| Opinionated, not bloated | Pre-set 4-shot template, 4 presets, no 5-page style wizard. |
+| Opinionated, not bloated | Pre-set 3-shot template, 4 personality presets, no 5-page style wizard. |
 | No-regret pricing | Failed gens refund automatically; per-shot regenerate free. |
 
 ## Goals

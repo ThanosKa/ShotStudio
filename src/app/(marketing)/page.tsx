@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Hero } from "@/components/marketing/hero";
 import { Section } from "@/components/marketing/section";
 import { HowItWorks } from "@/components/marketing/how-it-works";
-import { PresetGrid } from "@/components/marketing/preset-grid";
 import { LandingPricing } from "@/components/marketing/landing-pricing";
 import { FAQ } from "@/components/marketing/faq";
 import { FadeIn } from "@/components/marketing/fade-in";
@@ -50,20 +49,10 @@ export default function LandingPage() {
       </Section>
 
       <Section
-        eyebrow="Style presets"
-        title="Four presets. Auto-picked from your category."
-        description="No 5-page style wizard. Pick a category, get a preset, override if you want. Each preset bundles palette, type, backdrop, and prompt voice."
-      >
-        <FadeIn>
-          <PresetGrid />
-        </FadeIn>
-      </Section>
-
-      <Section
         id="pricing"
         eyebrow="Pricing"
         title="Pay once. Use whenever."
-        description="One set = three polished shots. Credits never expire, failed generations auto-refund, no subscription."
+        description="1 credit = 1 set = 3 polished shots. Credits never expire, failed generations auto-refund, no subscription."
       >
         <FadeIn>
           <LandingPricing />

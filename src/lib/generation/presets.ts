@@ -1,8 +1,17 @@
+/**
+ * Style presets define **personality only** — typography + headline voice.
+ *
+ * Theme (light vs dark) and palette (specific accent colors) are NOT bundled
+ * into presets. They come from the user's uploaded screenshots, which we
+ * attach to the OpenRouter call as reference images. The model sees the
+ * actual app pixels and matches them directly — a light app stays light,
+ * a dark app stays dark.
+ */
 export const STYLE_PRESET_IDS = [
-  "soft_bright",
-  "dark_premium",
-  "clean_minimal",
-  "bold_playful",
+  "friendly",
+  "professional",
+  "minimal",
+  "bold",
 ] as const;
 
 export type StylePresetId = (typeof STYLE_PRESET_IDS)[number];
@@ -10,39 +19,36 @@ export type StylePresetId = (typeof STYLE_PRESET_IDS)[number];
 export type StylePreset = {
   id: StylePresetId;
   label: string;
-  palette: string[];
+  /** Type-system feel for headlines and chrome. */
   typography: string;
-  toneModifier: string;
+  /** Headline-writing voice the AI uses for the marketing copy. */
+  voice: string;
 };
 
 export const STYLE_PRESETS: Record<StylePresetId, StylePreset> = {
-  soft_bright: {
-    id: "soft_bright",
-    label: "Soft & Bright",
-    palette: ["#FFE5EC", "#FFC2D1", "#FF9EBB"],
-    typography: "rounded sans-serif, friendly",
-    toneModifier: "warm, inviting, soft pastel gradients",
+  friendly: {
+    id: "friendly",
+    label: "Friendly",
+    typography: "rounded sans-serif, generous letter-spacing, warm and humane",
+    voice: "warm, plainspoken, talks-to-a-peer",
   },
-  dark_premium: {
-    id: "dark_premium",
-    label: "Dark & Premium",
-    palette: ["#0B0B0F", "#1A1A22", "#7C5CFF"],
-    typography: "Inter, sharp, professional",
-    toneModifier: "charcoal background with single bright accent",
+  professional: {
+    id: "professional",
+    label: "Professional",
+    typography: "Inter or system sans, sharp, restrained, technical",
+    voice: "confident, declarative, no fluff",
   },
-  clean_minimal: {
-    id: "clean_minimal",
-    label: "Clean & Minimal",
-    palette: ["#FFFFFF", "#F5F5F5", "#1F1F1F"],
-    typography: "restrained sans, plenty of whitespace",
-    toneModifier: "calm, focused, single accent color",
+  minimal: {
+    id: "minimal",
+    label: "Minimal",
+    typography: "restrained sans, plenty of whitespace, type does the work",
+    voice: "considered, short sentences, calm",
   },
-  bold_playful: {
-    id: "bold_playful",
-    label: "Bold & Playful",
-    palette: ["#FF3B30", "#FFD60A", "#34C759"],
-    typography: "oversized display type, sticker energy",
-    toneModifier: "saturated solids, high-energy, fun",
+  bold: {
+    id: "bold",
+    label: "Bold",
+    typography: "oversized display sans, sticker-energy, headlines first",
+    voice: "punchy, direct, single verb hooks",
   },
 };
 
@@ -50,14 +56,18 @@ export function formatCategory(value: string): string {
   return value.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Default personality preset suggested for a given app category. The user can
+ * override on the wizard. Theme/palette is upload-derived regardless of preset.
+ */
 export const CATEGORY_DEFAULT_PRESET: Record<string, StylePresetId> = {
-  productivity: "clean_minimal",
-  wellness: "soft_bright",
-  finance: "dark_premium",
-  games: "bold_playful",
-  social: "soft_bright",
-  education: "clean_minimal",
-  lifestyle: "soft_bright",
-  "dev tools": "dark_premium",
-  other: "clean_minimal",
+  productivity: "minimal",
+  wellness: "friendly",
+  finance: "professional",
+  games: "bold",
+  social: "friendly",
+  education: "minimal",
+  lifestyle: "friendly",
+  "dev tools": "professional",
+  other: "minimal",
 };
