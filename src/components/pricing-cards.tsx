@@ -53,15 +53,15 @@ export function PricingCards() {
         {CREDIT_PACKAGE_LIST.map((p) => (
           <Card key={p.id} className="flex h-full flex-col">
             <CardHeader>
-              <CardTitle className="text-xl">{p.name}</CardTitle>
+              <CardTitle className="text-heading-sm">{p.name}</CardTitle>
               <CardDescription>{BLURBS[p.id]}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col justify-between gap-8 pb-6">
               <div>
-                <div className="text-4xl font-semibold tracking-tight">
+                <div className="text-heading-lg font-semibold">
                   {formatPriceUSD(p.priceCents)}
                 </div>
-                <div className="mt-1 text-sm text-muted-foreground">
+                <div className="mt-1 text-body-lg text-muted-foreground">
                   {p.credits} {pluralize(p.credits, "credit")}
                 </div>
               </div>

@@ -31,15 +31,15 @@ export function Section({
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-2xl">
           {eyebrow && (
-            <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mb-3 font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
               {eyebrow}
             </p>
           )}
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          <h2 className="text-heading font-semibold md:text-heading-lg">
             {title}
           </h2>
           {description && (
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+            <p className="mt-4 text-body-lg text-muted-foreground md:text-heading-sm">
               {description}
             </p>
           )}

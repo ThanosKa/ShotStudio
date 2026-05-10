@@ -72,7 +72,7 @@ export default function LandingPage() {
 
       <Section
         eyebrow="FAQ"
-        title="The short version."
+        title="Frequently asked questions"
       >
         <FadeIn>
           <FAQ />

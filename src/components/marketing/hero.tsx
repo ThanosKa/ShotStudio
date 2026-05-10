@@ -14,7 +14,7 @@ export function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-muted/40">
+    <section className="relative overflow-hidden">
       <motion.div
         initial="hidden"
         animate="show"
@@ -24,7 +24,7 @@ export function Hero() {
         <motion.h1
           variants={item}
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="text-balance text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl"
+          className="text-balance text-heading-lg font-semibold md:text-display"
         >
           Marketing-grade App Store screenshots,{" "}
           <span className="text-muted-foreground">
@@ -35,7 +35,7 @@ export function Hero() {
         <motion.p
           variants={item}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto mt-6 max-w-xl text-pretty text-base text-muted-foreground md:text-lg"
+          className="mx-auto mt-6 max-w-xl text-pretty text-body-lg text-muted-foreground md:text-heading-sm"
         >
           Pay $7 once. Six polished shots back, ready for App Store Connect.
         </motion.p>

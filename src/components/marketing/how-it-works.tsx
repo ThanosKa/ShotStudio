@@ -21,13 +21,13 @@ export function HowItWorks() {
     <div className="grid gap-px overflow-hidden rounded-2xl border bg-border md:grid-cols-3">
       {STEPS.map((step) => (
         <div key={step.n} className="bg-background p-8">
-          <div className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
             Step {step.n}
           </div>
-          <h3 className="mt-6 text-xl font-semibold tracking-tight">
+          <h3 className="mt-6 text-heading-sm font-semibold">
             {step.title}
           </h3>
-          <p className="mt-3 text-sm text-muted-foreground">{step.body}</p>
+          <p className="mt-3 text-body-lg text-muted-foreground">{step.body}</p>
         </div>
       ))}
     </div>

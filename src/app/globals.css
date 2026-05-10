@@ -39,59 +39,100 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  /* Radius — DESIGN.md: 4px general, 8px prominent */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 20px;
+
+  /* Shadows — DESIGN.md multi-layered warm-ivory elevation */
+  --shadow-xs: oklab(0.263 0 0.012 / 0.1) 0px 0px 0px 1px;
+  --shadow-sm:
+    oklab(0.263 0 0.012 / 0.1) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+  --shadow-md:
+    oklab(0.263 0 0.012 / 0.1) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.08) 0px 4px 12px -2px;
+  --shadow-lg:
+    rgba(0, 0, 0, 0.14) 0px 28px 70px 0px, rgba(0, 0, 0, 0.1) 0px 14px 32px 0px,
+    oklab(0.263 0 0.012 / 0.1) 0px 0px 0px 1px;
+  --shadow-xl:
+    rgba(0, 0, 0, 0.25) 0px 25px 50px -12px,
+    rgba(0, 0, 0, 0.15) 0px 12px 24px -8px,
+    oklab(0.263 0 0.012 / 0.1) 0px 0px 0px 0.5px;
+  --shadow-2xl:
+    rgba(0, 0, 0, 0.3) 0px 35px 70px -15px,
+    rgba(0, 0, 0, 0.18) 0px 18px 32px -10px,
+    oklab(0.263 0 0.012 / 0.1) 0px 0px 0px 0.5px;
+
+  /* Type scale — DESIGN.md cursor scale */
+  --text-caption: 10px;
+  --text-caption--line-height: 1.1;
+  --text-caption--letter-spacing: 0.06px;
+  --text-body-lg: 14px;
+  --text-body-lg--line-height: 1.43;
+  --text-body-lg--letter-spacing: 0.08px;
+  --text-heading-sm: 22px;
+  --text-heading-sm--line-height: 1.25;
+  --text-heading-sm--letter-spacing: -0.08px;
+  --text-heading: 26px;
+  --text-heading--line-height: 1.2;
+  --text-heading--letter-spacing: -0.35px;
+  --text-heading-lg: 36px;
+  --text-heading-lg--line-height: 1.1;
+  --text-heading-lg--letter-spacing: -0.45px;
+  --text-display: 72px;
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -2.16px;
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
   @keyframes marquee {
-  from {
-    transform: translateX(0);
+    from {
+      transform: translateX(0);
     }
-  to {
-    transform: translateX(calc(-100% - var(--gap)));
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
     }
   }
   @keyframes marquee-vertical {
-  from {
-    transform: translateY(0);
+    from {
+      transform: translateY(0);
     }
-  to {
-    transform: translateY(calc(-100% - var(--gap)));
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
     }
   }
 }
 
 /* Cursor — Warm Ivory Studio (light) */
 :root {
-  --background: #f7f7f4;          /* canvas parchment */
-  --foreground: #262510;          /* inkwell */
+  --background: #f7f7f4; /* canvas parchment */
+  --foreground: #262510; /* inkwell */
   --card: #ffffff;
   --card-foreground: #262510;
   --popover: #ffffff;
   --popover-foreground: #262510;
-  --primary: #262510;             /* inkwell */
+  --primary: #262510; /* inkwell */
   --primary-foreground: #f7f7f4;
-  --secondary: #e6e5e0;           /* pebble gray */
+  --secondary: #e6e5e0; /* pebble gray */
   --secondary-foreground: #262510;
   --muted: #e6e5e0;
-  --muted-foreground: #7a7974;    /* muted stone */
-  --accent: #f54e00;              /* onyx outline (cursor orange) */
+  --muted-foreground: #7a7974; /* muted stone */
+  --accent: #f54e00; /* onyx outline (cursor orange) */
   --accent-foreground: #f7f7f4;
   --destructive: #c44535;
-  --border: #cdcdc9;              /* highlight beige */
+  --border: #cdcdc9; /* highlight beige */
   --input: #cdcdc9;
   --ring: #f54e00;
   --chart-1: #f54e00;
-  --chart-2: #c08532;             /* goldenrod */
-  --chart-3: #34785c;             /* forest green */
-  --chart-4: #4ade80;             /* chartreuse */
+  --chart-2: #c08532; /* goldenrod */
+  --chart-3: #34785c; /* forest green */
+  --chart-4: #4ade80; /* chartreuse */
   --chart-5: #7a7974;
-  --radius: 0.5rem;
+  --radius: 0.25rem; /* 4px — DESIGN.md general */
   --sidebar: #f7f7f4;
   --sidebar-foreground: #262510;
   --sidebar-primary: #262510;
@@ -104,7 +145,7 @@
 
 /* Cursor — dark counterpart (deep ink, same orange accent) */
 .dark {
-  --background: #141414;          /* deep shadow */
+  --background: #141414; /* deep shadow */
   --foreground: #f7f7f4;
   --card: #1c1c19;
   --card-foreground: #f7f7f4;
@@ -112,11 +153,11 @@
   --popover-foreground: #f7f7f4;
   --primary: #f7f7f4;
   --primary-foreground: #141414;
-  --secondary: #262510;           /* inkwell */
+  --secondary: #262510; /* inkwell */
   --secondary-foreground: #f7f7f4;
   --muted: #262510;
   --muted-foreground: #a8a7a2;
-  --accent: #f54e00;              /* cursor orange */
+  --accent: #f54e00; /* cursor orange */
   --accent-foreground: #f7f7f4;
   --destructive: #e06857;
   --border: rgb(247 247 244 / 10%);
@@ -146,5 +187,15 @@
   }
   html {
     @apply font-sans;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  /* Sticky nav is h-14 (56px); offset anchor targets so the heading clears it. */
+  :target,
+  section[id] {
+    scroll-margin-top: 5rem;
   }
 }

@@ -52,7 +52,7 @@ export default function PricingPage() {
         </p>
       </Section>
 
-      <Section eyebrow="FAQ" title="Common questions">
+      <Section eyebrow="FAQ" title="Frequently asked questions">
         <FAQ />
       </Section>
     </>

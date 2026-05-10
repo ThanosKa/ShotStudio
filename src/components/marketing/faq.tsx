@@ -1,14 +1,32 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { FAQS } from "@/lib/marketing/faq-data";
 
 export function FAQ() {
   return (
-    <div className="grid gap-px overflow-hidden rounded-2xl border bg-border md:grid-cols-2">
-      {FAQS.map(({ q, a }) => (
-        <div key={q} className="bg-background p-7">
-          <h3 className="text-base font-semibold tracking-tight">{q}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{a}</p>
-        </div>
+    <Accordion
+      type="single"
+      collapsible
+      className="w-full divide-y border-y"
+    >
+      {FAQS.map(({ q, a }, index) => (
+        <AccordionItem
+          key={q}
+          value={`item-${index}`}
+          className="border-b-0 last:border-b-0"
+        >
+          <AccordionTrigger className="text-heading-sm font-semibold tracking-tight hover:no-underline">
+            {q}
+          </AccordionTrigger>
+          <AccordionContent className="text-body-lg text-muted-foreground">
+            {a}
+          </AccordionContent>
+        </AccordionItem>
       ))}
-    </div>
+    </Accordion>
   );
 }

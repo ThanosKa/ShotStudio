@@ -4,7 +4,7 @@ import { Wordmark } from "@/components/wordmark";
 
 export function MarketingNav() {
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
         <Link href="/" aria-label="ShotStudio home">
           <Wordmark size="md" />

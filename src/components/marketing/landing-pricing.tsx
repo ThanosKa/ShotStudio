@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Show } from "@clerk/nextjs";
 import { cn, pluralize } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { BuyPackButton } from "@/components/marketing/buy-pack-button";
 import {
   CREDIT_PACKAGE_LIST,
   type CreditPackageId,
@@ -45,45 +47,52 @@ export function LandingPricing({
           <div
             key={pack.id}
             className={cn(
-              "relative flex flex-col rounded-2xl border bg-background p-7",
-              pack.featured && "border-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)]",
+              "relative flex h-full flex-col rounded-xl border bg-background p-7",
+              pack.featured && "border-foreground",
             )}
           >
             {pack.featured && (
-              <span className="absolute -top-2.5 left-7 rounded-full bg-foreground px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-background">
+              <span className="absolute -top-2.5 left-7 rounded-full bg-foreground px-2.5 py-0.5 font-mono text-caption uppercase tracking-wider text-background">
                 Most chosen
               </span>
             )}
             <div className="flex items-baseline justify-between">
-              <h3 className="text-lg font-semibold tracking-tight">{pack.name}</h3>
-              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              <h3 className="text-heading-sm font-semibold">{pack.name}</h3>
+              <span className="font-mono text-caption uppercase tracking-wider text-muted-foreground">
                 {pack.credits} {pluralize(pack.credits, "set")}
               </span>
             </div>
             <div className="mt-4 flex items-baseline gap-1.5">
-              <span className="text-4xl font-semibold tracking-tight">
-                {price}
-              </span>
-              <span className="text-sm text-muted-foreground">once</span>
+              <span className="text-heading-lg font-semibold">{price}</span>
+              <span className="text-body-lg text-muted-foreground">once</span>
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">{copy.blurb}</p>
-            <ul className="mt-6 space-y-2 text-sm">
+            <p className="mt-3 text-body-lg text-muted-foreground">{copy.blurb}</p>
+            <ul className="mt-6 flex flex-1 flex-col gap-2 text-body-lg">
               {copy.perks.map((perk) => (
                 <li key={perk} className="flex items-start gap-2">
-                  <span className="mt-[7px] inline-block size-1 shrink-0 rounded-full bg-foreground" />
+                  <span className="mt-[9px] inline-block size-1 shrink-0 rounded-full bg-foreground" />
                   <span>{perk}</span>
                 </li>
               ))}
             </ul>
-            <Button
-              asChild
-              variant={pack.featured ? "default" : "outline"}
-              className="mt-7 h-10 w-full"
+            <Show
+              when="signed-in"
+              fallback={
+                <Button
+                  asChild
+                  variant={pack.featured ? "default" : "outline"}
+                  className="mt-7 h-10 w-full"
+                >
+                  <Link href={ctaHref}>Get Started</Link>
+                </Button>
+              }
             >
-              <Link href={ctaHref}>
-                Buy {pack.name} — {price}
-              </Link>
-            </Button>
+              <BuyPackButton
+                packageId={pack.id}
+                label={`Continue with ${pack.name}`}
+                variant={pack.featured ? "default" : "outline"}
+              />
+            </Show>
           </div>
         );
       })}
