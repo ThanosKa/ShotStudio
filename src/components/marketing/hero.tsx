@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
@@ -19,14 +20,24 @@ export function Hero() {
         initial="hidden"
         animate="show"
         transition={{ staggerChildren: 0.08, delayChildren: 0.05 }}
-        className="mx-auto max-w-4xl px-6 pt-24 pb-12 text-center md:pt-32 md:pb-16"
+        className="mx-auto max-w-3xl px-6 pt-14 pb-8 text-center md:pt-20 md:pb-12"
       >
         <motion.h1
           variants={item}
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="text-balance text-heading-lg font-semibold md:text-display"
+          className="text-balance text-heading-lg font-semibold md:text-[56px] md:leading-[1.05] md:tracking-[-1.4px]"
         >
-          Marketing-grade App Store screenshots,{" "}
+          <Image
+            src="/app-store-badge.svg"
+            alt=""
+            width={40}
+            height={40}
+            priority
+            unoptimized
+            aria-hidden
+            className="mr-2 inline-block size-[0.9em] align-[-0.15em] md:mr-3"
+          />
+          App Store screenshots in under a minute,{" "}
           <span className="text-muted-foreground">
             without the subscription.
           </span>
@@ -35,15 +46,16 @@ export function Hero() {
         <motion.p
           variants={item}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto mt-6 max-w-xl text-pretty text-body-lg text-muted-foreground md:text-heading-sm"
+          className="mx-auto mt-4 max-w-lg text-pretty text-body-lg text-muted-foreground md:text-heading-sm"
         >
-          Pay $7 once. Six polished shots back, ready for App Store Connect.
+          Three raw uploads in, three polished shots back from $7, ready for App
+          Store Connect.
         </motion.p>
 
         <motion.div
           variants={item}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-10 flex justify-center"
+          className="mt-8 flex justify-center"
         >
           <Link
             href="/sign-up"
@@ -53,6 +65,15 @@ export function Hero() {
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </motion.div>
+
+        <motion.p
+          variants={item}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-5 text-center font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground"
+        >
+          Credits never expire · Auto-refund on failed shots · Images never
+          stored
+        </motion.p>
       </motion.div>
 
       <motion.div

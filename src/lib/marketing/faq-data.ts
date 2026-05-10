@@ -23,6 +23,6 @@ export const FAQS: Faq[] = [
   },
   {
     q: "Do you offer refunds?",
-    a: "Money is never refunded. The only thing we refund is credits, and only when image generation fails after our retry/fallback path is exhausted — that happens automatically.",
+    a: "We don't refund cash, but we automatically return the credit to your balance whenever a generation can't be salvaged after our retries and fallback path. No support ticket needed.",
   },
 ];

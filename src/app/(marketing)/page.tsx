@@ -63,7 +63,7 @@ export default function LandingPage() {
         id="pricing"
         eyebrow="Pricing"
         title="Pay once. Use whenever."
-        description="Credits never expire. Failed generations refund automatically. No subscription, no upsell."
+        description="One set = three polished shots. Credits never expire, failed generations auto-refund, no subscription."
       >
         <FadeIn>
           <LandingPricing />
