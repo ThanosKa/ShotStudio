@@ -42,7 +42,7 @@ export function ResultPanel({
         <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           Privacy-first · nothing is stored on our side
         </p>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {images.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img

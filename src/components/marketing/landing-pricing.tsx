@@ -14,20 +14,20 @@ type Copy = {
 
 const COPY: Record<CreditPackageId, Copy> = {
   starter: {
-    blurb: "Shipping a single app. One polished set, done.",
-    perks: ["1 generation set", "All 4 style presets", "Free per-shot regenerates"],
+    blurb: "Try it. Two sets to find the look.",
+    perks: ["2 generation sets", "All 4 style presets", "Credits never expire"],
   },
   growth: {
     blurb: "Iterate on copy or test alternate hero angles.",
     perks: [
-      "4 generation sets",
-      "Same as Starter",
+      "5 generation sets",
+      "All Starter perks",
       "Best per-set value if you A/B copy",
     ],
   },
   studio: {
     blurb: "Indie portfolios and small studios shipping a few apps a year.",
-    perks: ["10 generation sets", "Same as Growth", "Stays in your account, no expiry"],
+    perks: ["12 generation sets", "All Growth perks", "Lowest per-set price"],
   },
 };
 

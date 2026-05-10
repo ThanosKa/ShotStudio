@@ -11,8 +11,8 @@ const STEPS = [
   },
   {
     n: "03",
-    title: "Download four polished shots",
-    body: "One title hero plus three device-framed feature shots at 1290×2796 — exactly what App Store Connect expects.",
+    title: "Download three polished shots",
+    body: "Three device-framed shots at 1290×2796 — one per source screen you uploaded, exactly what App Store Connect expects.",
   },
 ];
 

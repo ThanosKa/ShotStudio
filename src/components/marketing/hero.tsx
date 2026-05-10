@@ -37,8 +37,7 @@ export function Hero() {
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mx-auto mt-6 max-w-xl text-pretty text-base text-muted-foreground md:text-lg"
         >
-          Pay $7 once. Get four polished shots back, ready for App Store
-          Connect.
+          Pay $7 once. Six polished shots back, ready for App Store Connect.
         </motion.p>
 
         <motion.div

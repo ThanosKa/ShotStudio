@@ -14,14 +14,14 @@ export const CREDIT_PACKAGES: Record<CreditPackageId, CreditPackage> = {
   starter: {
     id: "starter",
     name: "Starter",
-    credits: 1,
+    credits: 2,
     priceCents: 700,
     stripePriceId: process.env.STRIPE_PRICE_STARTER,
   },
   growth: {
     id: "growth",
     name: "Growth",
-    credits: 4,
+    credits: 5,
     priceCents: 1700,
     stripePriceId: process.env.STRIPE_PRICE_GROWTH,
     featured: true,
@@ -29,7 +29,7 @@ export const CREDIT_PACKAGES: Record<CreditPackageId, CreditPackage> = {
   studio: {
     id: "studio",
     name: "Studio",
-    credits: 10,
+    credits: 12,
     priceCents: 3700,
     stripePriceId: process.env.STRIPE_PRICE_STUDIO,
   },

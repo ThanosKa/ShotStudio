@@ -59,15 +59,15 @@ describe("runCheckoutFulfillment", () => {
 
     expect(outcome.kind).toBe("ok");
     if (outcome.kind !== "ok") return;
-    expect(outcome.creditsGranted).toBe(4);
-    expect(outcome.newBalance).toBe(4);
+    expect(outcome.creditsGranted).toBe(5);
+    expect(outcome.newBalance).toBe(5);
     expect(outcome.emailSent).toBe(true);
 
     const [u] = await db
       .select({ credits: users.credits })
       .from(users)
       .where(eq(users.id, "u_buy"));
-    expect(u.credits).toBe(4);
+    expect(u.credits).toBe(5);
 
     const txs = await db
       .select()
@@ -81,8 +81,8 @@ describe("runCheckoutFulfillment", () => {
     const arg = vi.mocked(sendCreditsPurchasedEmail).mock.calls[0][0];
     expect(arg.stripeEventId).toBe("evt_1");
     expect(arg.to).toBe("buyer@test");
-    expect(arg.creditsAdded).toBe(4);
-    expect(arg.newBalance).toBe(4);
+    expect(arg.creditsAdded).toBe(5);
+    expect(arg.newBalance).toBe(5);
     expect(arg.receiptUrl).toBe("https://stripe.test/receipt/x");
   });
 

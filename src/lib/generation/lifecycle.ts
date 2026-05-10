@@ -100,14 +100,12 @@ async function debitAndStartGeneration(
 }
 
 const ROLES: ShotRole[] = [
-  "title",
   "hero_feature",
   "differentiator",
   "another_feature",
 ];
 
-const REF_INDEX: Record<ShotRole, number | null> = {
-  title: null,
+const REF_INDEX: Record<ShotRole, number> = {
   hero_feature: 0,
   differentiator: 1,
   another_feature: 2,
@@ -137,7 +135,7 @@ async function runShot(
     preset,
   });
   const idx = REF_INDEX[role];
-  const referenceImages = idx === null ? [] : [ctx.screenshotDataUrls[idx]];
+  const referenceImages = [ctx.screenshotDataUrls[idx]];
 
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -223,7 +221,7 @@ export async function runGeneration(
 
   const failed = results.filter((r) => r.status === "rejected");
   if (failed.length > 0) {
-    const reason = `Generation failed: ${failed.length}/4 shots failed`;
+    const reason = `Generation failed: ${failed.length}/3 shots failed`;
     await markGenerationFailed(generationId, reason);
     try {
       await refund(input.userId, 1, {
