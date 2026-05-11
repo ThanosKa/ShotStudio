@@ -27,7 +27,6 @@ const ONE_PX_PNG_B64 =
 
 vi.mock("@/lib/openrouter", () => ({
   generateImage: vi.fn(async () => ONE_PX_PNG_B64),
-  generateText: vi.fn(async () => "Track every bite"),
 }));
 
 beforeEach(async () => {

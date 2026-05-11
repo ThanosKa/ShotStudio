@@ -9,7 +9,6 @@ import {
 import { generations, transactions, users } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { generateImage } from "@/lib/openrouter";
-import { synthesizeHeadline } from "./headline";
 import { STYLE_PRESETS, type StylePresetId } from "./presets";
 import { buildPrompt, type ShotRole } from "./prompts";
 import { upscaleToAppStore } from "./upscale";
@@ -115,7 +114,6 @@ async function runShot(
   role: ShotRole,
   ctx: {
     appName: string;
-    headline: string;
     pitch: string;
     audience?: string;
     category: string;
@@ -127,7 +125,6 @@ async function runShot(
   const preset = STYLE_PRESETS[ctx.stylePreset];
   const prompt = buildPrompt({
     appName: ctx.appName,
-    headline: ctx.headline,
     pitch: ctx.pitch,
     audience: ctx.audience,
     category: ctx.category,
@@ -191,23 +188,12 @@ export async function runGeneration(
   // Release ~5MB-per-file File handles before the long-running shot calls.
   (input.screenshots as File[]).length = 0;
 
-  const headline = await synthesizeHeadline(
-    {
-      appName: input.appName,
-      pitch: input.pitch,
-      audience: input.audience,
-      category: input.category,
-    },
-    shotLog,
-  );
-
   const results = await Promise.allSettled(
     ROLES.map((role) =>
       runShot(
         role,
         {
           appName: input.appName,
-          headline,
           pitch: input.pitch,
           audience: input.audience,
           category: input.category,

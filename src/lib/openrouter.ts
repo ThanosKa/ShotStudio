@@ -35,62 +35,6 @@ type ChatCompletionResponse = {
   }>;
 };
 
-export type TextGenerationInput = {
-  model: string;
-  system?: string;
-  prompt: string;
-  maxTokens?: number;
-  temperature?: number;
-  timeoutMs?: number;
-};
-
-export async function generateText(input: TextGenerationInput): Promise<string> {
-  const messages: Array<{ role: "system" | "user"; content: string }> = [];
-  if (input.system) messages.push({ role: "system", content: input.system });
-  messages.push({ role: "user", content: input.prompt });
-
-  const controller = new AbortController();
-  const timeoutMs = input.timeoutMs ?? 15_000;
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  let res: Response;
-  try {
-    res = await fetch(`${ENDPOINT}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": APP_URL,
-        "X-Title": "ShotStudio",
-      },
-      body: JSON.stringify({
-        model: input.model,
-        messages,
-        max_tokens: input.maxTokens ?? 60,
-        temperature: input.temperature ?? 0.8,
-        stream: false,
-      }),
-      signal: controller.signal,
-    });
-  } catch (err) {
-    if ((err as { name?: string }).name === "AbortError") {
-      throw new Error(`OpenRouter timed out after ${timeoutMs}ms`);
-    }
-    throw err;
-  } finally {
-    clearTimeout(timer);
-  }
-
-  if (!res.ok) {
-    throw new Error(`OpenRouter ${res.status}: ${await res.text()}`);
-  }
-
-  const data = (await res.json()) as ChatCompletionResponse;
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenRouter returned no text");
-  return content;
-}
-
 /**
  * Returns raw base64 (no `data:image/...` prefix) so callers can hand it to
  * `Buffer.from(b64, "base64")` directly.
