@@ -104,6 +104,10 @@ const ROLES: ShotRole[] = [
   "another_feature",
 ];
 
+// In dev, run just one shot (hero_feature) to save time and cost while iterating.
+const ACTIVE_ROLES: ShotRole[] =
+  process.env.NODE_ENV === "development" ? ["hero_feature"] : ROLES;
+
 const REF_INDEX: Record<ShotRole, number> = {
   hero_feature: 0,
   differentiator: 1,
@@ -137,7 +141,7 @@ async function runShot(
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const b64 = await generateImage({ prompt, referenceImages });
+      const b64 = await generateImage({ prompt, referenceImages, imageSize: "1K" });
       const png = await upscaleToAppStore(b64);
       return `data:image/png;base64,${png.toString("base64")}`;
     } catch (err) {
@@ -189,7 +193,7 @@ export async function runGeneration(
   (input.screenshots as File[]).length = 0;
 
   const results = await Promise.allSettled(
-    ROLES.map((role) =>
+    ACTIVE_ROLES.map((role) =>
       runShot(
         role,
         {
@@ -207,7 +211,7 @@ export async function runGeneration(
 
   const failed = results.filter((r) => r.status === "rejected");
   if (failed.length > 0) {
-    const reason = `Generation failed: ${failed.length}/3 shots failed`;
+    const reason = `Generation failed: ${failed.length}/${ACTIVE_ROLES.length} shots failed`;
     await markGenerationFailed(generationId, reason);
     try {
       await refund(input.userId, 1, {

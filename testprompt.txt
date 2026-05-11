@@ -1,0 +1,20 @@
+Generate THREE separate App Store screenshots for "Notely" (productivity), one image per role. Each output must be its own portrait 9:16 canvas. Do NOT combine them into a single wide composite. Each device must be fully visible inside its canvas with breathing room above and below — no cropping of the phone frame.
+
+What the app does: Capture notes in seconds — text, lists, photos, voice. Searchable, organized by tags, syncs across devices. The fastest way to get a thought out of your head and into a place you'll find it again.
+For: Knowledge workers, students, and anyone with too many ideas.
+
+The three attached images are bare iPhone screenshots of the real app UI: note list, note editor, search results. Use them as the visual source of truth — colors, layout, typography, real UI elements. Do NOT invent new UI.
+
+For each of the 3 shots:
+- Portrait 9:16 canvas. Render the app's screen inside a modern iPhone 16 Pro device mockup: slim uniform bezels, Dynamic Island, titanium frame, no home button. Keep the device at its natural proportions — do not stretch vertically. Center the phone with breathing room above and below.
+- Match the theme (light vs dark) and dominant palette of the attached references. Sample 1-2 accent colors and use them sparingly for chips, buttons, highlights.
+- Never force a theme that conflicts with the references (no dark backdrops behind a light app, no light backdrops behind a dark app).
+- Write a punchy 2-7 word marketing tagline rendered prominently above the device, voice: confident, declarative, no fluff.
+- Typography: Inter or system sans, sharp, restrained, technical.
+
+Shot roles (generate one image per role):
+  1. hero_feature      — lead with the single biggest outcome the app delivers (the hook). Use the note list screen as the visual.
+  2. differentiator    — show one specific action the app makes effortless (the journey). Use the note editor screen as the visual.
+  3. another_feature   — supporting feature or moment of trust (the closer). Use the search results screen as the visual.
+
+No watermarks. No fake App Store badges. No fake status bars added on top of the real one. Do not crop the devices. Do not stretch the iPhone.

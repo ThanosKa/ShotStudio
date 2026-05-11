@@ -224,7 +224,7 @@ export function Wizard() {
         );
       }
       const ok = data as { imageUrls?: string[] };
-      if (!ok.imageUrls || ok.imageUrls.length !== 3) {
+      if (!ok.imageUrls?.length) {
         throw new Error("Couldn't generate your screenshots. Please try again.");
       }
       setImages(ok.imageUrls);

@@ -1,0 +1,91 @@
+═══════════════════════════════════════════════════════════════════
+PROMPT 1 — Note list (paste into ChatGPT, download the image, save it)
+═══════════════════════════════════════════════════════════════════
+
+Generate a single bare iPhone screenshot, portrait 9:16 aspect ratio, of the home screen of a note-taking app called "Notely" (an Evernote-style productivity app). NO device frame, NO iPhone bezel, NO marketing background, NO added headline text — just the raw screen pixels exactly as if someone pressed Volume Up + Power on their iPhone.
+
+iOS chrome (top of screen):
+- iOS 17/18 status bar: time "9:41" left, signal/wifi/battery icons right, Dynamic Island visible at top
+- Large bold "Notes" title heading
+- iOS-style search bar below the title
+
+Content (main area):
+- Vertical list of 6 recent notes. Each row shows: bold note title, two lines of gray preview text, small right-aligned relative timestamp, small leading icon
+- Realistic note titles: "Q3 roadmap thoughts", "Grocery — Sat", "1:1 with Maria — Sep 10", "Book picks for Q4", "Apartment hunt checklist", "Recipe — pad thai"
+- Mix of icons per row (note, list, photo, link, checkbox)
+
+Bottom navigation:
+- iOS tab bar with 4 tabs: All Notes (selected, accent green), Tags, Shortcuts, Settings
+- Floating "+" action button bottom-right
+
+Style:
+- Light theme, white background, dark gray text (#1A1A1A)
+- Single accent color: calm green (Evernote-style #00A82D)
+- iOS system typography (SF Pro)
+- Looks like a real production iOS app
+
+Output: 9:16 portrait. Bare screen content ONLY. No phone frame. No marketing chrome. Just the pixels.
+
+
+═══════════════════════════════════════════════════════════════════
+PROMPT 2 — Note editor (paste into ChatGPT, download the image)
+═══════════════════════════════════════════════════════════════════
+
+Generate a single bare iPhone screenshot, portrait 9:16 aspect ratio, of an open note in a note-taking app called "Notely". NO device frame, NO bezel, NO marketing background, NO headline text — just the raw screen pixels.
+
+iOS chrome:
+- iOS 17/18 status bar at top, Dynamic Island visible
+- Back chevron top-left, share icon + ellipsis top-right
+
+Content:
+- Note title at top: "Q3 roadmap thoughts" in large bold serif or rounded sans
+- Subtle metadata row directly below: "Edited 12 min ago · 4 attachments"
+- Rich note body with mixed content stacked vertically:
+  - One paragraph of plain text (3 lines about product goals)
+  - Bulleted list with 4 short feature ideas
+  - A highlighted callout block (pale green background, one line of text)
+  - A small embedded image thumbnail (whiteboard photo placeholder)
+  - A checkbox list with 3 items, first two checked
+  - Final short paragraph
+
+Formatting toolbar (floating above where the keyboard would be):
+- Row of icons: bold, italic, underline, bullet list, checkbox, image, link
+- Active state visible on the bullet list icon
+
+Style:
+- Light theme, white background, dark gray text
+- Subtle green accent for checkboxes and the active toolbar item
+- iOS system typography (SF Pro), realistic spacing
+- No keyboard visible
+
+Output: 9:16 portrait. Bare screen content ONLY. No phone frame.
+
+
+═══════════════════════════════════════════════════════════════════
+PROMPT 3 — Search results (paste into ChatGPT, download the image)
+═══════════════════════════════════════════════════════════════════
+
+Generate a single bare iPhone screenshot, portrait 9:16 aspect ratio, of the search screen of a note-taking app called "Notely". NO device frame, NO bezel, NO marketing background, NO headline text — just the raw screen pixels.
+
+iOS chrome:
+- iOS 17/18 status bar at top, Dynamic Island visible
+- Active iOS search bar with the query "roadmap" typed in (with blinking cursor)
+- "Cancel" text button to the right of the search bar
+
+Content:
+- Section header "4 results" in small gray uppercase
+- Results list, each row shows:
+  - Bold note title with the matching word "roadmap" highlighted in pale green background
+  - Two lines of preview text, also with matched word highlighted
+  - Right-aligned timestamp ("2 days ago", "Last week", "Yesterday", "Aug 30")
+  - Small leading icon
+- Realistic result titles: "Q3 roadmap thoughts", "Engineering roadmap draft", "Roadmap review — Aug 30 mtg", "Pricing roadmap experiments"
+- Below results: horizontal scrollable chip row labeled "Filter by tag" with chips "Work", "Personal", "Meetings", "Ideas"
+
+Style:
+- Light theme, white background
+- Highlighted matched text on pale green background, slightly bolder weight
+- iOS system typography (SF Pro)
+- Subtle dividers between rows
+
+Output: 9:16 portrait. Bare screen content ONLY. No phone frame. No marketing chrome.
