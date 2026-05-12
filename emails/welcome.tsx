@@ -87,7 +87,7 @@ export default function WelcomeEmail({ firstName, appUrl }: WelcomeEmailProps) {
               </Text>
               <Text className="text-xs leading-5 text-muted mt-2 mb-0">
                 <Link href={appUrl} className="text-muted underline">
-                  shotstudio.app
+                  shotstudio.dev
                 </Link>
               </Text>
             </Section>
@@ -100,7 +100,7 @@ export default function WelcomeEmail({ firstName, appUrl }: WelcomeEmailProps) {
 
 WelcomeEmail.PreviewProps = {
   firstName: "Alex",
-  appUrl: "https://shotstudio.app",
+  appUrl: "https://shotstudio.dev",
 } satisfies WelcomeEmailProps;
 
 export { WelcomeEmail };

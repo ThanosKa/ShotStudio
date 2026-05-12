@@ -10,4 +10,4 @@ export function pluralize(n: number, singular: string, plural?: string): string 
 }
 
 export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://shotstudio.dev";

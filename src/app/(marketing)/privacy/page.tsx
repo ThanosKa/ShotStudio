@@ -88,7 +88,7 @@ export default function PrivacyPage() {
         You can update your email and payment methods through the Stripe
         Customer Portal at any time, accessible from Settings. To delete your
         account and the associated data described above, email{" "}
-        <a href="mailto:hello@shotstudio.app">hello@shotstudio.app</a>. Because
+        <a href="mailto:kazakis.th@gmail.com">kazakis.th@gmail.com</a>. Because
         we do not store screenshots or generated images, there is nothing
         image-related to delete.
       </p>
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
       <h2>Contact</h2>
       <p>
         Questions about this policy: email{" "}
-        <a href="mailto:hello@shotstudio.app">hello@shotstudio.app</a>.
+        <a href="mailto:kazakis.th@gmail.com">kazakis.th@gmail.com</a>.
       </p>
     </LegalPage>
   );

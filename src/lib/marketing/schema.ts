@@ -13,7 +13,7 @@ export function organizationSchema() {
     name: "ShotStudio",
     url: APP_URL,
     logo: `${APP_URL}/icon.png`,
-    email: "hello@shotstudio.app",
+    email: "kazakis.th@gmail.com",
     description:
       "ShotStudio turns three raw mobile screenshots into a polished three-shot App Store set in under a minute. One-time pay, never stored.",
   };

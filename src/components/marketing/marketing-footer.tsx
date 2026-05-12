@@ -39,12 +39,22 @@ export function MarketingFooter() {
             <p className="mt-4 max-w-xs text-body-lg text-muted-foreground">
               App Store screenshots in under a minute. One-time pay, never stored.
             </p>
-            <a
-              href="mailto:hello@shotstudio.app"
-              className="mt-5 inline-block text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              hello@shotstudio.app
-            </a>
+            <div className="mt-5 flex gap-4 text-sm">
+              <a
+                href="mailto:kazakis.th@gmail.com"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Email
+              </a>
+              <a
+                href="https://x.com/KazakisThanos"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                X
+              </a>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-7">

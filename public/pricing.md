@@ -31,4 +31,4 @@ ShotStudio sells **one-time credit packs**. There is no subscription. 1 credit =
 - All sales are final. Credits are refunded automatically only when image generation fails after our retry/fallback path is exhausted.
 
 ## Buy
-Public pricing page: https://shotstudio.app/pricing
+Public pricing page: https://shotstudio.dev/pricing

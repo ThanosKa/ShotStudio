@@ -154,7 +154,7 @@ export default function CreditsPurchasedEmail({
               </Text>
               <Text className="text-xs leading-5 text-muted mt-2 mb-0">
                 <Link href={appUrl} className="text-muted underline">
-                  shotstudio.app
+                  shotstudio.dev
                 </Link>
               </Text>
             </Section>
@@ -172,7 +172,7 @@ CreditsPurchasedEmail.PreviewProps = {
   newBalance: 5,
   amountFormatted: "$17.00",
   receiptUrl: "https://pay.stripe.com/receipts/example",
-  appUrl: "https://shotstudio.app",
+  appUrl: "https://shotstudio.dev",
 } satisfies CreditsPurchasedEmailProps;
 
 export { CreditsPurchasedEmail };

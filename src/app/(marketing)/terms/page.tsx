@@ -128,7 +128,7 @@ export default function TermsPage() {
       <h2>Contact</h2>
       <p>
         Questions about these Terms: email{" "}
-        <a href="mailto:hello@shotstudio.app">hello@shotstudio.app</a>.
+        <a href="mailto:kazakis.th@gmail.com">kazakis.th@gmail.com</a>.
       </p>
     </LegalPage>
   );
