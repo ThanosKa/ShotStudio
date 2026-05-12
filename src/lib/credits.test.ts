@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 import { db } from "@/lib/db";
-import { generations, transactions, users } from "@/lib/db/schema";
-import { ensureUser, reapStalePending } from "@/lib/db/queries";
+import { transactions, users } from "@/lib/db/schema";
+import { ensureUser } from "@/lib/db/queries";
 import { grant } from "./credits";
 
 describe("grant", () => {
@@ -20,29 +20,6 @@ describe("grant", () => {
       .from(transactions)
       .where(eq(transactions.stripePaymentId, "evt_X"));
     expect(txs).toHaveLength(1);
-  });
-});
-
-describe("reapStalePending", () => {
-  test("is idempotent — second call returns no rows", async () => {
-    await ensureUser("u_reap", "u_reap@test");
-    // Backdate a pending row to before the cutoff.
-    const oldTime = new Date(Date.now() - 30 * 60 * 1000);
-    await db.insert(generations).values({
-      userId: "u_reap",
-      appName: "Acme",
-      stylePreset: "friendly",
-      category: "productivity",
-      status: "pending",
-      createdAt: oldTime,
-    });
-
-    const cutoff = new Date(Date.now() - 10 * 60 * 1000);
-    const first = await reapStalePending(cutoff);
-    const second = await reapStalePending(cutoff);
-
-    expect(first).toHaveLength(1);
-    expect(second).toHaveLength(0);
   });
 });
 

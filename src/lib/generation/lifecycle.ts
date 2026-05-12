@@ -219,10 +219,9 @@ export async function runGeneration(
         generationId,
       });
     } catch (refundErr) {
-      // Reconciler is the safety net; the user-facing outcome stays the same.
       shotLog.error(
         { err: refundErr },
-        "inline refund failed; reconciler will retry",
+        "inline refund failed; manual refund required",
       );
     }
     return { kind: "failed_and_refunded", reason };

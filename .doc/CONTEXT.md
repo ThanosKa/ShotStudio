@@ -16,8 +16,6 @@ ShotStudio is a single-tenant, one-time-pay tool that turns three raw mobile scr
 - **Style Preset** — One of four named visual styles (`soft_bright`, `dark_premium`, `clean_minimal`, `bold_playful`) bundling palette, typography and tone modifier. _Avoid_ "theme", "style", "look".
 - **Category** — The app's App Store category; maps to a default Style Preset that the user can override. _Avoid_ "vertical", "genre".
 - **Pending Generation** — A Generation row whose `status = 'pending'` — Credit already debited, work in flight. _Avoid_ "in-progress generation", "running job".
-- **Stale Pending** — A Pending Generation older than 7 minutes (past the route's 5-minute `maxDuration` plus buffer); eligible for reaping. _Avoid_ "expired generation", "orphan generation".
-- **Reconciler** — The `/api/cron/reconcile-generations` cron job that fails Stale Pendings and refunds their Credits.
 
 ### Billing context
 
@@ -26,7 +24,7 @@ ShotStudio is a single-tenant, one-time-pay tool that turns three raw mobile scr
 - **Transaction** — A row in the Credits ledger recording a Credit movement of type `purchase`, `usage`, or `refund`. _Avoid_ "ledger entry", "credit event".
 - **Grant** — The Billing operation that credits a Pack's Credits to a User after a successful Stripe checkout; idempotent on `stripePaymentId`. _Avoid_ "issue", "top-up".
 - **Debit** — The atomic operation that decrements one Credit and inserts a Pending Generation in the same DB transaction (`debitAndStartGeneration`). _Avoid_ "charge", "spend", "consume".
-- **Refund** — The operation that re-credits one Credit when a Generation fails (in-route or via the Reconciler). _Avoid_ "reverse", "rollback".
+- **Refund** — The operation that re-credits one Credit when a Generation fails in-route. _Avoid_ "reverse", "rollback".
 - **Checkout Session** — The Stripe-hosted payment page created by `/api/checkout`; its `id` is reused as the `stripePaymentId` on the resulting Grant. _Avoid_ "payment session".
 
 ### Identity context
@@ -43,7 +41,7 @@ ShotStudio is a single-tenant, one-time-pay tool that turns three raw mobile scr
 - A **Generation** is configured by exactly one **Style Preset** and one **Category**; Category determines the default Style Preset.
 - A non-Title Shot consumes exactly one **Reference Screenshot**; the **Title Shot** consumes the **Tagline** instead.
 - A **Debit** atomically creates a Pending Generation and writes a `usage` Transaction.
-- A successful Generation transitions to `complete`; a failure transitions to `failed` and triggers a **Refund** (in-route or via the Reconciler) which writes a `refund` Transaction.
+- A successful Generation transitions to `complete`; a failure transitions to `failed` and triggers an in-route **Refund** which writes a `refund` Transaction.
 - A **Grant** writes a `purchase` Transaction whose `stripePaymentId` equals the **Checkout Session** id; this provides webhook idempotency.
 - A **Credit Pack** maps to a Stripe Price; on `checkout.session.completed` the Pack's `credits` are Granted to the User identified by `metadata.userId`.
 
@@ -55,7 +53,7 @@ ShotStudio is a single-tenant, one-time-pay tool that turns three raw mobile scr
 >
 > **PM:** "Got it. And if her Generation fails halfway through?"
 >
-> **Eng:** "Two safety nets. The route catches the error, marks the Generation `failed`, and Refunds the Credit inline. If the route itself dies before that runs — say, hits its `maxDuration` — the Reconciler reaps any Stale Pending Generations every 10 minutes and Refunds them. Either way she ends back at the same balance."
+> **Eng:** "The route catches the error, marks the Generation `failed`, and Refunds the Credit inline before responding — so her balance ends up where it started."
 
 ## Flagged ambiguities
 
