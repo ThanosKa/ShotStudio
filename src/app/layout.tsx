@@ -76,6 +76,9 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  verification: {
+    google: "6AGPR-3tc3oNACKAU0pyo1QAX17RhOJjSrKiPT0SQYg",
+  },
   category: "technology",
 };
 
