@@ -83,7 +83,6 @@ describe("runCheckoutFulfillment", () => {
     expect(arg.to).toBe("buyer@test");
     expect(arg.creditsAdded).toBe(5);
     expect(arg.newBalance).toBe(5);
-    expect(arg.receiptUrl).toBe("https://stripe.test/receipt/x");
   });
 
   test("unknown_pack: no grant, no email", async () => {

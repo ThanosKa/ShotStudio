@@ -22,7 +22,6 @@ interface CreditsPurchasedEmailProps {
   creditsAdded: number;
   newBalance: number;
   amountFormatted: string;
-  receiptUrl?: string | null;
   appUrl: string;
 }
 
@@ -32,7 +31,6 @@ export default function CreditsPurchasedEmail({
   creditsAdded,
   newBalance,
   amountFormatted,
-  receiptUrl,
   appUrl,
 }: CreditsPurchasedEmailProps) {
   const greeting = firstName?.trim() ? `Hi ${firstName.trim()},` : "Hey,";
@@ -127,35 +125,32 @@ export default function CreditsPurchasedEmail({
                 href={`${appUrl}/home`}
                 className="bg-brand text-white px-5 py-3 rounded-md text-sm font-medium no-underline box-border"
               >
-                Generate a screenshot set
+                Open ShotStudio
               </Button>
             </Section>
-
-            {receiptUrl ? (
-              <Section className="mt-6">
-                <Text className="text-sm leading-6 text-muted m-0">
-                  Need an invoice or receipt?{" "}
-                  <Link href={receiptUrl} className="text-ink underline">
-                    View your receipt
-                  </Link>
-                  .
-                </Text>
-              </Section>
-            ) : null}
 
             <Hr className="border-line border-solid my-8" />
 
             <Section>
               <Text className="text-xs leading-5 text-muted m-0">
-                All sales are final per our Terms of Service. Disputes are handled directly through Stripe.
+                All sales final. See our{" "}
+                <Link href={`${appUrl}/terms`} className="text-muted underline">
+                  Terms
+                </Link>
+                {" "}and{" "}
+                <Link href={`${appUrl}/privacy`} className="text-muted underline">
+                  Privacy Policy
+                </Link>
+                .
               </Text>
-              <Text className="text-xs leading-5 text-muted mt-2 mb-0">
-                Questions? Just reply to this email.
-              </Text>
-              <Text className="text-xs leading-5 text-muted mt-2 mb-0">
+              <Text className="text-xs leading-5 text-muted mt-3 mb-0">
                 <Link href={appUrl} className="text-muted underline">
                   shotstudio.dev
                 </Link>
+                {" "}— App Store screenshots, in a minute.
+              </Text>
+              <Text className="text-xs leading-5 text-muted mt-1 mb-0">
+                © 2026 ShotStudio
               </Text>
             </Section>
           </Container>
@@ -171,7 +166,6 @@ CreditsPurchasedEmail.PreviewProps = {
   creditsAdded: 5,
   newBalance: 5,
   amountFormatted: "$17.00",
-  receiptUrl: "https://pay.stripe.com/receipts/example",
   appUrl: "https://shotstudio.dev",
 } satisfies CreditsPurchasedEmailProps;
 

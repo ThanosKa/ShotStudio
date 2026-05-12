@@ -72,23 +72,26 @@ export default function WelcomeEmail({ firstName, appUrl }: WelcomeEmailProps) {
               </Button>
             </Section>
 
-            <Section className="mt-8">
-              <Text className="text-sm leading-6 text-muted m-0">
-                You start with 0 credits. Buy a pack whenever you&apos;re ready to ship —
-                Starter ($7), Growth ($17), or Studio ($37). Pay once, no recurring billing.
-              </Text>
-            </Section>
-
             <Hr className="border-line border-solid my-8" />
 
             <Section>
               <Text className="text-xs leading-5 text-muted m-0">
-                Questions? Just reply to this email.
+                <Link href={`${appUrl}/terms`} className="text-muted underline">
+                  Terms
+                </Link>
+                {" · "}
+                <Link href={`${appUrl}/privacy`} className="text-muted underline">
+                  Privacy
+                </Link>
               </Text>
-              <Text className="text-xs leading-5 text-muted mt-2 mb-0">
+              <Text className="text-xs leading-5 text-muted mt-3 mb-0">
                 <Link href={appUrl} className="text-muted underline">
                   shotstudio.dev
                 </Link>
+                {" "}— App Store screenshots, in a minute.
+              </Text>
+              <Text className="text-xs leading-5 text-muted mt-1 mb-0">
+                © 2026 ShotStudio
               </Text>
             </Section>
           </Container>

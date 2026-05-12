@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import type { Logger } from "pino";
 import type Stripe from "stripe";
 import { grant } from "@/lib/credits";
 import { db } from "@/lib/db";
@@ -38,6 +37,7 @@ export async function createCheckoutSession(
     client_reference_id: input.userId,
     allow_promotion_codes: true,
     automatic_tax: { enabled: true },
+    invoice_creation: { enabled: true },
     success_url: `${APP_URL}/home?purchase=success`,
     cancel_url: `${APP_URL}/pricing?purchase=cancelled`,
     metadata: {
@@ -72,25 +72,6 @@ function formatAmount(amountCents: number, currency: string): string {
     style: "currency",
     currency: currency.toUpperCase(),
   }).format(amountCents / 100);
-}
-
-async function fetchReceiptUrl(
-  paymentIntentId: string | null,
-  log: Logger,
-): Promise<string | null> {
-  if (!paymentIntentId) return null;
-  try {
-    const pi = await stripe.paymentIntents.retrieve(paymentIntentId, {
-      expand: ["latest_charge"],
-    });
-    const charge = pi.latest_charge;
-    return charge && typeof charge !== "string"
-      ? charge.receipt_url ?? null
-      : null;
-  } catch (err) {
-    log.warn({ err, paymentIntentId }, "failed to fetch receipt url");
-    return null;
-  }
 }
 
 export async function runCheckoutFulfillment(
@@ -128,15 +109,8 @@ export async function runCheckoutFulfillment(
     }
   }
 
-  const piPromise = fetchReceiptUrl(
-    typeof session.payment_intent === "string" ? session.payment_intent : null,
-    log,
-  );
-
   const newBalance = await grant(userId, pack.credits, session.id);
   log.info({ creditsAdded: pack.credits, newBalance }, "credits granted");
-
-  const receiptUrl = await piPromise;
 
   let emailSent = false;
   if (checkoutEmail) {
@@ -151,7 +125,6 @@ export async function runCheckoutFulfillment(
         session.amount_total ?? pack.priceCents,
         session.currency ?? "usd",
       ),
-      receiptUrl,
     });
     if (error) {
       log.error({ err: error }, "purchase email failed");

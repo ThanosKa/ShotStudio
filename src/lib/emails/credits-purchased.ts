@@ -10,7 +10,6 @@ export async function sendCreditsPurchasedEmail(params: {
   creditsAdded: number;
   newBalance: number;
   amountFormatted: string;
-  receiptUrl?: string | null;
 }) {
   return sendTransactional({
     element: CreditsPurchasedEmail({
@@ -19,11 +18,10 @@ export async function sendCreditsPurchasedEmail(params: {
       creditsAdded: params.creditsAdded,
       newBalance: params.newBalance,
       amountFormatted: params.amountFormatted,
-      receiptUrl: params.receiptUrl,
       appUrl: APP_URL,
     }),
     to: params.to,
-    subject: `Payment confirmed — ${params.creditsAdded} ${pluralize(params.creditsAdded, "credit")} added`,
+    subject: `Payment confirmed — ${params.creditsAdded} ${pluralize(params.creditsAdded, "set")} added`,
     idempotencyKey: `credits-purchased/${params.stripeEventId}`,
   });
 }

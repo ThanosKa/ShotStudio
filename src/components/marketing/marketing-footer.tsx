@@ -39,25 +39,9 @@ export function MarketingFooter() {
             <p className="mt-4 max-w-xs text-body-lg text-muted-foreground">
               App Store screenshots in under a minute. One-time pay, never stored.
             </p>
-            <div className="mt-5 flex gap-4 text-sm">
-              <a
-                href="mailto:kazakis.th@gmail.com"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Email
-              </a>
-              <a
-                href="https://x.com/KazakisThanos"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                X
-              </a>
-            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-7">
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 md:col-span-7">
             {COLUMNS.map((column) => (
               <div key={column.heading}>
                 <h4 className="text-sm font-semibold text-foreground">
@@ -77,6 +61,29 @@ export function MarketingFooter() {
                 </ul>
               </div>
             ))}
+            <div>
+              <h4 className="text-sm font-semibold text-foreground">Connect</h4>
+              <ul className="mt-4 space-y-3 text-sm">
+                <li>
+                  <a
+                    href="mailto:kazakis.th@gmail.com"
+                    className="text-foreground/80 transition-colors hover:text-foreground"
+                  >
+                    Email
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://x.com/KazakisThanos"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground/80 transition-colors hover:text-foreground"
+                  >
+                    X
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
