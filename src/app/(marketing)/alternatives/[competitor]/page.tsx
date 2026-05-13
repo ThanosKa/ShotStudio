@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/marketing/json-ld";
 import {
   breadcrumbSchema,
   organizationSchema,
+  softwareApplicationSchema,
 } from "@/lib/marketing/schema";
 import { COMPETITORS, getCompetitorBySlug } from "@/data/competitors";
 import { APP_URL } from "@/lib/utils";
@@ -55,6 +56,7 @@ export default async function CompetitorAlternativesPage({
         data={{
           "@graph": [
             organizationSchema(),
+            softwareApplicationSchema(),
             breadcrumbSchema([
               { name: "Home", url: APP_URL },
               { name: "Alternatives", url: `${APP_URL}/alternatives` },

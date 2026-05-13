@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -7,13 +9,13 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "shotstudio";
 }
 
-function downloadDataUrl(dataUrl: string, filename: string) {
-  const a = document.createElement("a");
-  a.href = dataUrl;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+function dataUrlToBytes(dataUrl: string): Uint8Array {
+  const comma = dataUrl.indexOf(",");
+  const b64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
 }
 
 export function ResultPanel({
@@ -26,11 +28,27 @@ export function ResultPanel({
   onReset: () => void;
 }) {
   const slug = slugify(appName);
+  const [zipping, setZipping] = useState(false);
 
-  function downloadAll() {
-    images.forEach((src, i) => {
-      downloadDataUrl(src, `${slug}-shot-${i + 1}.png`);
-    });
+  async function downloadAll() {
+    setZipping(true);
+    try {
+      const zip = new JSZip();
+      images.forEach((src, i) => {
+        zip.file(`${slug}-shot-${i + 1}.png`, dataUrlToBytes(src));
+      });
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slug}-shots.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } finally {
+      setZipping(false);
+    }
   }
 
   return (
@@ -54,8 +72,8 @@ export function ResultPanel({
           ))}
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button onClick={downloadAll} size="lg">
-            Download all
+          <Button onClick={downloadAll} size="lg" disabled={zipping}>
+            {zipping ? "Preparing ZIP…" : "Download all (.zip)"}
           </Button>
           <Button variant="outline" onClick={onReset}>
             Create another set

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ const EMPTY_SHOT: ShotState = {
 };
 
 export function Wizard() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>(0);
   const [appName, setAppName] = useState("");
   const [pitch, setPitch] = useState("");
@@ -229,6 +231,7 @@ export function Wizard() {
       }
       setImages(ok.imageUrls);
       setStatus("done");
+      router.refresh();
     } catch (err) {
       setStatus("error");
       setError(
@@ -632,6 +635,11 @@ const SHOT_OUTPUT_LABELS = [
 ] as const;
 
 function GeneratingPanel() {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const t = setTimeout(() => setWidth(85), 50);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <div className="mx-auto w-full max-w-5xl">
       <div className="mx-auto max-w-md rounded-xl border border-border bg-card px-5 py-4">
@@ -640,10 +648,16 @@ function GeneratingPanel() {
           <span className="font-medium">Generating your set</span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Running 3 parallel jobs · 30–90 seconds.
+          Running 3 parallel jobs · 30–120 seconds.
         </p>
         <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-foreground/10">
-          <span className="block h-full w-1/3 animate-pulse rounded-full bg-foreground" />
+          <span
+            className="block h-full rounded-full bg-foreground"
+            style={{
+              width: `${width}%`,
+              transition: "width 90s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          />
         </div>
       </div>
       <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">

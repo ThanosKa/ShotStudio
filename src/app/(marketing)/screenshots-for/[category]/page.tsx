@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/marketing/json-ld";
 import {
   breadcrumbSchema,
   organizationSchema,
+  softwareApplicationSchema,
 } from "@/lib/marketing/schema";
 import { CATEGORIES, getCategoryBySlug } from "@/data/categories";
 import { STYLE_PRESETS } from "@/lib/generation/presets";
@@ -60,6 +61,7 @@ export default async function CategoryPage({
         data={{
           "@graph": [
             organizationSchema(),
+            softwareApplicationSchema(),
             breadcrumbSchema([
               { name: "Home", url: APP_URL },
               { name: "Screenshots for", url: `${APP_URL}/screenshots-for` },

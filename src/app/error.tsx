@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 
 export default function ErrorBoundary({
@@ -11,6 +12,8 @@ export default function ErrorBoundary({
   error: Error;
   unstable_retry: () => void;
 }) {
+  const { isSignedIn } = useAuth();
+
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -22,11 +25,16 @@ export default function ErrorBoundary({
         <p className="text-sm text-muted-foreground">
           An unexpected error occurred. Try again, or head back home.
         </p>
-        <div className="flex justify-center gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           <Button onClick={() => unstable_retry()}>Try again</Button>
           <Button variant="outline" asChild>
             <Link href="/">Go home</Link>
           </Button>
+          {isSignedIn && (
+            <SignOutButton redirectUrl="/">
+              <Button variant="ghost">Sign out</Button>
+            </SignOutButton>
+          )}
         </div>
       </div>
     </main>
