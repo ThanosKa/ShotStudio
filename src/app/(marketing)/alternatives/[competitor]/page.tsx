@@ -5,11 +5,7 @@ import { Show, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight, Check, X } from "lucide-react";
 import { Section } from "@/components/marketing/section";
 import { JsonLd } from "@/components/marketing/json-ld";
-import {
-  breadcrumbSchema,
-  organizationSchema,
-  softwareApplicationSchema,
-} from "@/lib/marketing/schema";
+import { breadcrumbSchema } from "@/lib/marketing/schema";
 import { COMPETITORS, getCompetitorBySlug } from "@/data/competitors";
 import { APP_URL } from "@/lib/utils";
 
@@ -48,15 +44,13 @@ export default async function CompetitorAlternativesPage({
   const data = getCompetitorBySlug(competitor);
   if (!data) notFound();
 
-  const others = COMPETITORS.filter((c) => c.slug !== data.slug).slice(0, 3);
+  const others = COMPETITORS.filter((c) => c.slug !== data.slug);
 
   return (
     <>
       <JsonLd
         data={{
           "@graph": [
-            organizationSchema(),
-            softwareApplicationSchema(),
             breadcrumbSchema([
               { name: "Home", url: APP_URL },
               { name: "Alternatives", url: `${APP_URL}/alternatives` },
@@ -65,11 +59,49 @@ export default async function CompetitorAlternativesPage({
                 url: `${APP_URL}/alternatives/${data.slug}`,
               },
             ]),
+            {
+              "@type": "Article",
+              headline: `${data.name} alternatives — what indies actually pick`,
+              description: `Honest take on why indie iOS developers leave ${data.name}, where ${data.name} is still the right pick, and what ShotStudio does differently.`,
+              url: `${APP_URL}/alternatives/${data.slug}`,
+              inLanguage: "en-US",
+              author: {
+                "@type": "Organization",
+                name: "ShotStudio",
+                url: APP_URL,
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "ShotStudio",
+                url: APP_URL,
+                logo: { "@type": "ImageObject", url: `${APP_URL}/icon.png` },
+              },
+              about: {
+                "@type": "SoftwareApplication",
+                name: data.name,
+                applicationCategory: "DesignApplication",
+                applicationSubCategory: "App Store screenshot generator",
+              },
+              mentions: COMPETITORS.map((c) => ({
+                "@type": "SoftwareApplication",
+                name: c.name,
+                applicationCategory: "DesignApplication",
+              })),
+            },
+            {
+              "@type": "FAQPage",
+              mainEntity: data.faq.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
+            },
           ],
         }}
       />
 
       <Section
+        as="h1"
         eyebrow={`${data.name} alternatives`}
         title={`${data.name} alternatives — what indies actually pick`}
         description={`${data.name} is ${data.positioning.toLowerCase()} ${data.primaryWeakness} If you're looking for an alternative for the once-or-twice-a-year App Store launch, here's an honest take on what fits.`}
@@ -228,6 +260,17 @@ export default async function CompetitorAlternativesPage({
               </li>
             ))}
           </ul>
+        </div>
+      </Section>
+
+      <Section eyebrow="FAQ" title={`${data.name} alternatives — questions indies ask`}>
+        <div className="divide-y border-y">
+          {data.faq.map(({ q, a }) => (
+            <div key={q} className="py-6">
+              <h3 className="text-heading-sm font-semibold">{q}</h3>
+              <p className="mt-3 text-body-lg text-muted-foreground">{a}</p>
+            </div>
+          ))}
         </div>
       </Section>
 

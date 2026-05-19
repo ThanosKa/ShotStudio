@@ -52,6 +52,7 @@ export default function CategoriesHubPage() {
       />
 
       <Section
+        as="h1"
         eyebrow="By category"
         title="App Store screenshots by app category"
         description="Different apps need different things from a screenshot. A fitness app sells momentum, a finance app sells trust, a productivity app sells calm. ShotStudio picks the style preset for you based on category — pick yours below to see what converts and what kills the carousel."

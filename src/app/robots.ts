@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { APP_URL } from "@/lib/utils";
 
-const PRIVATE_PATHS = ["/api/", "/home", "/sign-in", "/sign-up"];
+const PRIVATE_PATHS = ["/api/", "/home"];
 
 const AI_SEARCH_BOTS = [
   "GPTBot",
@@ -27,7 +27,8 @@ export default function robots(): MetadataRoute.Robots {
       })),
       {
         userAgent: "CCBot",
-        disallow: "/",
+        allow: "/",
+        disallow: PRIVATE_PATHS,
       },
     ],
     sitemap: `${APP_URL}/sitemap.xml`,

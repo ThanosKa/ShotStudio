@@ -1,7 +1,7 @@
 # Programmatic SEO Plan
 
 *Last updated: 2026-05-10*
-*Reads `.agents/product-marketing-context.md` and `.agents/content-strategy.md`.*
+*Reads `.agents/product-marketing.md` and `.agents/content-strategy.md`.*
 
 ## Strategy
 

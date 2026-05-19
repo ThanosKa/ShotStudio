@@ -53,7 +53,7 @@ export default async function CategoryPage({
 
   const preset = STYLE_PRESETS[data.presetId];
   const example = SHOWCASE_SETS.find((s) => s.preset === data.presetId);
-  const related = CATEGORIES.filter((c) => c.slug !== data.slug).slice(0, 3);
+  const related = CATEGORIES.filter((c) => c.slug !== data.slug).slice(0, 6);
 
   return (
     <>
@@ -83,6 +83,7 @@ export default async function CategoryPage({
       />
 
       <Section
+        as="h1"
         eyebrow={`For ${data.noun}`}
         title={`App Store screenshots for ${data.name.toLowerCase()}`}
         description={data.lead}

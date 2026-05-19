@@ -1,6 +1,6 @@
 # Product Marketing Context
 
-*Last updated: 2026-05-10*
+*Last updated: 2026-05-19 (v1 live since 2026-05-12 — 7 days post-launch, 0 clicks / 63 impressions in GSC at writing)*
 
 ## Product Overview
 **One-liner:** App Store screenshots in under a minute, without the subscription.
@@ -103,7 +103,7 @@ B2C — single persona (the indie developer). Skipping the multi-stakeholder tab
 
 ## Proof Points
 **Metrics:** ~1 minute to three polished shots. $7 floor price. 4 personality presets + upload-derived theme/palette. Zero image persistence (architectural).
-**Customers:** None public yet (pre-launch / early traction).
+**Customers:** None public yet (v1 launched 2026-05-12; pre-traction).
 **Testimonials:** None yet — capture once live; prioritize indie-on-Twitter/X quotes.
 **Value themes:**
 | Theme | Proof |
@@ -117,4 +117,4 @@ B2C — single persona (the indie developer). Skipping the multi-stakeholder tab
 ## Goals
 **Business goal:** Indie iOS developer awareness → one-time credit-pack purchases. Volume comes from trial-by-purchase at $7, then upsell to Growth/Studio for repeat work.
 **Conversion action:** Sign up → buy credits → generate. Sign-up is the primary CTA; pricing is the secondary.
-**Current metrics:** Pre-launch / early — establish baseline at first traffic.
+**Current metrics:** Site went live 2026-05-12. First 7 days: 0 clicks, 63 impressions, 13 of 27 known pages indexed (12 "Discovered – currently not indexed", 1 blocked by robots.txt). No purchases yet. Baseline period is the next 30 days post-PH launch (scheduled 2026-05-19).

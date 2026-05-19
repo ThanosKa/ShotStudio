@@ -8,12 +8,12 @@ import { formatPublishedAt, getAllPostMetas } from "@/lib/blog";
 import { APP_URL } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Blog — App Store screenshots, indie iOS notes",
   description:
     "Notes from ShotStudio on App Store screenshots, listing conversion, and shipping iOS apps as an indie. Specs, comparisons, and what actually moves the needle in the carousel.",
   alternates: { canonical: "/blog" },
   openGraph: {
-    title: "ShotStudio Blog — App Store screenshots, indie iOS notes",
+    title: "Blog — App Store screenshots, indie iOS notes — ShotStudio",
     description:
       "Notes from ShotStudio on App Store screenshots, listing conversion, and shipping iOS apps as an indie.",
     url: `${APP_URL}/blog`,
@@ -37,6 +37,7 @@ export default function BlogIndexPage() {
       />
 
       <Section
+        as="h1"
         eyebrow="Blog"
         title="Notes on App Store screenshots, listing conversion, and indie iOS shipping."
         description="Specs, comparisons, and the parts of App Store Connect nobody warned you about. Written by the team building ShotStudio — biased, but with the bias clearly labeled."

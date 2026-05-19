@@ -47,6 +47,7 @@ export default function AlternativesHubPage() {
       />
 
       <Section
+        as="h1"
         eyebrow="Tool alternatives"
         title="App Store screenshot tool alternatives"
         description="Honest comparisons of the main tools indie iOS developers consider — including ours. Each page covers what the tool does well, where it falls short for the once-or-twice-a-year App Store launch, and which kind of indie still picks it."

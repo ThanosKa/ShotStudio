@@ -39,6 +39,7 @@ export default function PricingPage() {
         }}
       />
       <Section
+        as="h1"
         eyebrow="Pricing"
         title="Three packs. Buy what you need."
         description="1 credit = 1 set = 3 polished shots. Credits never expire, failed generations auto-refund, no subscription."

@@ -8,6 +8,7 @@ interface SectionProps {
   children: React.ReactNode;
   className?: string;
   bare?: boolean;
+  as?: "h1" | "h2";
 }
 
 export function Section({
@@ -18,7 +19,9 @@ export function Section({
   children,
   className,
   bare = false,
+  as = "h2",
 }: SectionProps) {
+  const Heading = as;
   return (
     <section
       id={id}
@@ -35,9 +38,9 @@ export function Section({
               {eyebrow}
             </p>
           )}
-          <h2 className="text-heading font-semibold md:text-heading-lg">
+          <Heading className="text-heading font-semibold md:text-heading-lg">
             {title}
-          </h2>
+          </Heading>
           {description && (
             <p className="mt-4 text-body-lg text-muted-foreground md:text-heading-sm">
               {description}

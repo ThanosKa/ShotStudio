@@ -11,11 +11,14 @@ export function MarketingNav() {
           <Wordmark size="md" />
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
-          <Link href="/#examples" className="hover:text-foreground">
-            Examples
+          <Link href="/screenshots-for" className="hover:text-foreground">
+            By app type
           </Link>
-          <Link href="/#how-it-works" className="hover:text-foreground">
-            How it works
+          <Link href="/alternatives" className="hover:text-foreground">
+            Alternatives
+          </Link>
+          <Link href="/blog" className="hover:text-foreground">
+            Blog
           </Link>
           <Link href="/pricing" className="hover:text-foreground">
             Pricing

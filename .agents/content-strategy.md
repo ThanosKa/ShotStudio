@@ -1,7 +1,7 @@
 # Content Strategy
 
 *Last updated: 2026-05-10*
-*Source of truth for ShotStudio blog/content pages. Reads `.agents/product-marketing-context.md`.*
+*Source of truth for ShotStudio blog/content pages. Reads `.agents/product-marketing.md`.*
 
 ## Goal
 Pull indie iOS developers into the funnel via search before they evaluate competitors. Primary KPI: organic sessions → sign-up. Secondary: cited by ChatGPT/Perplexity for "best App Store screenshot tool" queries.
@@ -70,12 +70,12 @@ Each pillar maps cleanly onto the ICP's actual pain — submission anxiety, conv
 - All posts under `/blog/[slug]` — flat structure, not hub-and-spoke (overkill at this stage).
 - Length: 1,200–2,000 words. No fluff intros. Lead with answer.
 - Every post includes: 1290×2796 spec mention, internal link to pricing, contextual CTA matching the pillar.
-- Tone: per `.agents/product-marketing-context.md` — confident, dry, declarative. Senior indie talking to a peer.
+- Tone: per `.agents/product-marketing.md` — confident, dry, declarative. Senior indie talking to a peer.
 - Cadence: 2 posts/week sustainable for one person; ship the priority 12 first, then layer pillars 2 and 3 deeper.
 
 ## Voice-of-customer language to keep using
 
-From product context — verbatim phrases to mirror:
+From `.agents/product-marketing.md` — verbatim phrases to mirror:
 - "I just need screenshots for the App Store."
 - "I don't want to pay a subscription for something I'll use once."
 - "I'm not a designer."
