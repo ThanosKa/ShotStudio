@@ -13,6 +13,7 @@
     "db:push": "dotenv -e .env.local -- drizzle-kit push",
     "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
     "db:reset": "dotenv -e .env.local -- tsx scripts/db-reset.ts && pnpm db:migrate",
+    "db:reconcile": "dotenv -e .env.local -- tsx scripts/reconcile-stripe.ts",
     "test:user": "dotenv -e .env.local -- tsx scripts/create-test-user.ts",
     "test": "vitest run",
     "test:watch": "vitest"

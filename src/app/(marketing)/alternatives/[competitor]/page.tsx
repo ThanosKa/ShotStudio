@@ -4,9 +4,26 @@ import { notFound } from "next/navigation";
 import { Show, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight, Check, X } from "lucide-react";
 import { Section } from "@/components/marketing/section";
+import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
+import { LinkCards } from "@/components/marketing/link-cards";
 import { JsonLd } from "@/components/marketing/json-ld";
-import { breadcrumbSchema } from "@/lib/marketing/schema";
+import {
+  breadcrumbSchema,
+  faqPageSchema,
+  organizationSchema,
+  softwareApplicationSchema,
+  webPageSchema,
+  websiteSchema,
+} from "@/lib/marketing/schema";
+import { competitorSnippet } from "@/lib/marketing/meta";
 import { COMPETITORS, getCompetitorBySlug } from "@/data/competitors";
+import {
+  categoriesForCompetitor,
+  competitorAnchor,
+  getCompetitorEditorial,
+} from "@/data/competitor-editorial";
+import { categoryAnchor } from "@/data/category-editorial";
+import { getAllPostMetas } from "@/lib/blog";
 import { APP_URL } from "@/lib/utils";
 
 export async function generateStaticParams() {
@@ -21,14 +38,13 @@ export async function generateMetadata({
   const { competitor } = await params;
   const data = getCompetitorBySlug(competitor);
   if (!data) return {};
-  const title = `${data.name} alternatives for App Store screenshots`;
-  const description = `Honest take on why indie iOS developers leave ${data.name}, where ${data.name} is still the right pick, and what ShotStudio does differently — $7 one-time, never stored, AI-picked preset.`;
+  const { title, description } = competitorSnippet(data);
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: `/alternatives/${data.slug}` },
     openGraph: {
-      title: `${title} — ShotStudio`,
+      title,
       description,
       url: `${APP_URL}/alternatives/${data.slug}`,
     },
@@ -45,37 +61,30 @@ export default async function CompetitorAlternativesPage({
   if (!data) notFound();
 
   const others = COMPETITORS.filter((c) => c.slug !== data.slug);
+  const editorial = getCompetitorEditorial(data.slug);
+  const relatedCats = categoriesForCompetitor(data.slug);
+  const posts = getAllPostMetas();
+  const comparisonPost = posts.find((p) => p.slug.includes("generators"));
+  const url = `${APP_URL}/alternatives/${data.slug}`;
+  const { title, description } = competitorSnippet(data);
 
   return (
     <>
       <JsonLd
         data={{
           "@graph": [
+            organizationSchema(),
+            websiteSchema(),
             breadcrumbSchema([
               { name: "Home", url: APP_URL },
               { name: "Alternatives", url: `${APP_URL}/alternatives` },
-              {
-                name: `${data.name} alternatives`,
-                url: `${APP_URL}/alternatives/${data.slug}`,
-              },
+              { name: `${data.name} alternatives`, url },
             ]),
-            {
-              "@type": "Article",
-              headline: `${data.name} alternatives — what indies actually pick`,
-              description: `Honest take on why indie iOS developers leave ${data.name}, where ${data.name} is still the right pick, and what ShotStudio does differently.`,
-              url: `${APP_URL}/alternatives/${data.slug}`,
-              inLanguage: "en-US",
-              author: {
-                "@type": "Organization",
-                name: "ShotStudio",
-                url: APP_URL,
-              },
-              publisher: {
-                "@type": "Organization",
-                name: "ShotStudio",
-                url: APP_URL,
-                logo: { "@type": "ImageObject", url: `${APP_URL}/icon.png` },
-              },
+            webPageSchema({
+              url,
+              name: title,
+              description,
+              primaryImage: `${url}/opengraph-image`,
               about: {
                 "@type": "SoftwareApplication",
                 name: data.name,
@@ -87,17 +96,19 @@ export default async function CompetitorAlternativesPage({
                 name: c.name,
                 applicationCategory: "DesignApplication",
               })),
-            },
-            {
-              "@type": "FAQPage",
-              mainEntity: data.faq.map((f) => ({
-                "@type": "Question",
-                name: f.q,
-                acceptedAnswer: { "@type": "Answer", text: f.a },
-              })),
-            },
+            }),
+            softwareApplicationSchema(),
+            faqPageSchema(data.faq),
           ],
         }}
+      />
+
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Alternatives", href: "/alternatives" },
+          { label: `${data.name} alternatives` },
+        ]}
       />
 
       <Section
@@ -134,10 +145,36 @@ export default async function CompetitorAlternativesPage({
             href="/pricing"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
-            See pricing →
+            ShotStudio pricing — $7, $17, $37 one-time →
           </Link>
         </div>
       </Section>
+
+      {editorial && (
+        <Section eyebrow="In short" title={`What is ${data.name}?`}>
+          <p className="max-w-3xl text-body-lg">{editorial.quickAnswer}</p>
+          <dl className="mt-8 grid gap-px overflow-hidden rounded-2xl border bg-border md:grid-cols-3">
+            <div className="bg-background p-7">
+              <dt className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
+                Pricing model
+              </dt>
+              <dd className="mt-3 text-body-lg">{data.pricingModel}</dd>
+            </div>
+            <div className="bg-background p-7">
+              <dt className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
+                What it costs
+              </dt>
+              <dd className="mt-3 text-body-lg">{data.pricingNote}</dd>
+            </div>
+            <div className="bg-background p-7">
+              <dt className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
+                Who still picks it
+              </dt>
+              <dd className="mt-3 text-body-lg">{data.whenTheyAreRight}</dd>
+            </div>
+          </dl>
+        </Section>
+      )}
 
       <Section
         eyebrow={`Why people leave ${data.name}`}
@@ -158,8 +195,8 @@ export default async function CompetitorAlternativesPage({
 
       <Section
         eyebrow="ShotStudio"
-        title="Same job, different model"
-        description="ShotStudio is built for the indie iOS developer doing this once or twice a year. Three raw uploads in, three polished 1290×2796 shots back, in under a minute. AI picks the preset from your category and writes the headline from your pitch — you bring the screenshots and the app name."
+        title={`What does ShotStudio do differently from ${data.name}?`}
+        description="ShotStudio is a one-time-pay App Store screenshot generator built for the indie iOS developer doing this once or twice a year. Three raw uploads in, three polished 1290×2796 shots back, in under a minute, from $7. AI picks the preset from your category and writes the headline from your pitch — you bring the screenshots and the app name."
       >
         <ul className="grid gap-4 md:grid-cols-2">
           {[
@@ -263,6 +300,43 @@ export default async function CompetitorAlternativesPage({
         </div>
       </Section>
 
+      {editorial && (
+        <Section
+          eyebrow="Switching"
+          title={`Moving from ${data.name} to ShotStudio`}
+          description={`There is no import, no project migration and no account to reconnect — the whole switch is the three screens you already have. ${relatedCats.length > 0 ? `Start from the category page for your app to see what the carousel has to prove before you generate.` : ""}`}
+        >
+          <ol className="grid gap-px overflow-hidden rounded-2xl border bg-border md:grid-cols-3">
+            {editorial.switchSteps.map((step, i) => (
+              <li key={step} className="bg-background p-7">
+                <div className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
+                  Step {String(i + 1).padStart(2, "0")}
+                </div>
+                <p className="mt-4 text-body-lg">{step}</p>
+              </li>
+            ))}
+          </ol>
+          {relatedCats.length > 0 && (
+            <div className="mt-8">
+              <p className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
+                What converts in your category
+              </p>
+              <div className="mt-4">
+                <LinkCards
+                  columns={2}
+                  items={relatedCats.map((c) => ({
+                    href: `/screenshots-for/${c.slug}`,
+                    label: categoryAnchor(c),
+                    eyebrow: `For ${c.noun}`,
+                    description: c.lead,
+                  }))}
+                />
+              </div>
+            </div>
+          )}
+        </Section>
+      )}
+
       <Section eyebrow="FAQ" title={`${data.name} alternatives — questions indies ask`}>
         <div className="divide-y border-y">
           {data.faq.map(({ q, a }) => (
@@ -285,23 +359,45 @@ export default async function CompetitorAlternativesPage({
               <div className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
                 {c.pricingModel}
               </div>
-              <div className="mt-3 flex items-center justify-between">
+              <div className="mt-3 flex items-start justify-between gap-3">
                 <span className="text-heading-sm font-semibold">
-                  {c.name} alternatives
+                  {competitorAnchor(c.slug, c.name)}
                 </span>
-                <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
               </div>
             </Link>
           ))}
         </div>
-        <div className="mt-6">
+        <p className="mt-6 text-body-lg text-muted-foreground">
+          Or read the round-up:{" "}
+          {comparisonPost ? (
+            <>
+              <Link
+                href={`/blog/${comparisonPost.slug}`}
+                className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+              >
+                {comparisonPost.title}
+              </Link>
+              , or the full index of{" "}
+            </>
+          ) : (
+            <>the full index of </>
+          )}
           <Link
             href="/alternatives"
-            className="text-sm text-muted-foreground hover:text-foreground"
+            className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
           >
-            See all alternatives →
+            App Store screenshot tool alternatives
           </Link>
-        </div>
+          . Pricing for all three ShotStudio credit packs is on the{" "}
+          <Link
+            href="/pricing"
+            className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+          >
+            pricing page
+          </Link>
+          .
+        </p>
       </Section>
     </>
   );

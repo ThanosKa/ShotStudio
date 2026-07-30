@@ -5,10 +5,16 @@ import { notFound } from "next/navigation";
 import { Show, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight } from "lucide-react";
 import { JsonLd } from "@/components/marketing/json-ld";
+import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { MdxContent } from "@/components/marketing/mdx-content";
+import {
+  categoriesByDemand,
+  categoryAnchor,
+} from "@/data/category-editorial";
 import {
   breadcrumbSchema,
   organizationSchema,
+  websiteSchema,
 } from "@/lib/marketing/schema";
 import {
   formatPublishedAt,
@@ -68,12 +74,20 @@ export default async function BlogPostPage({
 
   const isHowToCandidate = post.slug === "app-store-screenshot-sizes-2026";
 
+  // Highest-demand category pages, rotated per post so the two posts don't
+  // hand identical link blocks to the same three URLs.
+  const offset = post.slug.length % 3;
+  const relatedCategoryLinks = categoriesByDemand(9).filter(
+    (_, i) => i % 3 === offset,
+  );
+
   return (
     <>
       <JsonLd
         data={{
           "@graph": [
             organizationSchema(),
+            websiteSchema(),
             breadcrumbSchema([
               { name: "Home", url: APP_URL },
               { name: "Blog", url: `${APP_URL}/blog` },
@@ -84,18 +98,22 @@ export default async function BlogPostPage({
               "@id": `${APP_URL}/blog/${post.slug}#article`,
               headline: post.title,
               description: post.description,
+              url: `${APP_URL}/blog/${post.slug}`,
               datePublished: post.publishedAt,
               dateModified: post.updatedAt,
-              image: `${APP_URL}/icon.png`,
-              author: { "@type": "Organization", name: "ShotStudio" },
-              publisher: {
-                "@type": "Organization",
-                name: "ShotStudio",
-                logo: {
-                  "@type": "ImageObject",
-                  url: `${APP_URL}/icon.png`,
-                },
+              inLanguage: "en-US",
+              // Article rich results need a >=1200px-wide image; the icon is
+              // 512px square and does not qualify.
+              image: [
+                post.heroImage
+                  ? `${APP_URL}${post.heroImage}`
+                  : `${APP_URL}/og-default.png`,
+              ],
+              author: {
+                "@id": `${APP_URL}/#organization`,
               },
+              publisher: { "@id": `${APP_URL}/#organization` },
+              isPartOf: { "@id": `${APP_URL}/#website` },
               mainEntityOfPage: {
                 "@type": "WebPage",
                 "@id": `${APP_URL}/blog/${post.slug}`,
@@ -143,16 +161,16 @@ export default async function BlogPostPage({
         }}
       />
 
-      <article className="border-t py-20 md:py-24">
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Blog", href: "/blog" },
+          { label: post.title },
+        ]}
+      />
+
+      <article className="py-14 md:py-16">
         <div className="mx-auto max-w-2xl px-6">
-          <div className="mb-10">
-            <Link
-              href="/blog"
-              className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
 
           <h1 className="text-balance text-heading-lg font-semibold md:text-[44px] md:leading-[1.1] md:tracking-[-1px]">
             {post.title}
@@ -215,6 +233,53 @@ export default async function BlogPostPage({
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Show>
+            <p className="mt-5 text-body-lg text-muted-foreground">
+              <Link
+                href="/pricing"
+                className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+              >
+                ShotStudio pricing — $7, $17, $37 one-time
+              </Link>{" "}
+              · no subscription, credits never expire.
+            </p>
+          </div>
+
+          <div className="mt-10">
+            <p className="font-mono text-caption uppercase tracking-[0.18em] text-muted-foreground">
+              Keep reading
+            </p>
+            <ul className="mt-4 space-y-3 text-body-lg">
+              <li>
+                <Link
+                  href="/screenshots-for"
+                  className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+                >
+                  App Store screenshots by app category
+                </Link>{" "}
+                — what converts in your vertical, with headline patterns.
+              </li>
+              {relatedCategoryLinks.map((c) => (
+                <li key={c.slug}>
+                  <Link
+                    href={`/screenshots-for/${c.slug}`}
+                    className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+                  >
+                    {categoryAnchor(c)}
+                  </Link>{" "}
+                  — {c.whatConverts[0].toLowerCase()}
+                </li>
+              ))}
+              <li>
+                <Link
+                  href="/alternatives"
+                  className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+                >
+                  App Store screenshot tool alternatives
+                </Link>{" "}
+                — AppMockUp, Previewed, Rotato, Shotbot and Screenshots.pro
+                compared honestly.
+              </li>
+            </ul>
           </div>
         </div>
       </article>

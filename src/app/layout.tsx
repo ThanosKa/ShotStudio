@@ -38,9 +38,15 @@ export const metadata: Metadata = {
   authors: [{ name: "ShotStudio" }],
   creator: "ShotStudio",
   publisher: "ShotStudio",
-  alternates: {
-    canonical: "/",
-  },
+  // NOTE: deliberately no `alternates.canonical` here. Metadata `alternates` is
+  // inherited by every segment that does not set its own, so a root-level
+  // `canonical: "/"` made /home, /sign-in, /sign-up and *every 404 on the site*
+  // emit <link rel="canonical" href="https://shotstudio.dev">. That is what
+  // produced GSC's "Alternate page with proper canonical tag" (validation
+  // Failed) on /home: Clerk rewrites /home to a 404 for signed-out crawlers,
+  // and that 404 was inviting Google to fold the URL into the homepage.
+  // Every indexable page sets its own self-referencing canonical in
+  // src/app/(marketing)/**. Non-indexable routes must have none.
   openGraph: {
     type: "website",
     siteName: "ShotStudio",
@@ -65,12 +71,18 @@ export const metadata: Metadata = {
       "Three raw screenshots in, three polished App Store shots out. One-time pay, never stored.",
     images: ["/og-default.png"],
   },
+  // Preview directives only — no `index`/`follow`. Google gives a user-agent-
+  // specific tag precedence over the generic one, so the previous
+  // `googleBot: { index: true, follow: true }` overrode the `noindex` Next
+  // injects on not-found renders. Result: every 404 on the site (including
+  // /home, which Clerk rewrites to 404 for signed-out crawlers) shipped
+  // <meta name="robots" content="noindex"> next to
+  // <meta name="googlebot" content="index, follow, ...">, and Googlebot
+  // honoured the second one. Dropping index/follow leaves the preview hints
+  // intact while letting any noindex actually take effect. Absence of a
+  // `robots` meta already means index,follow for indexable pages.
   robots: {
-    index: true,
-    follow: true,
     googleBot: {
-      index: true,
-      follow: true,
       "max-image-preview": "large",
       "max-snippet": -1,
       "max-video-preview": -1,

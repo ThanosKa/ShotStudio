@@ -1,15 +1,46 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/marketing/legal-page";
+import { JsonLd } from "@/components/marketing/json-ld";
+import {
+  breadcrumbSchema,
+  organizationSchema,
+  webPageSchema,
+  websiteSchema,
+} from "@/lib/marketing/schema";
+import { hubMetadata } from "@/lib/marketing/meta";
+import { APP_URL } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "The terms governing your use of ShotStudio.",
-  alternates: { canonical: "/terms" },
-};
+const TITLE = "Terms — credits, refunds, and output rights";
+const DESCRIPTION =
+  "Credits never expire, failed generations return the credit automatically, and you own every image you generate. The ShotStudio terms in plain English.";
+
+export const metadata: Metadata = hubMetadata({
+  title: TITLE,
+  description: DESCRIPTION,
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (
-    <LegalPage title="Terms of Service" updated="May 2026">
+    <>
+      <JsonLd
+        data={{
+          "@graph": [
+            organizationSchema(),
+            websiteSchema(),
+            webPageSchema({
+              url: `${APP_URL}/terms`,
+              name: TITLE,
+              description: DESCRIPTION,
+            }),
+            breadcrumbSchema([
+              { name: "Home", url: APP_URL },
+              { name: "Terms of Service", url: `${APP_URL}/terms` },
+            ]),
+          ],
+        }}
+      />
+      <LegalPage title="Terms of Service" updated="May 2026">
       <p>
         These Terms govern your use of ShotStudio. By creating an account or
         purchasing credits you agree to them. If you don&apos;t agree, please
@@ -130,6 +161,7 @@ export default function TermsPage() {
         Questions about these Terms: email{" "}
         <a href="mailto:kazakis.th@gmail.com">kazakis.th@gmail.com</a>.
       </p>
-    </LegalPage>
+      </LegalPage>
+    </>
   );
 }

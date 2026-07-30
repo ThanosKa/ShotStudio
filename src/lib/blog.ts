@@ -43,7 +43,7 @@ function readPostFile(filename: string): Post {
   };
 }
 
-export function getAllPosts(): Post[] {
+function readAllPosts(): Post[] {
   if (!fs.existsSync(BLOG_DIR)) return [];
   return fs
     .readdirSync(BLOG_DIR)
@@ -52,8 +52,34 @@ export function getAllPosts(): Post[] {
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
 }
 
+/**
+ * Posts are read from disk once per process. `MarketingFooter` calls
+ * `getAllPostMetas()` from the `(marketing)` layout, so without this every one
+ * of the ~55 prerendered pages re-ran `readdirSync` + `readFileSync` +
+ * gray-matter + a word-count split over every post — ~110 parses to render two
+ * footer links, growing as posts × pages.
+ *
+ * Only cached in production: under `next dev` the MDX files change while the
+ * server is running, and editing a post must still show up on reload.
+ */
+const CACHE_POSTS = process.env.NODE_ENV === "production";
+let postsCache: Post[] | undefined;
+let postMetasCache: PostMeta[] | undefined;
+
+export function getAllPosts(): Post[] {
+  if (!CACHE_POSTS) return readAllPosts();
+  return (postsCache ??= readAllPosts());
+}
+
 export function getAllPostMetas(): PostMeta[] {
-  return getAllPosts().map(
+  if (CACHE_POSTS && postMetasCache) return postMetasCache;
+  const metas = toPostMetas(getAllPosts());
+  if (CACHE_POSTS) postMetasCache = metas;
+  return metas;
+}
+
+function toPostMetas(posts: Post[]): PostMeta[] {
+  return posts.map(
     ({
       slug,
       title,

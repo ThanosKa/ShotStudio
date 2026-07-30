@@ -2,23 +2,29 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Section } from "@/components/marketing/section";
+import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
+import { LinkCards } from "@/components/marketing/link-cards";
 import { JsonLd } from "@/components/marketing/json-ld";
-import { breadcrumbSchema } from "@/lib/marketing/schema";
+import {
+  breadcrumbSchema,
+  itemListSchema,
+  organizationSchema,
+  webPageSchema,
+  websiteSchema,
+} from "@/lib/marketing/schema";
 import { formatPublishedAt, getAllPostMetas } from "@/lib/blog";
+import { hubMetadata } from "@/lib/marketing/meta";
 import { APP_URL } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Blog — App Store screenshots, indie iOS notes",
-  description:
-    "Notes from ShotStudio on App Store screenshots, listing conversion, and shipping iOS apps as an indie. Specs, comparisons, and what actually moves the needle in the carousel.",
-  alternates: { canonical: "/blog" },
-  openGraph: {
-    title: "Blog — App Store screenshots, indie iOS notes — ShotStudio",
-    description:
-      "Notes from ShotStudio on App Store screenshots, listing conversion, and shipping iOS apps as an indie.",
-    url: `${APP_URL}/blog`,
-  },
-};
+const TITLE = "App Store screenshot notes for indie devs";
+const DESCRIPTION =
+  "Specs, tool comparisons, and the App Store Connect gotchas nobody warns you about. Written by the indie devs building ShotStudio — bias clearly labelled.";
+
+export const metadata: Metadata = hubMetadata({
+  title: TITLE,
+  description: DESCRIPTION,
+  path: "/blog",
+});
 
 export default function BlogIndexPage() {
   const posts = getAllPostMetas();
@@ -28,13 +34,33 @@ export default function BlogIndexPage() {
       <JsonLd
         data={{
           "@graph": [
+            organizationSchema(),
+            websiteSchema(),
+            {
+              ...webPageSchema({
+                url: `${APP_URL}/blog`,
+                name: TITLE,
+                description: DESCRIPTION,
+              }),
+              "@type": "Blog",
+            },
             breadcrumbSchema([
               { name: "Home", url: APP_URL },
               { name: "Blog", url: `${APP_URL}/blog` },
             ]),
+            itemListSchema({
+              id: `${APP_URL}/blog#list`,
+              name: "ShotStudio blog posts",
+              items: posts.map((post) => ({
+                name: post.title,
+                url: `${APP_URL}/blog/${post.slug}`,
+              })),
+            }),
           ],
         }}
       />
+
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog" }]} />
 
       <Section
         as="h1"
@@ -76,6 +102,38 @@ export default function BlogIndexPage() {
             ))}
           </ul>
         )}
+      </Section>
+
+      <Section
+        eyebrow="Start here"
+        title="The three pages people actually came for"
+        description="Most readers land here from a spec question or a tool question. These are the shortest routes to an answer."
+      >
+        <LinkCards
+          items={[
+            {
+              href: "/screenshots-for",
+              label: "App Store screenshots by app category",
+              eyebrow: "What converts",
+              description:
+                "Dos, don'ts and headline patterns per vertical — fitness, finance, VPN, dating, indie games and more.",
+            },
+            {
+              href: "/alternatives",
+              label: "App Store screenshot tool alternatives",
+              eyebrow: "Compare",
+              description:
+                "AppMockUp, Previewed, Rotato, Shotbot and Screenshots.pro, with the honest case for each.",
+            },
+            {
+              href: "/pricing",
+              label: "ShotStudio pricing — $7, $17, $37 one-time",
+              eyebrow: "No subscription",
+              description:
+                "1 credit = 1 set = 3 polished 1290×2796 shots. Credits never expire; failed generations refund automatically.",
+            },
+          ]}
+        />
       </Section>
     </>
   );

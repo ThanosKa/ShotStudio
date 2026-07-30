@@ -1,16 +1,46 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/marketing/legal-page";
+import { JsonLd } from "@/components/marketing/json-ld";
+import {
+  breadcrumbSchema,
+  organizationSchema,
+  webPageSchema,
+  websiteSchema,
+} from "@/lib/marketing/schema";
+import { hubMetadata } from "@/lib/marketing/meta";
+import { APP_URL } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description:
-    "How ShotStudio handles screenshots, generated images, and account data.",
-  alternates: { canonical: "/privacy" },
-};
+const TITLE = "Privacy — your screenshots are never stored";
+const DESCRIPTION =
+  "ShotStudio never writes your uploads or generated images to disk, S3, or any database. Exactly what we store, what we don't, and every sub-processor.";
+
+export const metadata: Metadata = hubMetadata({
+  title: TITLE,
+  description: DESCRIPTION,
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="May 2026">
+    <>
+      <JsonLd
+        data={{
+          "@graph": [
+            organizationSchema(),
+            websiteSchema(),
+            webPageSchema({
+              url: `${APP_URL}/privacy`,
+              name: TITLE,
+              description: DESCRIPTION,
+            }),
+            breadcrumbSchema([
+              { name: "Home", url: APP_URL },
+              { name: "Privacy Policy", url: `${APP_URL}/privacy` },
+            ]),
+          ],
+        }}
+      />
+      <LegalPage title="Privacy Policy" updated="May 2026">
       <p>
         ShotStudio is built privacy-first. Your uploaded screenshots and the
         images we generate from them are not persisted on our servers — they
@@ -110,6 +140,7 @@ export default function PrivacyPage() {
         Questions about this policy: email{" "}
         <a href="mailto:kazakis.th@gmail.com">kazakis.th@gmail.com</a>.
       </p>
-    </LegalPage>
+      </LegalPage>
+    </>
   );
 }

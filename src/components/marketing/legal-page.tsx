@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export function LegalPage({
@@ -27,6 +28,31 @@ export function LegalPage({
       >
         {children}
       </article>
+
+      {/*
+        /privacy and /terms outrank /pricing by ~20 positions in Search Console
+        while passing their equity nowhere. These contextual links push it back
+        toward the money page instead of leaving legal as a dead end.
+      */}
+      <aside className="mt-14 border-t pt-8 text-sm text-muted-foreground">
+        <p>
+          Looking for the product rather than the legal copy?{" "}
+          <Link
+            href="/pricing"
+            className="text-foreground underline underline-offset-4"
+          >
+            ShotStudio pricing — $7, $17, $37 one-time
+          </Link>
+          , or see what converts in your vertical on{" "}
+          <Link
+            href="/screenshots-for"
+            className="text-foreground underline underline-offset-4"
+          >
+            App Store screenshots by app category
+          </Link>
+          .
+        </p>
+      </aside>
     </div>
   );
 }
