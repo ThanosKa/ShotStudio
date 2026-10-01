@@ -26,7 +26,7 @@ export function organizationSchema() {
       "@type": "ImageObject",
       url: `${APP_URL}/icon.png`,
     },
-    email: "kazakis.th@gmail.com",
+    email: "hello@shotstudio.dev",
     sameAs: SAME_AS,
     description:
       "ShotStudio turns three raw mobile screenshots into a polished three-shot App Store set in under a minute. One-time pay, never stored.",

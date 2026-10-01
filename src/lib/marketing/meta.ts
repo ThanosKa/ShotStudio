@@ -28,6 +28,51 @@ export const TITLE_SUFFIX_LENGTH = TITLE_SUFFIX.length;
 export const MAX_TITLE_LENGTH = 60;
 export const MAX_DESCRIPTION_LENGTH = 155;
 
+/** Default social card, used by every page that has no image of its own. */
+const SOCIAL_IMAGE = {
+  url: `${APP_URL}/og-default.png`,
+  width: 1731,
+  height: 909,
+  alt: "ShotStudio — App Store screenshots in under a minute",
+};
+
+/**
+ * `openGraph` + `twitter` for a page. A page-level `openGraph` replaces the
+ * root layout's block wholesale (Next merges metadata shallowly), so a page
+ * that sets its own title/description/url also has to restate the image, and
+ * `twitter` is never derived from `openGraph`: without this, /pricing and the
+ * hubs shipped no og:image and inherited the homepage's twitter text.
+ */
+export function socialMetadata({
+  title,
+  description,
+  url,
+}: {
+  /** Already includes any brand suffix. */
+  title: string;
+  description: string;
+  /** Absolute URL of the page. */
+  url: string;
+}): Pick<Metadata, "openGraph" | "twitter"> {
+  return {
+    openGraph: {
+      type: "website",
+      siteName: "ShotStudio",
+      title,
+      description,
+      url,
+      locale: "en_US",
+      images: [SOCIAL_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [SOCIAL_IMAGE.url],
+    },
+  };
+}
+
 /**
  * Metadata for a static hub page (`/screenshots-for`, `/alternatives`, `/blog`,
  * `/privacy`, `/terms`).
@@ -56,11 +101,11 @@ export function hubMetadata({
     title,
     description,
     alternates: { canonical: path },
-    openGraph: {
+    ...socialMetadata({
       title: `${title}${TITLE_SUFFIX}`,
       description,
       url: `${APP_URL}${path}`,
-    },
+    }),
   };
 }
 

@@ -19,6 +19,7 @@ import {
 import { categorySnippet } from "@/lib/marketing/meta";
 import { CATEGORIES, getCategoryBySlug } from "@/data/categories";
 import { COMPETITORS } from "@/data/competitors";
+import { isCompetitorPruned } from "@/lib/marketing/pruned";
 import {
   categoryAnchor,
   clusterOf,
@@ -82,7 +83,8 @@ export default async function CategoryPage({
   const editorial = getCategoryEditorial(data.slug);
   const comparedTools = competitorSlugsForCategory(data.slug)
     .map((slug) => COMPETITORS.find((c) => c.slug === slug))
-    .filter((c): c is (typeof COMPETITORS)[number] => Boolean(c));
+    .filter((c): c is (typeof COMPETITORS)[number] => Boolean(c))
+    .filter((c) => !isCompetitorPruned(c.slug));
   const posts = getAllPostMetas().slice(0, 2);
   const url = `${APP_URL}/screenshots-for/${data.slug}`;
   const { title, description } = categorySnippet(data);

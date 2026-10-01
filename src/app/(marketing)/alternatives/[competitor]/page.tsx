@@ -17,6 +17,7 @@ import {
 } from "@/lib/marketing/schema";
 import { competitorSnippet } from "@/lib/marketing/meta";
 import { COMPETITORS, getCompetitorBySlug } from "@/data/competitors";
+import { indexableCompetitors } from "@/lib/marketing/pruned";
 import {
   categoriesForCompetitor,
   competitorAnchor,
@@ -60,7 +61,7 @@ export default async function CompetitorAlternativesPage({
   const data = getCompetitorBySlug(competitor);
   if (!data) notFound();
 
-  const others = COMPETITORS.filter((c) => c.slug !== data.slug);
+  const others = indexableCompetitors().filter((c) => c.slug !== data.slug);
   const editorial = getCompetitorEditorial(data.slug);
   const relatedCats = categoriesForCompetitor(data.slug);
   const posts = getAllPostMetas();

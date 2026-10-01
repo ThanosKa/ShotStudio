@@ -1,4 +1,5 @@
 import { CATEGORIES, type Category } from "@/data/categories";
+import { isCategoryPruned } from "@/lib/marketing/pruned";
 
 /**
  * Editorial + internal-linking layer over `categories.ts`.
@@ -514,9 +515,17 @@ export function categoryAnchor(category: Pick<Category, "slug" | "noun">): strin
   return CATEGORY_EDITORIAL[category.slug]?.anchor ?? `${category.noun} screenshots`;
 }
 
-export function categoriesInCluster(cluster: CategoryClusterId): Category[] {
+/** Every category in a cluster, pruned or not. Internal: keeps ring math stable. */
+function allCategoriesInCluster(cluster: CategoryClusterId): Category[] {
   return CATEGORIES.filter(
     (c) => CATEGORY_EDITORIAL[c.slug]?.cluster === cluster,
+  );
+}
+
+/** Indexable categories in a cluster. Pruned pages are not listed in hubs. */
+export function categoriesInCluster(cluster: CategoryClusterId): Category[] {
+  return allCategoriesInCluster(cluster).filter(
+    (c) => !isCategoryPruned(c.slug),
   );
 }
 
@@ -532,10 +541,10 @@ const CATEGORIES_BY_DEMAND: readonly Category[] = (() => {
   const rest = CATEGORIES.filter(
     (c) => !PRIORITY_CATEGORY_SLUGS.includes(c.slug),
   );
-  return [...ranked, ...rest];
+  return [...ranked, ...rest].filter((c) => !isCategoryPruned(c.slug));
 })();
 
-/** Categories ordered by real search demand, highest first. */
+/** Indexable categories ordered by real search demand, highest first. */
 export function categoriesByDemand(limit?: number): Category[] {
   return CATEGORIES_BY_DEMAND.slice(0, limit);
 }
@@ -561,6 +570,8 @@ export function relatedCategories(slug: string, limit = 6): Category[] {
   const picked: Category[] = [];
   const push = (c: Category | undefined) => {
     if (!c) return;
+    // Pruned (noindex) pages never receive sibling links.
+    if (isCategoryPruned(c.slug)) return;
     if (c.slug !== slug && !picked.some((p) => p.slug === c.slug)) picked.push(c);
   };
 
@@ -568,7 +579,7 @@ export function relatedCategories(slug: string, limit = 6): Category[] {
     // Ring window *within* the cluster: a plain slice would always pick the
     // first N members, leaving the tail of every cluster with no inbound
     // sibling links at all.
-    const members = categoriesInCluster(editorial.cluster);
+    const members = allCategoriesInCluster(editorial.cluster);
     const selfInCluster = members.findIndex((c) => c.slug === slug);
     for (
       let i = 1;

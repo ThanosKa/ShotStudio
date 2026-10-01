@@ -237,8 +237,8 @@ Hub: https://shotstudio.dev/screenshots-for
 
 ## 10. Editorial content
 
-- **App Store screenshot sizes 2026 — the only spec that matters.** The required 1290×2796 spec, why Apple chose it, the failure modes that get listings rejected, and what iPad/Watch/Mac actually require. https://shotstudio.dev/blog/app-store-screenshot-sizes-2026
-- **Best App Store screenshot generators in 2026 — an honest indie's guide.** Side-by-side of AppMockUp, Previewed, Rotato, Shotbot, Screenshots.pro and ShotStudio, including where each one is the wrong choice. https://shotstudio.dev/blog/best-app-store-screenshot-generators-2026
+- **App Store screenshot sizes 2026: the full spec.** The required 1290×2796 spec, why Apple chose it, the failure modes that get listings rejected, and what iPad/Watch/Mac actually require. https://shotstudio.dev/blog/app-store-screenshot-sizes-2026
+- **Best App Store screenshot generators (2026).** Side-by-side of AppMockUp, Previewed, Rotato, Shotbot, Screenshots.pro and ShotStudio, including where each one is the wrong choice. https://shotstudio.dev/blog/best-app-store-screenshot-generators-2026
 
 ---
 

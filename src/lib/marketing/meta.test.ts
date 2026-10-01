@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CATEGORIES } from "@/data/categories";
 import { COMPETITORS } from "@/data/competitors";
+import { getAllPostMetas } from "@/lib/blog";
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
@@ -8,6 +9,7 @@ import {
   categorySnippet,
   competitorSnippet,
   hubMetadata,
+  socialMetadata,
 } from "@/lib/marketing/meta";
 
 /**
@@ -70,18 +72,46 @@ describe("hubMetadata", () => {
       title: "Privacy — your screenshots are never stored",
       description: "Exactly what we store and what we don't.",
       alternates: { canonical: "/privacy" },
-      openGraph: {
+      openGraph: expect.objectContaining({
         title: "Privacy — your screenshots are never stored — ShotStudio",
         description: "Exactly what we store and what we don't.",
         url: "https://shotstudio.dev/privacy",
-      },
+      }),
+      twitter: expect.objectContaining({
+        card: "summary_large_image",
+        title: "Privacy — your screenshots are never stored — ShotStudio",
+        description: "Exactly what we store and what we don't.",
+      }),
     });
+  });
+
+  it("gives every hub an og:image and a twitter image", () => {
+    const meta = hubMetadata({ title: "T", description: "D", path: "/blog" });
+    expect(meta.openGraph?.images).toEqual([
+      expect.objectContaining({ url: "https://shotstudio.dev/og-default.png" }),
+    ]);
+    expect(meta.twitter?.images).toEqual(["https://shotstudio.dev/og-default.png"]);
   });
 
   it("keeps the canonical root-relative and the OpenGraph url absolute", () => {
     const meta = hubMetadata({ title: "T", description: "D", path: "/blog" });
     expect(meta.alternates?.canonical).toBe("/blog");
     expect(meta.openGraph).toMatchObject({ url: "https://shotstudio.dev/blog" });
+  });
+});
+
+describe("socialMetadata", () => {
+  it("restates the image and the twitter block that a page-level openGraph would drop", () => {
+    const meta = socialMetadata({
+      title: "Pricing",
+      description: "Desc",
+      url: "https://shotstudio.dev/pricing",
+    });
+    expect(meta.openGraph).toMatchObject({
+      url: "https://shotstudio.dev/pricing",
+      siteName: "ShotStudio",
+    });
+    expect(meta.twitter).toMatchObject({ title: "Pricing", description: "Desc" });
   });
 });
 
@@ -92,6 +122,26 @@ describe("competitorSnippet", () => {
   // than taking the layout's suffix — so they get the full budget.
   it("keeps every title inside the budget", () => {
     expect(tooLong(snippets, (s) => s.title, MAX_TITLE_LENGTH)).toEqual([]);
+  });
+
+  it("keeps every description inside the budget", () => {
+    expect(
+      tooLong(snippets, (s) => s.description, MAX_DESCRIPTION_LENGTH),
+    ).toEqual([]);
+  });
+});
+
+describe("blog post snippets", () => {
+  const snippets = getAllPostMetas().map((p) => ({
+    title: p.title,
+    description: p.description,
+  }));
+
+  it("keeps every title inside the budget once the brand suffix is appended", () => {
+    expect(snippets.length).toBeGreaterThan(0);
+    expect(
+      tooLong(snippets, (s) => s.title, MAX_TITLE_LENGTH - TITLE_SUFFIX_LENGTH),
+    ).toEqual([]);
   });
 
   it("keeps every description inside the budget", () => {

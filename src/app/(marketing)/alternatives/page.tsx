@@ -13,7 +13,7 @@ import {
   webPageSchema,
   websiteSchema,
 } from "@/lib/marketing/schema";
-import { COMPETITORS } from "@/data/competitors";
+import { indexableCompetitors } from "@/lib/marketing/pruned";
 import { competitorAnchor } from "@/data/competitor-editorial";
 import {
   categoriesByDemand,
@@ -59,7 +59,7 @@ export default function AlternativesHubPage() {
             itemListSchema({
               id: `${APP_URL}/alternatives#list`,
               name: "App Store screenshot tool alternatives",
-              items: COMPETITORS.map((c) => ({
+              items: indexableCompetitors().map((c) => ({
                 name: `${c.name} alternatives`,
                 url: `${APP_URL}/alternatives/${c.slug}`,
               })),
@@ -80,7 +80,7 @@ export default function AlternativesHubPage() {
         className="border-t-0"
       >
         <div className="grid gap-3 md:grid-cols-2">
-          {COMPETITORS.map((c) => (
+          {indexableCompetitors().map((c) => (
             <Link
               key={c.slug}
               href={`/alternatives/${c.slug}`}
@@ -133,7 +133,7 @@ export default function AlternativesHubPage() {
                   .
                 </td>
               </tr>
-              {COMPETITORS.map((c) => (
+              {indexableCompetitors().map((c) => (
                 <tr key={c.slug}>
                   <td className="py-4 pr-6 font-semibold">
                     <Link

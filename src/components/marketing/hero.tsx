@@ -34,7 +34,7 @@ export function Hero() {
             width={40}
             height={40}
             priority
-            unoptimized
+            sizes="40px"
             aria-hidden
             className="mr-2 inline-block size-[0.9em] align-[-0.15em] md:mr-3"
           />

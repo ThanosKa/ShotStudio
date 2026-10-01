@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CATEGORIES } from "@/data/categories";
+import { indexableCategories, isCategoryPruned } from "@/lib/marketing/pruned";
 import {
   CATEGORY_CLUSTERS,
   categoriesByDemand,
@@ -54,8 +55,8 @@ describe("relatedCategories", () => {
    * The regression that motivated the whole function: with `.slice(0, 6)` this
    * was 1 for 33 of 40 categories. The rotating ring currently yields 4–8.
    */
-  it("leaves no category with fewer than two inbound sibling links", () => {
-    const inbound = new Map(CATEGORIES.map((c) => [c.slug, 0]));
+  it("leaves no indexable category with fewer than two inbound sibling links", () => {
+    const inbound = new Map(indexableCategories().map((c) => [c.slug, 0]));
     for (const related of blocks.values()) {
       for (const r of related) {
         inbound.set(r.slug, (inbound.get(r.slug) ?? 0) + 1);
@@ -68,11 +69,19 @@ describe("relatedCategories", () => {
   });
 
   /** Byte-identical blocks across 40 pages are the thin-content signal. */
-  it("gives every category a distinct related block", () => {
-    const fingerprints = [...blocks.values()].map((related) =>
-      related.map((r) => r.slug).join(","),
+  it("gives every indexable category a distinct related block", () => {
+    const fingerprints = indexableCategories().map((c) =>
+      (blocks.get(c.slug) ?? []).map((r) => r.slug).join(","),
     );
-    expect(new Set(fingerprints).size).toBe(CATEGORIES.length);
+    expect(new Set(fingerprints).size).toBe(indexableCategories().length);
+  });
+
+  it("never links a pruned (noindex) category from any block", () => {
+    for (const [slug, related] of blocks) {
+      for (const r of related) {
+        expect(isCategoryPruned(r.slug), `${slug} -> ${r.slug}`).toBe(false);
+      }
+    }
   });
 
   it("puts cluster siblings before ring fillers", () => {
@@ -111,10 +120,12 @@ describe("category editorial data", () => {
 });
 
 describe("categoriesByDemand", () => {
-  it("returns every category exactly once when unlimited", () => {
+  it("returns every indexable category exactly once when unlimited", () => {
     const all = categoriesByDemand();
-    expect(all).toHaveLength(CATEGORIES.length);
-    expect(new Set(all.map((c) => c.slug)).size).toBe(CATEGORIES.length);
+    const kept = indexableCategories();
+    expect(all).toHaveLength(kept.length);
+    expect(new Set(all.map((c) => c.slug)).size).toBe(kept.length);
+    expect(all.some((c) => isCategoryPruned(c.slug))).toBe(false);
   });
 
   it("respects the limit", () => {
@@ -128,6 +139,6 @@ describe("categoriesByDemand", () => {
   it("hands out a copy, not the cached ordering", () => {
     const first = categoriesByDemand();
     first.length = 0;
-    expect(categoriesByDemand()).toHaveLength(CATEGORIES.length);
+    expect(categoriesByDemand()).toHaveLength(indexableCategories().length);
   });
 });
