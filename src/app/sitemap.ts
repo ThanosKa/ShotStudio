@@ -3,6 +3,7 @@ import { APP_URL } from "@/lib/utils";
 import { CATEGORIES } from "@/data/categories";
 import { COMPETITORS } from "@/data/competitors";
 import { getAllPostMetas } from "@/lib/blog";
+import { isCategoryPruned, isCompetitorPruned } from "@/lib/marketing/pruned";
 
 /**
  * Content revision dates — the last time the content behind each surface
@@ -31,13 +32,19 @@ const REVISED = {
   // revision date for all of them. Previous genuine dates, for reference:
   // home 2026-05-11, pricing/hubs 2026-05-19, privacy/terms 2026-05-12,
   // categories 2026-06-13, competitors 2026-05-19.
-  home: "2026-07-29",
-  pricing: "2026-07-29",
-  screenshotsForHub: "2026-07-29",
-  alternativesHub: "2026-07-29",
+  // 2026-10-01: pruning sprint (see PRUNED.md). Home, pricing and the two hubs
+  // changed their links/counts/social metadata; kept category and competitor
+  // pages changed their sibling blocks (overrides below). Everything else is
+  // untouched and keeps its date.
+  home: "2026-10-01",
+  pricing: "2026-10-01",
+  screenshotsForHub: "2026-10-01",
+  alternativesHub: "2026-10-01",
   blogHub: "2026-07-29",
   privacy: "2026-07-29",
   terms: "2026-07-29",
+  /** /tools/app-store-screenshot-sizes, new 2026-10-01. */
+  sizeChecker: "2026-10-01",
   /** Fallback for `/screenshots-for/[category]` — src/data/categories.ts. */
   categories: "2026-07-29",
   /** Fallback for `/alternatives/[competitor]` — src/data/competitors.ts. */
@@ -45,10 +52,26 @@ const REVISED = {
 } as const;
 
 /** Per-slug overrides. Add an entry when you rewrite one category page. */
-const CATEGORY_REVISED: Record<string, string> = {};
+const CATEGORY_REVISED: Record<string, string> = {
+  // 2026-10-01: sibling blocks and compared-tool lists no longer link pruned pages.
+  "fitness-apps": "2026-10-01",
+  "finance-apps": "2026-10-01",
+  "education-apps": "2026-10-01",
+  "music-apps": "2026-10-01",
+  "weather-apps": "2026-10-01",
+  "vpn-apps": "2026-10-01",
+  "pet-care-apps": "2026-10-01",
+  "running-apps": "2026-10-01",
+  "ai-chatbot-apps": "2026-10-01",
+};
 
 /** Per-slug overrides. Add an entry when you rewrite one competitor page. */
-const COMPETITOR_REVISED: Record<string, string> = {};
+const COMPETITOR_REVISED: Record<string, string> = {
+  // 2026-10-01: "other alternatives" and related-category blocks dropped pruned pages.
+  appmockup: "2026-10-01",
+  previewed: "2026-10-01",
+  shotbot: "2026-10-01",
+};
 
 /**
  * Parse a revision string into a Date. `YYYY-MM-DD` is normalised to UTC
@@ -98,6 +121,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${APP_URL}/tools/app-store-screenshot-sizes`,
+      lastModified: revisedAt(REVISED.sizeChecker),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
     // Kept in the sitemap on purpose: /privacy and /terms are trust signals and
     // are linked from Stripe checkout and Clerk sign-up. They are NOT
     // noindexed. Their low priority reflects that they should never outrank
@@ -116,14 +145,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const categoryPages: MetadataRoute.Sitemap = CATEGORIES.map((c) => ({
+  // Pruned (noindex) pages are listed in src/lib/marketing/pruned.ts and must
+  // not appear here: a sitemap URL has to be one we want indexed.
+  const categoryPages: MetadataRoute.Sitemap = CATEGORIES.filter(
+    (c) => !isCategoryPruned(c.slug),
+  ).map((c) => ({
     url: `${APP_URL}/screenshots-for/${c.slug}`,
     lastModified: revisedAt(CATEGORY_REVISED[c.slug] ?? REVISED.categories),
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
-  const competitorPages: MetadataRoute.Sitemap = COMPETITORS.map((c) => ({
+  const competitorPages: MetadataRoute.Sitemap = COMPETITORS.filter(
+    (c) => !isCompetitorPruned(c.slug),
+  ).map((c) => ({
     url: `${APP_URL}/alternatives/${c.slug}`,
     lastModified: revisedAt(COMPETITOR_REVISED[c.slug] ?? REVISED.competitors),
     changeFrequency: "monthly",

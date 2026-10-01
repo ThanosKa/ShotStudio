@@ -14,7 +14,8 @@ import {
   webPageSchema,
   websiteSchema,
 } from "@/lib/marketing/schema";
-import { CATEGORIES } from "@/data/categories";
+import { indexableCategories } from "@/lib/marketing/pruned";
+import { socialMetadata } from "@/lib/marketing/meta";
 import {
   categoriesByDemand,
   categoryAnchor,
@@ -29,11 +30,11 @@ export const metadata: Metadata = {
   title: { absolute: TITLE },
   description: DESCRIPTION,
   alternates: { canonical: "/pricing" },
-  openGraph: {
+  ...socialMetadata({
     title: TITLE,
     description: DESCRIPTION,
     url: `${APP_URL}/pricing`,
-  },
+  }),
 };
 
 export default function PricingPage() {
@@ -93,7 +94,7 @@ export default function PricingPage() {
           }))}
         />
         <p className="mt-6 text-body-lg text-muted-foreground">
-          All {CATEGORIES.length} verticals:{" "}
+          All {indexableCategories().length} verticals:{" "}
           <Link
             href="/screenshots-for"
             className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"

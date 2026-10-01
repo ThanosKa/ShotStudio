@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
-import { COMPETITORS } from "@/data/competitors";
+import { indexableCompetitors } from "@/lib/marketing/pruned";
 import { categoriesByDemand, categoryAnchor } from "@/data/category-editorial";
 import { competitorAnchor } from "@/data/competitor-editorial";
 import { getAllPostMetas } from "@/lib/blog";
@@ -11,6 +11,10 @@ const PRODUCT_LINKS: FooterLink[] = [
   { label: "Pricing — $7 one-time, no subscription", href: "/pricing" },
   { label: "How ShotStudio works", href: "/#how-it-works" },
   { label: "Example screenshot sets", href: "/#examples" },
+  {
+    label: "Free App Store screenshot size checker",
+    href: "/tools/app-store-screenshot-sizes",
+  },
 ];
 
 const FOOTER_CATEGORY_COUNT = 5;
@@ -28,7 +32,7 @@ export function MarketingFooter() {
     href: "/screenshots-for",
   });
 
-  const competitorLinks: FooterLink[] = COMPETITORS.slice(
+  const competitorLinks: FooterLink[] = indexableCompetitors().slice(
     0,
     FOOTER_COMPETITOR_COUNT,
   ).map((c) => ({

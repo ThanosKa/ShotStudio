@@ -17,7 +17,7 @@ export function ShowcaseCard({ set }: { set: ShowcaseSet }) {
         alt={`${set.app} App Store screenshot set — ${set.tagline}`}
         width={1600}
         height={1067}
-        unoptimized
+        sizes="840px"
         priority={false}
         className="block h-auto w-full"
       />

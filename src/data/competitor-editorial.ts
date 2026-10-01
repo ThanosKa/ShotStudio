@@ -1,4 +1,5 @@
 import { CATEGORIES, type Category } from "@/data/categories";
+import { isCategoryPruned } from "@/lib/marketing/pruned";
 
 /**
  * Editorial + internal-linking layer over `competitors.ts`.
@@ -121,5 +122,6 @@ export function categoriesForCompetitor(slug: string): Category[] {
   const slugs = COMPETITOR_EDITORIAL[slug]?.categorySlugs ?? [];
   return slugs
     .map((s) => CATEGORIES.find((c) => c.slug === s))
-    .filter((c): c is Category => Boolean(c));
+    .filter((c): c is Category => Boolean(c))
+    .filter((c) => !isCategoryPruned(c.slug));
 }

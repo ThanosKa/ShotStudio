@@ -14,8 +14,7 @@ import {
   softwareApplicationSchema,
   websiteSchema,
 } from "@/lib/marketing/schema";
-import { CATEGORIES } from "@/data/categories";
-import { COMPETITORS } from "@/data/competitors";
+import { indexableCategories, indexableCompetitors } from "@/lib/marketing/pruned";
 import {
   categoriesByDemand,
   categoryAnchor,
@@ -25,7 +24,7 @@ import { getAllPostMetas } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "ShotStudio — App Store screenshots in under a minute",
+    absolute: "ShotStudio: AI App Store Screenshot Generator",
   },
   description:
     "Three raw mobile screenshots in, three polished App Store shots out — in under a minute. One-time pay, never stored.",
@@ -85,8 +84,8 @@ export default function LandingPage() {
           >
             App Store screenshots by app category
           </Link>{" "}
-          — all {CATEGORIES.length} verticals, from VPN app screenshots to
-          indie game screenshots.
+          — all {indexableCategories().length} verticals, from VPN app screenshots to
+          running app screenshots.
         </p>
       </Section>
 
@@ -119,7 +118,7 @@ export default function LandingPage() {
       >
         <FadeIn>
           <LinkCards
-            items={COMPETITORS.map((c) => ({
+            items={indexableCompetitors().map((c) => ({
               href: `/alternatives/${c.slug}`,
               label: competitorAnchor(c.slug, c.name),
               eyebrow: c.pricingModel,

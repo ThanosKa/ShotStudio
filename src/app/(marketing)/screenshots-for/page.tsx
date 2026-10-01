@@ -14,7 +14,7 @@ import {
   webPageSchema,
   websiteSchema,
 } from "@/lib/marketing/schema";
-import { CATEGORIES } from "@/data/categories";
+import { indexableCategories } from "@/lib/marketing/pruned";
 import {
   CATEGORY_CLUSTERS,
   categoriesByDemand,
@@ -26,8 +26,9 @@ import { getAllPostMetas } from "@/lib/blog";
 import { hubMetadata } from "@/lib/marketing/meta";
 import { APP_URL } from "@/lib/utils";
 
-const TITLE = `App Store screenshot guides for ${CATEGORIES.length} categories`;
-const DESCRIPTION = `What converts in fitness, finance, productivity, games, VPN, dating and ${CATEGORIES.length - 6} more categories — and what kills the carousel. Three polished shots from $7.`;
+const KEPT_CATEGORIES = indexableCategories();
+const TITLE = `App Store screenshot guides for ${KEPT_CATEGORIES.length} categories`;
+const DESCRIPTION = `What converts in fitness, finance, VPN, running, weather and ${KEPT_CATEGORIES.length - 5} more categories — and what kills the carousel. Three polished shots from $7.`;
 
 export const metadata: Metadata = hubMetadata({
   title: TITLE,
@@ -62,7 +63,7 @@ export default function CategoriesHubPage() {
             itemListSchema({
               id: `${APP_URL}/screenshots-for#list`,
               name: "App Store screenshots by app category",
-              items: CATEGORIES.map((c) => ({
+              items: KEPT_CATEGORIES.map((c) => ({
                 name: c.name,
                 url: `${APP_URL}/screenshots-for/${c.slug}`,
               })),
