@@ -4,13 +4,13 @@ const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey) throw new Error("OPENROUTER_API_KEY is not set");
 
 const ENDPOINT = "https://openrouter.ai/api/v1";
-const MODEL = "openai/gpt-5.4-image-2";
+const MODEL = "openai/gpt-image-2.5-sunburst";
 
 export type ImageGenerationInput = {
   prompt: string;
   /**
    * Optional reference images as data URLs (e.g. `data:image/jpeg;base64,...`).
-   * Sent as `image_url` content parts alongside the text prompt for image-to-image generation.
+   * Sent as `input_references` for image-to-image generation (the model accepts up to 16).
    */
   referenceImages?: string[];
   aspectRatio?: string;
@@ -19,33 +19,54 @@ export type ImageGenerationInput = {
   timeoutMs?: number;
 };
 
-type ContentPart =
-  | { type: "text"; text: string }
-  | { type: "image_url"; image_url: { url: string } };
-
-type ChatCompletionResponse = {
-  choices?: Array<{
-    message?: {
-      content?: string;
-      images?: Array<{
-        type?: string;
-        image_url?: { url?: string };
-      }>;
-    };
-  }>;
+type ImagesResponse = {
+  data?: Array<{ b64_json?: string; media_type?: string }>;
 };
+
+/** Long edge in px per size tier. Concrete dimensions are derived from the aspect ratio. */
+const LONG_EDGE_PX: Record<NonNullable<ImageGenerationInput["imageSize"]>, number> = {
+  "0.5K": 1024,
+  "1K": 1536,
+  "2K": 2048,
+  "4K": 3840,
+};
+
+/**
+ * The images endpoint for gpt-image models wants explicit `WIDTHxHEIGHT` (a tier like
+ * "1K" is rejected with 400). Dimensions are rounded to multiples of 16.
+ */
+function toPixelSize({
+  aspectRatio,
+  imageSize,
+}: {
+  aspectRatio: string;
+  imageSize: NonNullable<ImageGenerationInput["imageSize"]>;
+}): string {
+  const match = /^(\d+):(\d+)$/.exec(aspectRatio);
+  const w = match ? Number(match[1]) : 0;
+  const h = match ? Number(match[2]) : 0;
+  if (!(w > 0 && h > 0)) throw new Error(`Invalid aspect ratio: ${aspectRatio}`);
+
+  const long = LONG_EDGE_PX[imageSize];
+  const scale = long / Math.max(w, h);
+  const round16 = (n: number) => Math.max(16, Math.round(n / 16) * 16);
+  return `${round16(w * scale)}x${round16(h * scale)}`;
+}
+
+function isImagesResponse(value: unknown): value is ImagesResponse {
+  if (typeof value !== "object" || value === null) return false;
+  return !("data" in value) || Array.isArray(value.data);
+}
 
 /**
  * Returns raw base64 (no `data:image/...` prefix) so callers can hand it to
  * `Buffer.from(b64, "base64")` directly.
  */
 export async function generateImage(input: ImageGenerationInput): Promise<string> {
-  const content: ContentPart[] = [{ type: "text", text: input.prompt }];
-  if (input.referenceImages) {
-    for (const url of input.referenceImages) {
-      content.push({ type: "image_url", image_url: { url } });
-    }
-  }
+  const size = toPixelSize({
+    aspectRatio: input.aspectRatio ?? "9:16",
+    imageSize: input.imageSize ?? "2K",
+  });
 
   const controller = new AbortController();
   const timeoutMs = input.timeoutMs ?? 120_000;
@@ -53,7 +74,7 @@ export async function generateImage(input: ImageGenerationInput): Promise<string
 
   let res: Response;
   try {
-    res = await fetch(`${ENDPOINT}/chat/completions`, {
+    res = await fetch(`${ENDPOINT}/images`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -63,18 +84,22 @@ export async function generateImage(input: ImageGenerationInput): Promise<string
       },
       body: JSON.stringify({
         model: MODEL,
-        modalities: ["image", "text"],
-        messages: [{ role: "user", content }],
-        image_config: {
-          aspect_ratio: input.aspectRatio ?? "9:16",
-          image_size: input.imageSize ?? "2K",
-        },
-        stream: false,
+        prompt: input.prompt,
+        size,
+        n: 1,
+        ...(input.referenceImages?.length
+          ? {
+              input_references: input.referenceImages.map((url) => ({
+                type: "image_url",
+                image_url: { url },
+              })),
+            }
+          : {}),
       }),
       signal: controller.signal,
     });
   } catch (err) {
-    if ((err as { name?: string }).name === "AbortError") {
+    if (err instanceof Error && err.name === "AbortError") {
       throw new Error(`OpenRouter timed out after ${timeoutMs}ms`);
     }
     throw err;
@@ -86,13 +111,8 @@ export async function generateImage(input: ImageGenerationInput): Promise<string
     throw new Error(`OpenRouter ${res.status}: ${await res.text()}`);
   }
 
-  const data = (await res.json()) as ChatCompletionResponse;
-  const dataUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-  if (!dataUrl) throw new Error("OpenRouter returned no image");
-
-  const commaIdx = dataUrl.indexOf(",");
-  if (commaIdx < 0 || !dataUrl.startsWith("data:")) {
-    throw new Error("OpenRouter returned malformed image URL");
-  }
-  return dataUrl.slice(commaIdx + 1);
+  const data: unknown = await res.json();
+  const b64 = isImagesResponse(data) ? data.data?.[0]?.b64_json : undefined;
+  if (typeof b64 !== "string" || b64.length === 0) throw new Error("OpenRouter returned no image");
+  return b64;
 }
