@@ -1,5 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { z } from "zod";
+import { logger } from "./logger";
 import { redis } from "./redis";
 
 const perHour = z.coerce
@@ -45,7 +46,7 @@ function buildLimiter(opts: {
       },
     };
   }
-  return new Ratelimit({
+  const limiter = new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(opts.perWindow, opts.window),
     analytics: true,
@@ -55,6 +56,18 @@ function buildLimiter(opts: {
     // If Redis is slow, fail-open after 1s so users don't see 500s.
     timeout: 1000,
   });
+  return {
+    async limit(key) {
+      try {
+        return await limiter.limit(key);
+      } catch (err) {
+        // `timeout` only covers slow Redis, not thrown errors (quota exceeded,
+        // bad token, REST proxy errors). Fail open so Redis can't take down routes.
+        logger.error({ err, prefix: opts.prefix }, "rate limiter failed; failing open");
+        return { success: true, limit: opts.perWindow, remaining: opts.perWindow, reset: 0 };
+      }
+    },
+  };
 }
 
 export const generationRateLimit = buildLimiter({
