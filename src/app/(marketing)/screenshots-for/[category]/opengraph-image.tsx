@@ -84,7 +84,7 @@ export default async function Image({
               maxWidth: 980,
             }}
           >
-            {data ? data.name.toLowerCase() : "every iOS app"}
+            {data ? data.noun : "every iOS app"}
           </div>
         </div>
         <div

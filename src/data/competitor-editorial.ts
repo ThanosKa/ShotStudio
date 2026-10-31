@@ -33,7 +33,7 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
     switchSteps: [
       "Keep the three source screens you were about to drop into a template — same PNGs, no re-export needed.",
       "Paste your app name and the one-line pitch you already wrote for the App Store description; ShotStudio writes the headline from it.",
-      "Generate, click-to-edit any text on the preview, download three 1290×2796 PNGs. No template picking, no dragging.",
+      "Generate and download three 1290×2796 PNGs in one ZIP. No template picking, no dragging.",
     ],
     categorySlugs: [
       "productivity-apps",
@@ -49,7 +49,7 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
     switchSteps: [
       "Skip the template gallery — ShotStudio picks the personality preset from your app category instead.",
       "Upload the same three screens; theme and palette are sampled from them, so you don't rebuild your brand in an editor.",
-      "Regenerate any single shot as many times as you like inside one credit — no 10-export ceiling.",
+      "Download every set you generate with no lifetime export ceiling: one credit is one set of three shots.",
     ],
     categorySlugs: [
       "finance-apps",

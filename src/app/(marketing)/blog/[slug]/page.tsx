@@ -208,7 +208,7 @@ export default async function BlogPostPage({
             </h2>
             <p className="mt-3 max-w-prose text-body-lg text-muted-foreground">
               ShotStudio is the indie iOS developer&rsquo;s screenshot tool — $7
-              one-time, AI-picked preset, ready for App Store Connect in under
+              one-time, preset matched to your category, ready for App Store Connect in under
               a minute.
             </p>
             <Show

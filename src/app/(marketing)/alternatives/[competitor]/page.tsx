@@ -206,7 +206,7 @@ export default async function CompetitorAlternativesPage({
             "Zero image persistence — uploads pass through memory to the model and are dropped. No images table, no S3.",
             "Category-aware preset auto-selection — no scrolling a 200-template gallery to start.",
             "AI-written headline from your one-line pitch — you don't bring the copywriting.",
-            "Click-to-edit text on the preview — adjust before you export.",
+            "Three finished 1290×2796 PNGs in one ZIP — nothing to lay out or export by hand.",
           ].map((point) => (
             <li
               key={point}

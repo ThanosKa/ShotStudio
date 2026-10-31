@@ -36,8 +36,10 @@ const REVISED = {
   // changed their links/counts/social metadata; kept category and competitor
   // pages changed their sibling blocks (overrides below). Everything else is
   // untouched and keeps its date.
-  home: "2026-10-01",
-  pricing: "2026-10-01",
+  // 2026-10-31: fact fix (no click-to-edit, no free per-shot regenerate) on
+  // home + pricing, plus every kept category and competitor page (overrides).
+  home: "2026-10-31",
+  pricing: "2026-10-31",
   screenshotsForHub: "2026-10-01",
   alternativesHub: "2026-10-01",
   blogHub: "2026-07-29",
@@ -54,20 +56,22 @@ const REVISED = {
 /** Per-slug overrides. Add an entry when you rewrite one category page. */
 const CATEGORY_REVISED: Record<string, string> = {
   // 2026-10-01: sibling blocks and compared-tool lists no longer link pruned pages.
-  "fitness-apps": "2026-10-01",
-  "finance-apps": "2026-10-01",
-  "education-apps": "2026-10-01",
-  "music-apps": "2026-10-01",
-  "weather-apps": "2026-10-01",
-  "vpn-apps": "2026-10-01",
-  "pet-care-apps": "2026-10-01",
-  "running-apps": "2026-10-01",
-  "ai-chatbot-apps": "2026-10-01",
+  // 2026-10-31: H1 casing + removed false click-to-edit claim.
+  "fitness-apps": "2026-10-31",
+  "finance-apps": "2026-10-31",
+  "education-apps": "2026-10-31",
+  "music-apps": "2026-10-31",
+  "weather-apps": "2026-10-31",
+  "vpn-apps": "2026-10-31",
+  "pet-care-apps": "2026-10-31",
+  "running-apps": "2026-10-31",
+  "ai-chatbot-apps": "2026-10-31",
 };
 
 /** Per-slug overrides. Add an entry when you rewrite one competitor page. */
 const COMPETITOR_REVISED: Record<string, string> = {
   // 2026-10-01: "other alternatives" and related-category blocks dropped pruned pages.
+  // 2026-10-31: removed false click-to-edit / unlimited-regenerate claims.
   appmockup: "2026-10-01",
   previewed: "2026-10-01",
   shotbot: "2026-10-01",

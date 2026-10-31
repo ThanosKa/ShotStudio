@@ -38,7 +38,7 @@ Rules that apply to every pack:
 - **One-time payment.** ShotStudio has no subscription tier, no monthly plan, and no annual plan. There is no recurring charge anywhere in the product.
 - **Credits never expire.** A credit bought today is still usable years later.
 - **1 credit = 1 generation set = 3 finished images**, one polished shot per uploaded source screen.
-- **Unlimited regenerations per credit.** Re-rolling an individual shot inside a set does not consume another credit.
+- **One credit per set.** Every new set of three costs one credit; there is no free per-shot re-roll.
 - **No free tier and no free trial.** The $7 Starter pack is the entry point.
 - **Automatic credit refund on failure.** If generation cannot produce three valid images after the retry and fallback path, the credit is returned to the balance automatically — no support ticket. Cash refunds are not offered; credit refunds are.
 - **Tax** is calculated at checkout by Stripe Tax.
@@ -55,8 +55,7 @@ Rules that apply to every pack:
 - Writes the headline copy with AI from the user's one-sentence pitch and stated target audience.
 - Applies one of four personality presets — Friendly, Professional, Minimal, Bold — which control typography and headline voice only. The preset is auto-selected from the App Store category and can be overridden.
 - Derives theme and palette from the uploaded screenshots: a light app keeps a light backdrop, a dark app keeps a dark one.
-- Allows click-to-edit of every text element on the preview before export.
-- Allows free per-shot regeneration within a set.
+- Renders the headline into each image and delivers the three PNGs as one ZIP. There is no in-product text editor and no per-shot re-roll; a new set costs one credit.
 - Completes a set in roughly one minute.
 
 **Does not (v1 scope, deliberately):**
@@ -131,7 +130,7 @@ If you ship multiple apps a year, need API access for CI, or localize across sto
 There is a free tier, but the meaningful features (locale exports, 3D device angles, custom fonts, the larger template library) require Standard at $19/mo or Extended at $49/mo. Annual billing knocks 35% off. There is no one-time-pay option.
 
 **What's a good alternative to Screenshots.pro?**
-For one-time-pay indie use, ShotStudio ($7 floor, AI-picked preset, zero image persistence) and Previewed's $9.99 one-time Plus tier are the closest matches. AppMockUp Studio is free if you don't mind manual template editing. Rotato is the strongest pick if you also need 3D animation or App Preview videos.
+For one-time-pay indie use, ShotStudio ($7 for two sets, preset matched to your category, zero image persistence) and Previewed's $9.99 one-time Plus tier are the closest matches. AppMockUp Studio is free if you don't mind manual template editing. Rotato is the strongest pick if you also need 3D animation or App Preview videos.
 
 **Does Screenshots.pro export at the App Store 1290×2796 spec?**
 Yes — Screenshots.pro covers 23 devices including iPhone 6.7" portrait (1290×2796), iPad M4, and Pixel 8 Pro, with auto-export to App Store Connect's required device specs. The output spec is correct; the question is whether subscription pricing fits your launch cadence.
@@ -153,13 +152,13 @@ Yes — both AppMockUp Studio and the AI variant support iPhone 6.7" portrait (1
 ### Previewed (https://shotstudio.dev/alternatives/previewed)
 
 **Is Previewed worth it for indie iOS developers?**
-The $9.99 Plus tier is the closest one-time-pay option in the category — a fair fit if you want 3D snapshots or promo video output alongside static screenshots. The 10-export cap on Plus matters if you A/B-test multiple sets. If you only need polished static shots, a $7 ShotStudio credit gets you unlimited regenerations per set.
+The $9.99 Plus tier is the closest one-time-pay option in the category — a fair fit if you want 3D snapshots or promo video output alongside static screenshots. The 10-export cap on Plus matters if you A/B-test multiple sets. If you only need polished static shots, ShotStudio's $7 Starter pack buys two full sets of three, with no export cap on what you download.
 
 **Is Previewed free?**
 The Lite tier is free but exports at 720p with a Creative Commons attribution requirement — meaning your published screenshots credit Previewed, not your app. For commercial indie use you'll need Plus at $9.99 one-time (10 exports) or Pro at $19/mo ($228/yr unlimited).
 
 **What's a good alternative to Previewed?**
-For a true one-time-pay indie tool with no export cap, ShotStudio is $7 with unlimited regenerations per credit and zero image persistence. For 3D animation specifically, Rotato is the strongest in the category. AppMockUp Studio is the free option if you don't need animation or AI assistance.
+For a one-time-pay indie tool with no export cap, ShotStudio is $7 for two sets of three shots, with zero image persistence. For 3D animation specifically, Rotato is the strongest in the category. AppMockUp Studio is the free option if you don't need animation or AI assistance.
 
 **Does Previewed export at App Store Connect's required spec?**
 Yes — Previewed supports iPhone 6.7" portrait output at 1080p+ on Plus and Pro tiers. The free Lite tier caps at 720p, which falls below Apple's required resolution for App Store carousel screenshots and won't pass review.
@@ -187,7 +186,7 @@ If you live in the Apple ecosystem and want Share Sheet, Shortcuts, and iCloud s
 Yes, there's a free tier — but with a daily frame limit. The Unlimited tier is a subscription via Apple in-app purchase; exact pricing varies by region. The daily cap on the free tier tends to hit exactly when you're trying to ship a screenshot set on submission day.
 
 **What's a good alternative to Shotbot?**
-For one-time-pay indie use without a native app install, ShotStudio is $7 with unlimited regenerations and zero image persistence. For free manual editing on the web, AppMockUp Studio works. For 3D mockups or App Preview videos, Rotato's desktop app is the strongest pick.
+For one-time-pay indie use without a native app install, ShotStudio is $7 for two sets of three shots, with zero image persistence. For free manual editing on the web, AppMockUp Studio works. For 3D mockups or App Preview videos, Rotato's desktop app is the strongest pick.
 
 **Does Shotbot output the correct 1290×2796 spec?**
 Yes — Shotbot frames screenshots at the iPhone 5.5" master spec and auto-scales to every iPhone size including 6.7" portrait (1290×2796) for App Store Connect. iPad output is supported; Android is in beta. The output spec is correct; the friction is the native-app-plus-subscription combination.
@@ -206,7 +205,7 @@ Nowhere. Uploads are passed to the model in-memory and dropped after generation.
 The failing shot is retried once automatically. If retries and fallback can't deliver three valid images, the credit is returned to the balance — no support ticket needed.
 
 **Can I edit the text afterwards?**
-Yes. Every text element on every shot is click-to-edit on the preview screen.
+Not inside ShotStudio. The headline is rendered into each image, so what you download is a finished PNG. To change the wording, generate a new set with a different pitch (one credit), or touch up the PNG in any image editor.
 
 **What sizes do I get?**
 Three PNGs at 1290×2796, the App Store iPhone 6.7" portrait spec — sRGB, no transparency, no watermark.
