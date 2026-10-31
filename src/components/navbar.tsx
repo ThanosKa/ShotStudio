@@ -3,6 +3,7 @@ import { UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { pluralize } from "@/lib/utils";
 import { Wordmark } from "@/components/wordmark";
+import { BuyCreditsButton } from "@/components/buy-credits-button";
 
 export function Navbar({ credits }: { credits: number }) {
   return (
@@ -15,6 +16,7 @@ export function Navbar({ credits }: { credits: number }) {
           <span className="rounded-full border px-3 py-1 text-sm">
             {credits} {pluralize(credits, "credit")}
           </span>
+          {credits > 0 && <BuyCreditsButton />}
           <UserButton appearance={dark} />
         </div>
       </div>
