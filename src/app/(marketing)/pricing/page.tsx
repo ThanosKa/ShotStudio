@@ -69,7 +69,7 @@ export default function PricingPage() {
         as="h1"
         eyebrow="Pricing"
         title="ShotStudio pricing — three one-time packs, no subscription"
-        description="ShotStudio costs $7 once for 2 sets, $17 for 5 sets, or $37 for 12 sets. There is no subscription and no recurring charge. 1 credit = 1 set = 3 polished 1290×2796 shots. Credits never expire, regenerating a single shot inside a set is free, and failed generations return the credit automatically."
+        description="ShotStudio costs $7 once for 2 sets, $17 for 5 sets, or $37 for 12 sets. There is no subscription and no recurring charge. 1 credit = 1 set = 3 polished 1290×2796 shots. Credits never expire, and failed generations return the credit automatically."
         className="border-t-0"
       >
         <LandingPricing />

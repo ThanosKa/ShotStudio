@@ -15,7 +15,7 @@ export const FAQS: Faq[] = [
   },
   {
     q: "Can I edit the text after?",
-    a: "Yes. Every text element on every shot is click-to-edit on the preview screen.",
+    a: "Not inside ShotStudio. The headline is rendered into each image, so what you download is a finished PNG. To change the wording, generate a new set with a different pitch (one credit), or touch up the PNG in any image editor.",
   },
   {
     q: "What sizes do I get?",

@@ -124,7 +124,7 @@ export default async function CategoryPage({
       <Section
         as="h1"
         eyebrow={`For ${data.noun}`}
-        title={`App Store screenshots for ${data.name.toLowerCase()}`}
+        title={`App Store screenshots for ${data.noun}`}
         description={data.lead}
         className="border-t-0"
       >
@@ -190,7 +190,7 @@ export default async function CategoryPage({
         <Section
           eyebrow="Headline patterns"
           title={`Headlines that work on ${data.noun}`}
-          description={`The hero headline does more conversion work than the artwork behind it. These three patterns are the ones that keep landing for ${data.noun} — an outcome with a number in it, a single daily moment, and a promise the buyer can picture. ShotStudio writes yours from your one-line pitch, then every line is click-to-edit on the preview.`}
+          description={`The hero headline does more conversion work than the artwork behind it. These three patterns are the ones that keep landing for ${data.noun} — an outcome with a number in it, a single daily moment, and a promise the buyer can picture. ShotStudio writes yours from your one-line pitch and renders it into the shot, so the pitch you type is the lever.`}
         >
           <ol className="grid gap-px overflow-hidden rounded-2xl border bg-border md:grid-cols-3">
             {editorial.headlineExamples.map((headline, i) => (
@@ -250,7 +250,7 @@ export default async function CategoryPage({
             {
               n: "03",
               title: "Download three polished shots",
-              body: "1290×2796 sRGB PNGs, no watermark. Click-to-edit any text on the preview before exporting.",
+              body: "1290×2796 sRGB PNGs, no watermark, delivered as one ZIP. Want different copy? Change the pitch and run a new set.",
             },
           ].map((step) => (
             <div key={step.n} className="bg-background p-7">

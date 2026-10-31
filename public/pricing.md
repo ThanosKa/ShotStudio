@@ -22,7 +22,7 @@ ShotStudio sells **one-time credit packs**. There is no subscription. 1 credit =
 - Four personality presets: Friendly, Professional, Minimal, Bold (typography and headline voice).
 - Theme and palette derived from your uploaded screenshots — light apps stay light, dark apps stay dark. The marketing output always matches your actual app.
 - AI-written headline from your pitch and audience.
-- Click-to-edit text on the preview screen.
+- All three PNGs download together as one ZIP.
 - Credits never expire.
 
 ## Notes

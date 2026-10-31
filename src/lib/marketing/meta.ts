@@ -272,6 +272,6 @@ export function competitorSnippet(competitor: Competitor): Snippet {
 
   return {
     title: `${competitor.name} alternatives — ShotStudio, $7 one-time`,
-    description: `Why indies leave ${competitor.name}, where it still wins, and how ShotStudio compares: $7 one-time, AI-picked preset, screenshots never stored.`,
+    description: `Why indies leave ${competitor.name}, where it still wins, and how ShotStudio compares: $7 one-time, preset matched to your category, never stored.`,
   };
 }

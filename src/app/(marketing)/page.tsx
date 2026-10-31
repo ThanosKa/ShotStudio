@@ -58,6 +58,18 @@ export default function LandingPage() {
         <FadeIn>
           <HowItWorks />
         </FadeIn>
+        <p className="mt-6 text-body-lg text-muted-foreground">
+          Already have screenshots and only need to know if Apple will accept
+          them? The free{" "}
+          <Link
+            href="/tools/app-store-screenshot-sizes"
+            className="text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
+          >
+            App Store screenshot size checker
+          </Link>{" "}
+          tests each file against every App Store and Google Play size in your
+          browser, with no signup.
+        </p>
       </Section>
 
       <Section
@@ -93,7 +105,7 @@ export default function LandingPage() {
         id="pricing"
         eyebrow="Pricing"
         title="How much does ShotStudio cost?"
-        description="$7 once for two sets, $17 for five, $37 for twelve. There is no subscription. 1 credit = 1 set = 3 polished shots, credits never expire, regenerating a single shot costs nothing, and failed generations return the credit automatically."
+        description="$7 once for two sets, $17 for five, $37 for twelve. There is no subscription. 1 credit = 1 set = 3 polished shots, credits never expire, and failed generations return the credit automatically."
       >
         <FadeIn>
           <LandingPricing />

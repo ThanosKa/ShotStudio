@@ -1,0 +1,2 @@
+# launchmatic.app sitemap snapshot 2026-10-31 (0 URLs: no public sitemap.xml found at /sitemap.xml, /sitemap_index.xml or /sitemap-index.xml; diff by crawling their blog index instead)
+

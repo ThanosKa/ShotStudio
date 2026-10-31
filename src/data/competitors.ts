@@ -51,7 +51,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "What's a good alternative to Screenshots.pro?",
-        a: "For one-time-pay indie use, ShotStudio ($7 floor, AI-picked preset, zero image persistence) and Previewed's $9.99 one-time Plus tier are the closest matches. AppMockUp Studio is free if you don't mind manual template editing. Rotato is the strongest pick if you also need 3D animation or App Preview videos.",
+        a: "For one-time-pay indie use, ShotStudio ($7 for two sets, preset matched to your category, zero image persistence) and Previewed's $9.99 one-time Plus tier are the closest matches. AppMockUp Studio is free if you don't mind manual template editing. Rotato is the strongest pick if you also need 3D animation or App Preview videos.",
       },
       {
         q: "Does Screenshots.pro export at the App Store 1290×2796 spec?",
@@ -123,7 +123,7 @@ export const COMPETITORS: Competitor[] = [
     faq: [
       {
         q: "Is Previewed worth it for indie iOS developers?",
-        a: "The $9.99 Plus tier is the closest one-time-pay option in the category — a fair fit if you want 3D snapshots or promo video output alongside static screenshots. The 10-export cap on Plus matters if you A/B-test multiple sets. If you only need polished static shots, a $7 ShotStudio credit gets you unlimited regenerations per set.",
+        a: "The $9.99 Plus tier is the closest one-time-pay option in the category — a fair fit if you want 3D snapshots or promo video output alongside static screenshots. The 10-export cap on Plus matters if you A/B-test multiple sets. If you only need polished static shots, ShotStudio's $7 Starter pack buys two full sets of three, with no export cap on what you download.",
       },
       {
         q: "Is Previewed free?",
@@ -131,7 +131,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "What's a good alternative to Previewed?",
-        a: "For a true one-time-pay indie tool with no export cap, ShotStudio is $7 with unlimited regenerations per credit and zero image persistence. For 3D animation specifically, Rotato is the strongest in the category. AppMockUp Studio is the free option if you don't need animation or AI assistance.",
+        a: "For a one-time-pay indie tool with no export cap, ShotStudio is $7 for two sets of three shots, with zero image persistence. For 3D animation specifically, Rotato is the strongest in the category. AppMockUp Studio is the free option if you don't need animation or AI assistance.",
       },
       {
         q: "Does Previewed export at App Store Connect's required spec?",
@@ -210,7 +210,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "What's a good alternative to Shotbot?",
-        a: "For one-time-pay indie use without a native app install, ShotStudio is $7 with unlimited regenerations and zero image persistence. For free manual editing on the web, AppMockUp Studio works. For 3D mockups or App Preview videos, Rotato's desktop app is the strongest pick.",
+        a: "For one-time-pay indie use without a native app install, ShotStudio is $7 for two sets of three shots, with zero image persistence. For free manual editing on the web, AppMockUp Studio works. For 3D mockups or App Preview videos, Rotato's desktop app is the strongest pick.",
       },
       {
         q: "Does Shotbot output the correct 1290×2796 spec?",

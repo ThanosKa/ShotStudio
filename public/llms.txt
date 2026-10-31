@@ -29,8 +29,8 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 - **Headline copy** is AI-written from the user's pitch and target audience — the user does not write the marketing copy.
 - **Style:** 4 personality presets (Friendly, Professional, Minimal, Bold) controlling typography and headline voice only. Auto-picked from the app's category; the user can override.
 - **Theme and palette** are derived from the uploaded screenshots, not from the preset. A light app gets a light marketing backdrop; a dark app gets a dark one.
-- **Per-shot regenerate** is free — re-roll a single image in a set without consuming another credit.
-- **Editing:** every text element on the preview is click-to-edit before export.
+- **Editing:** none inside the product. The headline is rendered into each image; to change copy, the user runs a new set (one credit) with a different pitch.
+- **Delivery:** the three PNGs download together as one ZIP.
 
 ## Pricing (one-time, no subscription)
 
@@ -38,7 +38,7 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 - Growth — $17 USD for 5 generation sets (most chosen).
 - Studio — $37 USD for 12 generation sets.
 - 1 credit = 1 set = 3 polished images. Credits never expire.
-- Unlimited regenerations per credit; a credit is consumed per set, not per image.
+- A credit is consumed per set of three, not per image. There is no free per-shot re-roll: every new set costs one credit.
 - Credits are refunded automatically when image generation fails after the retry/fallback path is exhausted. Cash refunds are not offered.
 - Tax is calculated at checkout via Stripe Tax.
 - Structured pricing file: https://shotstudio.dev/pricing.md
