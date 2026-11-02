@@ -1,12 +1,12 @@
 ---
 title: "App Store screenshot sizes 2026: the full spec"
-description: "Apple wants 1290×2796 portrait, sRGB, no transparency, no rounded corners. The 2026 App Store Connect screenshot spec and what gets listings rejected."
+description: "iPhone needs one 6.9\" set: 1290×2796, 1260×2736 or 1320×2868, PNG or JPEG, no transparency. The 2026 App Store screenshot sizes and what gets rejected."
 publishedAt: "2026-05-10"
-updatedAt: "2026-10-31"
+updatedAt: "2026-11-02"
 heroImage: "/blog/screenshot-sizes-hero.png"
 ---
 
-If you're shipping an iOS app to the App Store in 2026, the screenshot spec you actually have to meet is short: **1290×2796 pixels, portrait orientation, sRGB color space, no transparency, no rounded corners, no app chrome**. That's the iPhone 6.7" display size — the one Apple uses as the master spec across the App Store carousel.
+If you're shipping an iOS app to the App Store in 2026, the screenshot spec you actually have to meet is short: **one set for the 6.9" iPhone display, at 1290×2796, 1260×2736 or 1320×2868 pixels portrait, PNG or JPEG, no transparency**. Apple accepts all three sizes for that display class; 1290×2796 is the most common because most templates and tools (ShotStudio included) export it.
 
 Everything else on the App Store Connect screenshot help page is either optional, derived from this size, or only applies if you're shipping iPad or macOS builds. This post is the version of that spec written by someone who's actually submitted apps, with the failure modes baked in.
 
@@ -14,29 +14,37 @@ Everything else on the App Store Connect screenshot help page is either optional
 
 | Property | Value |
 |---|---|
-| Resolution | 1290×2796 (portrait) or 2796×1290 (landscape) |
-| Device | iPhone 6.7" display |
+| Resolution | 1290×2796, 1260×2736 or 1320×2868 (portrait), or the same sizes in landscape |
+| Device | iPhone 6.9" display |
 | Color space | sRGB or P3 (sRGB strongly recommended) |
 | Transparency | Not allowed |
 | File format | PNG or JPEG |
 | Maximum file size | 8 MB per image |
 | Rounded corners | Don't add them — the App Store renders rounded corners itself |
 | Status bar | Don't fake one — App Store strips it |
-| Quantity | 3–10 screenshots per locale, per device size |
+| Quantity | 1–10 screenshots per locale, per device size |
 
 Want to check a folder of screenshots against this spec, and against Google Play's limits too? The free [App Store and Google Play screenshot size checker](/tools/app-store-screenshot-sizes) validates each image in your browser and can pad or crop it to a required size.
 
-## Why 1290×2796 specifically
+## Why the 6.9" set is the one that matters
 
-That's the resolution of the iPhone 15 Pro Max, 14 Pro Max, and 16 Pro Max display in portrait. Apple makes one master spec the canonical one, generates smaller-device assets from it, and serves them to the App Store app at runtime. Submit at 1290×2796 once and you've covered every iPhone Apple still sells.
+Apple's screenshot specification lists one row of sizes per display class: 6.9", 6.5", 6.3", 6.1", 5.5" and 4.7" for iPhone. Only the 6.5" row carries a requirement, and it reads: *"Required if the app runs on iPhone and screenshots for the 6.9" display are not provided."* Upload a 6.9" set and you don't need the 6.5" one. Skip the 6.9" set and you have to upload 6.5" screenshots (1284×2778 or 1242×2688) instead.
 
-You used to need to upload separate sets for the 6.5" display, 5.5" display, 12.9" iPad, 11" iPad, and so on. Apple started accepting 6.7" as the universal iPhone master in iOS 15 era and has been consolidating ever since.
+The 6.9" class accepts three sizes, and any of them passes:
+
+| 6.9" size (portrait) | Notes |
+|---|---|
+| 1320×2868 | The largest accepted size |
+| 1290×2796 | The size most templates and generators export |
+| 1260×2736 | The smallest accepted 6.9" size |
+
+You can check any file against every display class with the [screenshot size checker](/tools/app-store-screenshot-sizes).
 
 ## The failure modes I see most often
 
 These are the reasons indie iOS apps get rejected or rendered weirdly on the carousel:
 
-- **Wrong aspect ratio.** 1284×2778 is the iPhone 12/13 Pro Max — close, but the App Store will reject it with "image dimensions are not valid."
+- **A size from the wrong row.** 1284×2778 is a valid 6.5" size, but it is not a 6.9" size. Drop it into the 6.9" slot in App Store Connect and the upload fails. Match the file to the display slot you're filling.
 - **PNG with transparency baked in.** Even one alpha-channel pixel kills the upload. Flatten to a solid background before exporting.
 - **Status bar drawn on top.** Apple strips and re-renders the status bar. If you draw one, it'll get stripped and the bottom of your image will end up taller than expected. Don't include it.
 - **Round corners drawn on the screenshot.** Same story — the App Store applies its own corner radius. If you draw them, you get a double-radius effect.
@@ -45,7 +53,7 @@ These are the reasons indie iOS apps get rejected or rendered weirdly on the car
 
 ## What you actually need to ship
 
-Three to ten screenshots per locale. Most indies ship three. The order on the App Store carousel matters more than people realize — your hero shot has to do all the work in the first 200ms of someone scrolling, because shots 4 onward are behind a "show more" tap that almost nobody takes.
+One to ten screenshots per locale. Most indies ship three. The order on the App Store carousel matters more than people realize — your hero shot has to do all the work in the first 200ms of someone scrolling, because shots 4 onward are behind a "show more" tap that almost nobody takes.
 
 The safe default for what each shot should *do* is: **shot 1 sells the outcome, shot 2 shows the workflow, shot 3 shows the differentiator**. What that means in practice changes per vertical — compare [fitness app screenshots](/screenshots-for/fitness-apps), where shot 1 has to imply momentum, with [finance app screenshots](/screenshots-for/finance-apps), where shot 1 is one number large enough to read across the room, or [VPN app screenshots](/screenshots-for/vpn-apps), where shot 1 has to prove the connection is safe before anyone reads a word.
 
@@ -59,18 +67,18 @@ The faster option is [ShotStudio](/) — three raw simulator screenshots in, thr
 
 This post is iPhone-only on purpose. Apple still requires separate uploads for:
 
-- **iPad 13"**: 2064×2752 portrait
+- **iPad 13"**: 2064×2752 or 2048×2732 portrait (required if the app runs on iPad)
 - **Apple Watch**: depends on series
 - **Mac**: 1280×800 minimum
 
-If you're shipping a universal iPhone + iPad app, you need both sets. ShotStudio v1 outputs iPhone 6.7" only — Google Play and iPad export are explicitly out of scope for v1.
+If you're shipping a universal iPhone + iPad app, you need both sets. ShotStudio v1 outputs iPhone portrait only, at 1290×2796 (a 6.9" size) — Google Play and iPad export are explicitly out of scope for v1.
 
 ## TL;DR
 
-- Submit at **1290×2796 portrait, sRGB, PNG, no transparency, no rounded corners**.
-- 3–10 screenshots per locale; first three carry all the conversion weight.
+- For iPhone, submit one **6.9" set: 1290×2796, 1260×2736 or 1320×2868 portrait, PNG or JPEG, no transparency**.
+- 1–10 screenshots per locale; the first three carry all the conversion weight.
 - Don't draw a status bar. Don't draw rounded corners.
-- The 6.7" master covers every iPhone Apple sells.
-- For everything beyond iPhone 6.7", Apple still wants separate uploads.
+- With a 6.9" set you don't need a 6.5" set; without one, the 6.5" set is required.
+- iPad, Apple Watch and Mac still need their own uploads.
 
 Need to ship by tomorrow morning? [Generate three polished shots in under a minute](/sign-up) — no subscription, $7 once. The full breakdown of the three credit packs is on the [ShotStudio pricing page](/pricing), and if you're still shortlisting tools, the [App Store screenshot tool alternatives](/alternatives) index compares AppMockUp, Previewed, Rotato, Shotbot and Screenshots.pro on price and on how much layout work they leave you.

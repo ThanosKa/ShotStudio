@@ -125,13 +125,13 @@ export default async function BlogPostPage({
                     "@type": "HowTo",
                     name: "Export App Store screenshots at the correct 2026 spec",
                     description:
-                      "Submit App Store screenshots that pass review on the first upload — correct resolution, color space, format, and aspect ratio for the iPhone 6.7\" master spec.",
+                      "Submit App Store screenshots that pass review on the first upload — correct resolution, color space, format, and aspect ratio for the iPhone 6.9\" display.",
                     totalTime: "PT5M",
                     step: [
                       {
                         "@type": "HowToStep",
                         name: "Resize to 1290×2796 portrait",
-                        text: "Export each screenshot at exactly 1290×2796 pixels in portrait orientation. This is the iPhone 6.7\" display master spec Apple uses across the App Store carousel.",
+                        text: "Export each screenshot at exactly 1290×2796 pixels in portrait orientation. This is one of the three sizes Apple accepts for the 6.9\" iPhone display; with a 6.9\" set, Apple does not require a separate 6.5\" set.",
                       },
                       {
                         "@type": "HowToStep",

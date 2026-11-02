@@ -29,7 +29,7 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
   appmockup: {
     anchor: "AppMockUp alternatives",
     quickAnswer:
-      "AppMockUp is two products under one brand: AppMockUp Studio, a free browser template editor with 400+ App Store screenshot templates, and appmockupgenerator.com, a Gemini-powered AI variant sold as one-time credit packs from $9 for 25 screenshots. Both output the iPhone 6.7\" 1290×2796 spec; both still leave the layout decisions to you.",
+      "AppMockUp is two products under one brand: AppMockUp Studio, a free browser template editor with 400+ App Store screenshot templates, and appmockupgenerator.com, a Gemini-powered AI variant sold as one-time credit packs from $9 for 25 screenshots. Both output 1290×2796, one of Apple's accepted 6.9\" iPhone sizes; both still leave the layout decisions to you.",
     switchSteps: [
       "Keep the three source screens you were about to drop into a template — same PNGs, no re-export needed.",
       "Paste your app name and the one-line pitch you already wrote for the App Store description; ShotStudio writes the headline from it.",

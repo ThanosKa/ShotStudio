@@ -19,7 +19,7 @@ export const FAQS: Faq[] = [
   },
   {
     q: "What sizes do I get?",
-    a: "Three PNGs at 1290×2796, the App Store iPhone 6.7\" portrait spec — sRGB, no transparency, no watermark.",
+    a: "Three PNGs at 1290×2796, one of Apple's accepted 6.9\" iPhone sizes, portrait — sRGB, no transparency, no watermark.",
   },
   {
     q: "Do you offer refunds?",

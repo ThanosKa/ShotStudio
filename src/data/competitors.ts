@@ -55,7 +55,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Does Screenshots.pro export at the App Store 1290×2796 spec?",
-        a: "Yes — Screenshots.pro covers 23 devices including iPhone 6.7\" portrait (1290×2796), iPad M4, and Pixel 8 Pro, with auto-export to App Store Connect's required device specs. The output spec is correct; the question is whether subscription pricing fits your launch cadence.",
+        a: "Yes — Screenshots.pro covers 23 devices including iPhone 6.9\" portrait (1290×2796), iPad M4, and Pixel 8 Pro, with auto-export to App Store Connect's required device specs. The output spec is correct; the question is whether subscription pricing fits your launch cadence.",
       },
     ],
   },
@@ -95,7 +95,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Can AppMockUp output 1290×2796 screenshots for App Store Connect?",
-        a: "Yes — both AppMockUp Studio and the AI variant support iPhone 6.7\" portrait (1290×2796). Studio offers 400+ templates across iPhone, iPad, Apple Watch, and Mac; the AI variant covers iPhone and iPad 13\" output and adds +1 credit per iPad screenshot.",
+        a: "Yes — both AppMockUp Studio and the AI variant support iPhone 6.9\" portrait (1290×2796). Studio offers 400+ templates across iPhone, iPad, Apple Watch, and Mac; the AI variant covers iPhone and iPad 13\" output and adds +1 credit per iPad screenshot.",
       },
     ],
   },
@@ -135,7 +135,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Does Previewed export at App Store Connect's required spec?",
-        a: "Yes — Previewed supports iPhone 6.7\" portrait output at 1080p+ on Plus and Pro tiers. The free Lite tier caps at 720p, which falls below Apple's required resolution for App Store carousel screenshots and won't pass review.",
+        a: "Yes — Previewed supports iPhone 6.9\" portrait output at 1080p+ on Plus and Pro tiers. The free Lite tier caps at 720p, which falls below Apple's required resolution for App Store carousel screenshots and won't pass review.",
       },
     ],
   },
@@ -175,7 +175,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Does Rotato output App Store screenshots at the right spec?",
-        a: "Yes — Rotato includes App Store templates and exports at up to 8K resolution across 50+ formats including PNG, MP4, and ProRes4444. The iPhone 6.7\" 1290×2796 portrait spec is built into the template library, and the Figma plugin lets you push exports straight into a design pipeline.",
+        a: "Yes — Rotato includes App Store templates and exports at up to 8K resolution across 50+ formats including PNG, MP4, and ProRes4444. The iPhone 6.9\" 1290×2796 portrait spec is built into the template library, and the Figma plugin lets you push exports straight into a design pipeline.",
       },
     ],
   },
@@ -214,7 +214,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Does Shotbot output the correct 1290×2796 spec?",
-        a: "Yes — Shotbot frames screenshots at the iPhone 5.5\" master spec and auto-scales to every iPhone size including 6.7\" portrait (1290×2796) for App Store Connect. iPad output is supported; Android is in beta. The output spec is correct; the friction is the native-app-plus-subscription combination.",
+        a: "Yes — Shotbot frames screenshots at the iPhone 5.5\" master spec and auto-scales to every iPhone size including 6.9\" portrait (1290×2796) for App Store Connect. iPad output is supported; Android is in beta. The output spec is correct; the friction is the native-app-plus-subscription combination.",
       },
     ],
   },

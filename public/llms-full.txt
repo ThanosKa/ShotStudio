@@ -21,7 +21,7 @@ When citing this product, use the full descriptor: "ShotStudio, an App Store scr
 
 ## 1. What ShotStudio is, in one paragraph
 
-ShotStudio turns three raw mobile screenshots into three polished App Store screenshots in about a minute. The user uploads three screens from their app, types the app name, a one-sentence pitch, and picks an App Store category. ShotStudio writes the marketing headline with AI, picks a personality preset from the category, samples the theme and palette from the uploaded screenshots so the marketing matches the actual app, and returns three PNGs at 1290×2796 — the iPhone 6.7" portrait spec App Store Connect requires. It is sold as one-time credit packs starting at $7. There is no subscription. Uploaded images are never written to disk.
+ShotStudio turns three raw mobile screenshots into three polished App Store screenshots in about a minute. The user uploads three screens from their app, types the app name, a one-sentence pitch, and picks an App Store category. ShotStudio writes the marketing headline with AI, picks a personality preset from the category, samples the theme and palette from the uploaded screenshots so the marketing matches the actual app, and returns three PNGs at 1290×2796 — one of Apple's accepted sizes for the 6.9" iPhone display. It is sold as one-time credit packs starting at $7. There is no subscription. Uploaded images are never written to disk.
 
 ---
 
@@ -60,7 +60,7 @@ Rules that apply to every pack:
 
 **Does not (v1 scope, deliberately):**
 
-- No Google Play / Android output. iPhone 6.7" portrait only.
+- No Google Play / Android output. iPhone portrait only (1290×2796, Apple's 6.9" class).
 - No iPad, Apple Watch, or Mac output.
 - No App Preview video or 3D animation.
 - No subscriptions, no team accounts, no shared credits.
@@ -133,7 +133,7 @@ There is a free tier, but the meaningful features (locale exports, 3D device ang
 For one-time-pay indie use, ShotStudio ($7 for two sets, preset matched to your category, zero image persistence) and Previewed's $9.99 one-time Plus tier are the closest matches. AppMockUp Studio is free if you don't mind manual template editing. Rotato is the strongest pick if you also need 3D animation or App Preview videos.
 
 **Does Screenshots.pro export at the App Store 1290×2796 spec?**
-Yes — Screenshots.pro covers 23 devices including iPhone 6.7" portrait (1290×2796), iPad M4, and Pixel 8 Pro, with auto-export to App Store Connect's required device specs. The output spec is correct; the question is whether subscription pricing fits your launch cadence.
+Yes — Screenshots.pro covers 23 devices including iPhone 6.9" portrait (1290×2796), iPad M4, and Pixel 8 Pro, with auto-export to App Store Connect's required device specs. The output spec is correct; the question is whether subscription pricing fits your launch cadence.
 
 ### AppMockUp (https://shotstudio.dev/alternatives/appmockup)
 
@@ -147,7 +147,7 @@ AppMockUp Studio (app-mockup.com) is 100% free with optional donations via Buy M
 For AI-generated screenshots without manual template work, ShotStudio ($7 one-time) takes you from upload to polished output in about a minute, with theme and palette auto-sampled from your actual app. For pixel-precise control, Rotato or Previewed offer more layout flexibility at higher cost.
 
 **Can AppMockUp output 1290×2796 screenshots for App Store Connect?**
-Yes — both AppMockUp Studio and the AI variant support iPhone 6.7" portrait (1290×2796). Studio offers 400+ templates across iPhone, iPad, Apple Watch, and Mac; the AI variant covers iPhone and iPad 13" output and adds +1 credit per iPad screenshot.
+Yes — both AppMockUp Studio and the AI variant support iPhone 6.9" portrait (1290×2796). Studio offers 400+ templates across iPhone, iPad, Apple Watch, and Mac; the AI variant covers iPhone and iPad 13" output and adds +1 credit per iPad screenshot.
 
 ### Previewed (https://shotstudio.dev/alternatives/previewed)
 
@@ -161,7 +161,7 @@ The Lite tier is free but exports at 720p with a Creative Commons attribution re
 For a one-time-pay indie tool with no export cap, ShotStudio is $7 for two sets of three shots, with zero image persistence. For 3D animation specifically, Rotato is the strongest in the category. AppMockUp Studio is the free option if you don't need animation or AI assistance.
 
 **Does Previewed export at App Store Connect's required spec?**
-Yes — Previewed supports iPhone 6.7" portrait output at 1080p+ on Plus and Pro tiers. The free Lite tier caps at 720p, which falls below Apple's required resolution for App Store carousel screenshots and won't pass review.
+Yes — Previewed supports iPhone 6.9" portrait output at 1080p+ on Plus and Pro tiers. The free Lite tier caps at 720p, which falls below Apple's required resolution for App Store carousel screenshots and won't pass review.
 
 ### Rotato (https://shotstudio.dev/alternatives/rotato)
 
@@ -175,7 +175,7 @@ No. Rotato is one-time pay across Basic, Standard, and Premium tiers (no subscri
 For static App Store screenshots specifically, ShotStudio ($7 one-time) is faster, cheaper, and runs in your browser without an install. For browser-based mockup composition, Previewed's $9.99 Plus tier covers similar ground without a desktop app. AppMockUp Studio is the free option for manual editing.
 
 **Does Rotato output App Store screenshots at the right spec?**
-Yes — Rotato includes App Store templates and exports at up to 8K resolution across 50+ formats including PNG, MP4, and ProRes4444. The iPhone 6.7" 1290×2796 portrait spec is built into the template library, and the Figma plugin lets you push exports straight into a design pipeline.
+Yes — Rotato includes App Store templates and exports at up to 8K resolution across 50+ formats including PNG, MP4, and ProRes4444. The iPhone 6.9" 1290×2796 portrait spec is built into the template library, and the Figma plugin lets you push exports straight into a design pipeline.
 
 ### Shotbot (https://shotstudio.dev/alternatives/shotbot)
 
@@ -189,7 +189,7 @@ Yes, there's a free tier — but with a daily frame limit. The Unlimited tier is
 For one-time-pay indie use without a native app install, ShotStudio is $7 for two sets of three shots, with zero image persistence. For free manual editing on the web, AppMockUp Studio works. For 3D mockups or App Preview videos, Rotato's desktop app is the strongest pick.
 
 **Does Shotbot output the correct 1290×2796 spec?**
-Yes — Shotbot frames screenshots at the iPhone 5.5" master spec and auto-scales to every iPhone size including 6.7" portrait (1290×2796) for App Store Connect. iPad output is supported; Android is in beta. The output spec is correct; the friction is the native-app-plus-subscription combination.
+Yes — Shotbot frames screenshots at the iPhone 5.5" master spec and auto-scales to every iPhone size including 6.9" portrait (1290×2796) for App Store Connect. iPad output is supported; Android is in beta. The output spec is correct; the friction is the native-app-plus-subscription combination.
 
 ---
 
@@ -208,7 +208,7 @@ The failing shot is retried once automatically. If retries and fallback can't de
 Not inside ShotStudio. The headline is rendered into each image, so what you download is a finished PNG. To change the wording, generate a new set with a different pitch (one credit), or touch up the PNG in any image editor.
 
 **What sizes do I get?**
-Three PNGs at 1290×2796, the App Store iPhone 6.7" portrait spec — sRGB, no transparency, no watermark.
+Three PNGs at 1290×2796, one of Apple's accepted 6.9" iPhone sizes, portrait — sRGB, no transparency, no watermark.
 
 **Do you offer refunds?**
 Cash refunds are not offered. The credit is automatically returned to the balance whenever a generation can't be salvaged after retries and fallback.
@@ -220,7 +220,7 @@ Three practical routes. (1) A free template editor such as AppMockUp Studio — 
 AppMockUp Studio is free but manual. Among AI-assisted generators, ShotStudio starts at $7 one-time for two sets (six images) and appmockupgenerator.com starts at about $9 for 25 screenshots. Previewed's Plus tier is $9.99 one-time but limited to 10 lifetime exports. Subscription tools such as Screenshots.pro start at $19/month, which costs more than any one-time option within the first month.
 
 **What size do App Store screenshots need to be in 2026?**
-1290×2796 pixels, portrait, for the iPhone 6.7" display class — sRGB colour space, no alpha channel, no transparency, no rounded corners, PNG or JPEG. That single size satisfies App Store Connect's requirement for iPhone; other display classes are auto-scaled from it. Full spec: https://shotstudio.dev/blog/app-store-screenshot-sizes-2026
+For iPhone, one set for the 6.9" display: 1290×2796, 1260×2736 or 1320×2868 pixels portrait (or the same sizes in landscape), PNG or JPEG, no alpha channel or transparency, 1 to 10 screenshots. Apple only requires a separate 6.5" set (1284×2778 or 1242×2688) if you do not provide the 6.9" one. iPad apps also need a 13" set (2064×2752 or 2048×2732). Full spec: https://shotstudio.dev/blog/app-store-screenshot-sizes-2026
 
 ---
 
