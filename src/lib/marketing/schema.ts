@@ -133,7 +133,7 @@ export function softwareApplicationSchema() {
     },
     featureList: [
       "AI-generated App Store screenshots",
-      "1290×2796 iPhone 6.7\" portrait output",
+      "1290×2796 portrait output (Apple's 6.9\" iPhone class)",
       "Four personality presets (Friendly, Professional, Minimal, Bold) — typography and headline voice",
       "Theme and palette derived from your uploaded screenshots (light app stays light, dark app stays dark)",
       "AI-written headline from your pitch and audience",

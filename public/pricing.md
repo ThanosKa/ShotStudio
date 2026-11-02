@@ -18,7 +18,7 @@ ShotStudio sells **one-time credit packs**. There is no subscription. 1 credit =
 - Features: Same as Growth. Lowest per-set price — built for indie portfolios and small studios shipping a few apps a year.
 
 ## What every plan includes
-- 1290×2796 PNG output (iPhone 6.7" portrait, the App Store Connect-required spec).
+- 1290×2796 PNG output (portrait, one of Apple's accepted 6.9" iPhone sizes).
 - Four personality presets: Friendly, Professional, Minimal, Bold (typography and headline voice).
 - Theme and palette derived from your uploaded screenshots — light apps stay light, dark apps stay dark. The marketing output always matches your actual app.
 - AI-written headline from your pitch and audience.

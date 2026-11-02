@@ -38,10 +38,12 @@ const REVISED = {
   // untouched and keeps its date.
   // 2026-10-31: fact fix (no click-to-edit, no free per-shot regenerate) on
   // home + pricing, plus every kept category and competitor page (overrides).
-  home: "2026-10-31",
+  // 2026-11-02: 1290×2796 relabelled as a 6.9" size (was the "6.7-inch spec") on home FAQ,
+  // alternatives hub and the kept competitor pages (overrides).
+  home: "2026-11-02",
   pricing: "2026-10-31",
   screenshotsForHub: "2026-10-01",
-  alternativesHub: "2026-10-01",
+  alternativesHub: "2026-11-02",
   blogHub: "2026-07-29",
   privacy: "2026-07-29",
   terms: "2026-07-29",
@@ -72,9 +74,10 @@ const CATEGORY_REVISED: Record<string, string> = {
 const COMPETITOR_REVISED: Record<string, string> = {
   // 2026-10-01: "other alternatives" and related-category blocks dropped pruned pages.
   // 2026-10-31: removed false click-to-edit / unlimited-regenerate claims.
-  appmockup: "2026-10-01",
-  previewed: "2026-10-01",
-  shotbot: "2026-10-01",
+  // 2026-11-02: FAQ relabels 1290×2796 as a 6.9" size.
+  appmockup: "2026-11-02",
+  previewed: "2026-11-02",
+  shotbot: "2026-11-02",
 };
 
 /**

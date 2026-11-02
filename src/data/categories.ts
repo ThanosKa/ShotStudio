@@ -240,7 +240,7 @@ export const CATEGORIES: Category[] = [
       },
       {
         q: "Does ShotStudio handle the App Store Connect screenshot spec for budgeting apps?",
-        a: "Yes — every output is 1290×2796, sRGB, no transparency, regardless of category. That's the iPhone 6.7\" portrait spec App Store Connect requires.",
+        a: "Yes — every output is 1290×2796, sRGB, no transparency, regardless of category. That's one of Apple's accepted sizes for the 6.9\" iPhone display; with a 6.9\" set, Apple does not require a separate 6.5\" set.",
       },
     ],
   },

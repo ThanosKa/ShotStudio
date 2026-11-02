@@ -122,7 +122,7 @@ export default function AlternativesHubPage() {
                 <td className="py-4 pr-6 font-semibold">ShotStudio</td>
                 <td className="py-4 pr-6">$7 one-time (2 sets)</td>
                 <td className="py-4 text-muted-foreground">
-                  Opinionated: fixed three-shot template, iPhone 6.7-inch
+                  Opinionated: fixed three-shot template, iPhone 6.9-inch
                   output only.{" "}
                   <Link
                     href="/pricing"

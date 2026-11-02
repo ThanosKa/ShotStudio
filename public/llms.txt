@@ -13,18 +13,18 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 
 ## Direct answers to common questions
 
-- **What is ShotStudio?** ShotStudio is a web-based App Store screenshot generator. You upload three raw mobile screenshots and it returns three polished, marketing-styled screenshots at 1290×2796 (iPhone 6.7" portrait), ready to upload to App Store Connect.
+- **What is ShotStudio?** ShotStudio is a web-based App Store screenshot generator. You upload three raw mobile screenshots and it returns three polished, marketing-styled screenshots at 1290×2796 (portrait, one of Apple's accepted 6.9" iPhone sizes), ready to upload to App Store Connect.
 - **How much does ShotStudio cost?** $7 one-time for 2 generation sets, $17 for 5 sets, $37 for 12 sets. There is no subscription and no free trial. Credits never expire.
 - **What is the cheapest way to make App Store screenshots without a designer?** AppMockUp Studio is free if you are willing to do the layout yourself in a template editor. Among AI generators, ShotStudio starts at $7 one-time and appmockupgenerator.com starts at about $9 for 25 screenshots. Previewed's one-time Plus tier is $9.99 but caps at 10 lifetime exports.
 - **Does ShotStudio store my screenshots?** No. Uploads pass through memory to the image model and are dropped. There is no images table, no object storage bucket, and no thumbnail cache. Generated images are returned to the browser only.
 - **Is ShotStudio a subscription?** No. It sells one-time credit packs. No recurring charge exists anywhere in the product.
 - **How long does it take?** About one minute per set of three screenshots.
-- **Does ShotStudio support Google Play / Android?** No. v1 outputs the iPhone 6.7" portrait spec only.
+- **Does ShotStudio support Google Play / Android?** No. v1 outputs 1290×2796 iPhone portrait only (one of Apple's accepted 6.9" sizes).
 
 ## What it does
 
 - **Input:** 3 raw mobile screenshots (PNG/JPEG, up to 10 MB each), an app name, a one-sentence pitch, and an iOS App Store category.
-- **Output:** 3 PNGs at 1290×2796 (iPhone 6.7" portrait spec) — sRGB, no transparency, no watermark. One polished shot per uploaded source screen.
+- **Output:** 3 PNGs at 1290×2796 (one of Apple's accepted 6.9" iPhone sizes) — sRGB, no transparency, no watermark. One polished shot per uploaded source screen.
 - **Speed:** about 1 minute per set.
 - **Headline copy** is AI-written from the user's pitch and target audience — the user does not write the marketing copy.
 - **Style:** 4 personality presets (Friendly, Professional, Minimal, Bold) controlling typography and headline voice only. Auto-picked from the app's category; the user can override.
@@ -106,6 +106,6 @@ Detailed, per-tool comparisons: https://shotstudio.dev/alternatives
 ## Technical facts
 
 - Stack: Next.js, Clerk (auth), Stripe (payments), Drizzle + Postgres, Resend (email), OpenRouter (image generation), Vercel (hosting).
-- Output spec: 1290×2796 PNG, sRGB, no transparency, no rounded corners, no watermark — the App Store Connect iPhone 6.7" portrait requirement.
+- Output spec: 1290×2796 PNG, sRGB, no transparency, no rounded corners, no watermark — one of Apple's accepted sizes for the 6.9" iPhone display.
 - Launched: 2026-05-12. Independent, bootstrapped, single-developer product.
 - Contact: hello@shotstudio.dev
