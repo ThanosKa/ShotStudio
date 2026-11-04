@@ -83,6 +83,8 @@ GSC columns: clicks = both exports combined; impressions = 2026-10-01 export (20
 
 Note: /screenshots-for/indie-games (37 impressions in July, 7 now, 0 clicks) and /alternatives/screenshots-pro fall under the rule and are pruned. If you want either back, delete the line.
 
+2026-11-04: `/screenshots-for/indie-games` restored (owner decision). GSC 2026-08-02..10-31 showed 1 click and 16 impressions at position 10.7 while noindexed, which meets the keep rule.
+
 ## Sitemap REVISED dates bumped to 2026-10-01 (only pages whose content really changed)
 
 - `home`, `pricing`, `screenshotsForHub`, `alternativesHub` (links, counts, social metadata).

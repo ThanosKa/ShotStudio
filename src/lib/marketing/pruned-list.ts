@@ -37,7 +37,6 @@ const COMPETITOR_REASON =
 
 export const PRUNED: readonly PrunedEntry[] = [
   { path: "/screenshots-for/productivity-apps", action: "noindex", reason: CATEGORY_REASON, gsc: { clicks: 0, impressions: 0 } },
-  { path: "/screenshots-for/indie-games", action: "noindex", reason: CATEGORY_REASON, gsc: { clicks: 0, impressions: 7 } },
   { path: "/screenshots-for/dev-tools", action: "noindex", reason: CATEGORY_REASON, gsc: { clicks: 0, impressions: 0 } },
   { path: "/screenshots-for/meditation-apps", action: "noindex", reason: CATEGORY_REASON, gsc: { clicks: 0, impressions: 4 } },
   { path: "/screenshots-for/budgeting-apps", action: "noindex", reason: CATEGORY_REASON, gsc: { clicks: 0, impressions: 2 } },
