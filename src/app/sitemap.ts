@@ -40,9 +40,11 @@ const REVISED = {
   // home + pricing, plus every kept category and competitor page (overrides).
   // 2026-11-02: 1290×2796 relabelled as a 6.9" size (was the "6.7-inch spec") on home FAQ,
   // alternatives hub and the kept competitor pages (overrides).
-  home: "2026-11-02",
-  pricing: "2026-10-31",
-  screenshotsForHub: "2026-10-01",
+  // 2026-11-04: /screenshots-for/indie-games un-pruned (1 click while noindexed);
+  // home, pricing and the category hub now link it (hub count 9 -> 10).
+  home: "2026-11-04",
+  pricing: "2026-11-04",
+  screenshotsForHub: "2026-11-04",
   alternativesHub: "2026-11-02",
   blogHub: "2026-07-29",
   privacy: "2026-07-29",
@@ -68,6 +70,8 @@ const CATEGORY_REVISED: Record<string, string> = {
   "pet-care-apps": "2026-10-31",
   "running-apps": "2026-10-31",
   "ai-chatbot-apps": "2026-10-31",
+  // 2026-11-04: un-pruned (noindex removed, back in the sitemap and hubs).
+  "indie-games": "2026-11-04",
 };
 
 /** Per-slug overrides. Add an entry when you rewrite one competitor page. */
