@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs for the same branch / PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Placeholder values so `next build` can evaluate modules that read env
+    # vars at import time. Not real credentials; CI uses no secrets.
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      LOG_LEVEL: warn
+      # Well-formed dummy key (base64 of "example.clerk.accounts.dev$").
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk
+      CLERK_SECRET_KEY: sk_test_ci_placeholder
+      CLERK_WEBHOOK_SIGNING_SECRET: whsec_ci_placeholder
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      RESEND_API_KEY: re_ci_placeholder
+      RESEND_FROM_EMAIL: ci@example.com
+      UPSTASH_REDIS_REST_URL: https://ci-placeholder.upstash.io
+      UPSTASH_REDIS_REST_TOKEN: ci-placeholder-token
+      OPENROUTER_API_KEY: sk-or-ci-placeholder
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      # This repo declares no `packageManager` field, so pin pnpm here
+      # (lockfileVersion 9, matches local pnpm 10).
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      # No Node version is declared in the repo; 24 matches Vercel's default.
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
