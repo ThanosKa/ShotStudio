@@ -106,6 +106,22 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
       "ecommerce-apps",
     ],
   },
+  applaunchpad: {
+    anchor: "AppLaunchpad alternatives",
+    quickAnswer:
+      "AppLaunchpad is a browser-based screenshot template editor for the App Store and Google Play, with a free plan and a Pro plan at $15/mo billed monthly or $10/mo billed annually (pricing page, checked 2026-11-06). Pro adds unlimited exports, 1,000+ templates, an AI translator and automatic resizing to every iPhone, iPad and Android size; the layout and the headlines are still yours to make.",
+    switchSteps: [
+      "Export the three iPhone screens you were going to drop into a template; ShotStudio takes the same PNG or JPEG files.",
+      "Type your app name and the one-line pitch from your App Store description. The headline is written from it, so there is no caption to draft.",
+      "Download three 1290×2796 PNGs in one ZIP for $7 one-time. Keep AppLaunchpad for the Google Play or iPad set if you need one.",
+    ],
+    categorySlugs: [
+      "fitness-apps",
+      "finance-apps",
+      "weather-apps",
+      "indie-games",
+    ],
+  },
 };
 
 export function competitorAnchor(slug: string, name: string): string {

@@ -42,10 +42,11 @@ const REVISED = {
   // alternatives hub and the kept competitor pages (overrides).
   // 2026-11-04: /screenshots-for/indie-games un-pruned (1 click while noindexed);
   // home, pricing and the category hub now link it (hub count 9 -> 10).
+  // 2026-11-06: new /alternatives/applaunchpad; the alternatives hub lists it.
   home: "2026-11-04",
   pricing: "2026-11-04",
   screenshotsForHub: "2026-11-04",
-  alternativesHub: "2026-11-02",
+  alternativesHub: "2026-11-06",
   blogHub: "2026-07-29",
   privacy: "2026-07-29",
   terms: "2026-07-29",
@@ -79,9 +80,12 @@ const COMPETITOR_REVISED: Record<string, string> = {
   // 2026-10-01: "other alternatives" and related-category blocks dropped pruned pages.
   // 2026-10-31: removed false click-to-edit / unlimited-regenerate claims.
   // 2026-11-02: FAQ relabels 1290×2796 as a 6.9" size.
-  appmockup: "2026-11-02",
-  previewed: "2026-11-02",
-  shotbot: "2026-11-02",
+  // 2026-11-06: "other alternatives" block lists AppLaunchpad; preset copy fixed (lookup, not AI).
+  appmockup: "2026-11-06",
+  previewed: "2026-11-06",
+  shotbot: "2026-11-06",
+  // 2026-11-06: new page (pricing checked on theapplaunchpad.com/pricing that day).
+  applaunchpad: "2026-11-06",
 };
 
 /**

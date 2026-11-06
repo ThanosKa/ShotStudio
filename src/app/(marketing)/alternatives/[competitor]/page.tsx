@@ -197,7 +197,7 @@ export default async function CompetitorAlternativesPage({
       <Section
         eyebrow="ShotStudio"
         title={`What does ShotStudio do differently from ${data.name}?`}
-        description="ShotStudio is a one-time-pay App Store screenshot generator built for the indie iOS developer doing this once or twice a year. Three raw uploads in, three polished 1290×2796 shots back, in under a minute, from $7. AI picks the preset from your category and writes the headline from your pitch — you bring the screenshots and the app name."
+        description="ShotStudio is a one-time-pay App Store screenshot generator built for the indie iOS developer doing this once or twice a year. Three raw uploads in, three polished 1290×2796 shots back, in under a minute, from $7. The preset is matched to your category and the headline is written from your pitch — you bring the screenshots and the app name."
       >
         <ul className="grid gap-4 md:grid-cols-2">
           {[
