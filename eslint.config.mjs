@@ -5,6 +5,15 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Server code logs through `@/lib/logger`. Client error boundaries can't
+  // import pino, and `scripts/` sits outside `src`, so both keep `console`.
+  {
+    files: ["src/**"],
+    ignores: ["src/app/**/error.tsx", "src/app/**/global-error.tsx"],
+    rules: {
+      "no-console": "error",
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
