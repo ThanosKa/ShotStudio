@@ -218,6 +218,45 @@ export const COMPETITORS: Competitor[] = [
       },
     ],
   },
+  {
+    slug: "applaunchpad",
+    name: "AppLaunchpad",
+    positioning: "A browser-based App Store and Google Play screenshot template editor with 1,000+ templates on Pro, a free tier, and a monthly or annual Pro subscription (pricing checked 2026-11-06).",
+    pricingModel: "Free tier + subscription",
+    pricingNote: "Free ($0, 10 templates, limited exports) · Pro $15/mo billed monthly or $10/mo billed annually (as of 2026-11-06, theapplaunchpad.com/pricing).",
+    primaryWeakness: "Unlimited exports and the full template library sit behind a Pro subscription, and you still pick the template, place the device and write every headline yourself.",
+    honestStrengths: [
+      "Covers both stores in one project: App Store and Google Play sizes, with automatic scaling to every required iPhone, iPad and Android size on Pro.",
+      "Localization with an AI translator on Pro, which ShotStudio does not offer at all.",
+      "A large template library (1,000+ on Pro) and a free tier you can try without paying.",
+    ],
+    featureGaps: [
+      "Subscription for a job most indies do once or twice a year: $15 for a single month, or $120 a year on the annual plan.",
+      "Template editor, not a generator: you choose the layout, drop in your screens and type the copy.",
+      "No headline written from your pitch; its AI features are translation and resizing, not copywriting.",
+      "The free tier caps exports and limits you to 10 templates.",
+      "Projects live in your AppLaunchpad account; ShotStudio never stores your screenshots.",
+    ],
+    whenTheyAreRight: "If you ship to Google Play and iPad as well as iPhone, or you need the same carousel in several languages, AppLaunchpad's Pro plan covers ground ShotStudio deliberately doesn't.",
+    faq: [
+      {
+        q: "Is AppLaunchpad worth it for indie iOS developers?",
+        a: "If you ship on both the App Store and Google Play, need iPad sizes, or localize your listing, AppLaunchpad Pro does all three in one editor. For an iPhone-only indie shipping once or twice a year, Pro is a subscription for a one-night job, and you still lay out every screenshot and write every headline yourself.",
+      },
+      {
+        q: "How much does AppLaunchpad cost?",
+        a: "As of 2026-11-06, AppLaunchpad's pricing page lists a Free plan at $0 (10 templates, limited exports) and Pro at $15/mo billed monthly or $10/mo billed annually, which is $120 a year. Pro adds unlimited exports, 1,000+ templates, the AI translator and up to 100 projects. You can cancel any time; there is no one-time option.",
+      },
+      {
+        q: "What's a good alternative to AppLaunchpad?",
+        a: "For iPhone-only App Store shots without a subscription, ShotStudio is $7 one-time for two sets of three 1290×2796 shots, with the headline written from your pitch and nothing stored. AppMockUp Studio is the free option if you are happy to edit templates by hand. For 3D mockups or promo video, look at Previewed.",
+      },
+      {
+        q: "Does AppLaunchpad export the right App Store sizes?",
+        a: "Yes. AppLaunchpad says it covers all required App Store and Google Play sizes, including the latest iPhones and iPads, and Pro scales one design to every size automatically. ShotStudio outputs 1290×2796, one of Apple's accepted 6.9\" iPhone sizes, and nothing else: no iPad, no Android.",
+      },
+    ],
+  },
 ];
 
 export function getCompetitorBySlug(slug: string): Competitor | undefined {

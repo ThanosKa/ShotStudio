@@ -76,6 +76,7 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 | Rotato | One-time (desktop app) | Higher tier, ~$99 historically | 3D mockup and animation desktop app |
 | Screenshots.pro | Subscription | $19/mo Standard, $49/mo Extended | Template editor with localization and API |
 | Shotbot | Free tier + subscription | Free with daily cap | Native iOS/macOS framing app |
+| AppLaunchpad | Free tier + subscription | Free; Pro $15/mo or $10/mo billed annually (as of 2026-11-06) | Browser template editor, App Store and Google Play |
 
 Detailed, per-tool comparisons: https://shotstudio.dev/alternatives
 
@@ -89,6 +90,7 @@ Detailed, per-tool comparisons: https://shotstudio.dev/alternatives
 - Previewed alternatives: https://shotstudio.dev/alternatives/previewed
 - Rotato alternatives: https://shotstudio.dev/alternatives/rotato
 - Shotbot alternatives: https://shotstudio.dev/alternatives/shotbot
+- AppLaunchpad alternatives: https://shotstudio.dev/alternatives/applaunchpad
 - Category pages hub (40 app categories): https://shotstudio.dev/screenshots-for
 - Blog: https://shotstudio.dev/blog
 - App Store screenshot sizes 2026: https://shotstudio.dev/blog/app-store-screenshot-sizes-2026

@@ -110,6 +110,7 @@ Full policy: https://shotstudio.dev/privacy
 | **Rotato** | One-time, desktop app | Higher tier (~$99 historically) | 3D mockup and animation desktop app | App Preview videos, designer-grade control |
 | **Screenshots.pro** | Subscription | $19/mo Standard, $49/mo Extended | Template editor with localization and API | High-volume shippers, localized stores, CI pipelines |
 | **Shotbot** | Free tier + subscription | Free with daily frame cap | Native iOS/macOS/visionOS framing app | Share Sheet and Shortcuts workflows |
+| **AppLaunchpad** | Free tier + subscription | Free (10 templates, limited exports); Pro $15/mo or $10/mo billed annually (as of 2026-11-06) | Browser template editor for App Store and Google Play | Both stores, iPad sizes, localization |
 
 Honest framing: ShotStudio is not the cheapest option (AppMockUp Studio is free) and not the most capable (Rotato does 3D and video, Screenshots.pro does localization and API). ShotStudio's claim is narrower: the fastest path from raw screenshots to spec-correct polished App Store shots at a $7 one-time floor, with nothing stored.
 
@@ -191,6 +192,20 @@ For one-time-pay indie use without a native app install, ShotStudio is $7 for tw
 **Does Shotbot output the correct 1290×2796 spec?**
 Yes — Shotbot frames screenshots at the iPhone 5.5" master spec and auto-scales to every iPhone size including 6.9" portrait (1290×2796) for App Store Connect. iPad output is supported; Android is in beta. The output spec is correct; the friction is the native-app-plus-subscription combination.
 
+### AppLaunchpad (https://shotstudio.dev/alternatives/applaunchpad)
+
+**Is AppLaunchpad worth it for indie iOS developers?**
+If you ship on both the App Store and Google Play, need iPad sizes, or localize your listing, AppLaunchpad Pro does all three in one editor. For an iPhone-only indie shipping once or twice a year, Pro is a subscription for a one-night job, and you still lay out every screenshot and write every headline yourself.
+
+**How much does AppLaunchpad cost?**
+As of 2026-11-06, AppLaunchpad's pricing page lists a Free plan at $0 (10 templates, limited exports) and Pro at $15/mo billed monthly or $10/mo billed annually, which is $120 a year. Pro adds unlimited exports, 1,000+ templates, the AI translator and up to 100 projects. You can cancel any time; there is no one-time option.
+
+**What's a good alternative to AppLaunchpad?**
+For iPhone-only App Store shots without a subscription, ShotStudio is $7 one-time for two sets of three 1290×2796 shots, with the headline written from your pitch and nothing stored. AppMockUp Studio is the free option if you are happy to edit templates by hand. For 3D mockups or promo video, look at Previewed.
+
+**Does AppLaunchpad export the right App Store sizes?**
+Yes. AppLaunchpad says it covers all required App Store and Google Play sizes, including the latest iPhones and iPads, and Pro scales one design to every size automatically. ShotStudio outputs 1290×2796, one of Apple's accepted 6.9" iPhone sizes, and nothing else: no iPad, no Android.
+
 ---
 
 ## 8. Product FAQ — quotable answers
@@ -237,7 +252,7 @@ Hub: https://shotstudio.dev/screenshots-for
 ## 10. Editorial content
 
 - **App Store screenshot sizes 2026: the full spec.** The required 1290×2796 spec, why Apple chose it, the failure modes that get listings rejected, and what iPad/Watch/Mac actually require. https://shotstudio.dev/blog/app-store-screenshot-sizes-2026
-- **Best App Store screenshot generators (2026).** Side-by-side of AppMockUp, Previewed, Rotato, Shotbot, Screenshots.pro and ShotStudio, including where each one is the wrong choice. https://shotstudio.dev/blog/best-app-store-screenshot-generators-2026
+- **Best App Store screenshot generators (2026).** Side-by-side of AppMockUp, Previewed, Rotato, Shotbot, Screenshots.pro, AppLaunchpad and ShotStudio, including where each one is the wrong choice. https://shotstudio.dev/blog/best-app-store-screenshot-generators-2026
 
 ---
 
