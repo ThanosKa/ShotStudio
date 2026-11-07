@@ -6,10 +6,12 @@ export * from "vinext/server/fetch-handler";
 type Env = Parameters<typeof resolveConnectionString>[0];
 type Context = Parameters<typeof runWithRequestDb>[1];
 
-export default {
+const worker = {
   fetch(request: Request, env: Env, ctx: Context) {
     return runWithRequestDb(resolveConnectionString(env), ctx, () =>
       vinext.fetch(request, env, ctx),
     );
   },
 };
+
+export default worker;
