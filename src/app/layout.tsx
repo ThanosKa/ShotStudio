@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import "./globals.css";
+import { CloudflareWebAnalytics } from "@/components/cloudflare-web-analytics";
 import { APP_URL, cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -113,6 +114,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider appearance={{ theme: dark }}>{children}</ClerkProvider>
+        <CloudflareWebAnalytics />
       </body>
     </html>
   );

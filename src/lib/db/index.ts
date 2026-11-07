@@ -5,7 +5,7 @@ import * as schema from "./schema";
 
 function createClient(connectionString: string | undefined) {
   if (!connectionString) {
-    throw new Error("DATABASE_URL is not set");
+    throw new Error("No database connection string");
   }
   return postgres(connectionString, {
     prepare: false,
@@ -25,12 +25,15 @@ type RequestScope = { connectionString: string | undefined; db?: Db };
 
 const requestScope = new AsyncLocalStorage<RequestScope>();
 
-/** The one place a Worker chooses its database: add a Hyperdrive binding and it wins. */
+/**
+ * The one place a Worker chooses its database. There is no fallback to
+ * DATABASE_URL: Postgres.js would send those queries in the clear, and a Worker
+ * cannot open TLS to Supabase's pooler itself (it rejects the private CA).
+ */
 export function resolveConnectionString(env: {
-  DATABASE_URL?: string;
   HYPERDRIVE?: { connectionString: string };
 }): string | undefined {
-  return env.HYPERDRIVE?.connectionString ?? env.DATABASE_URL;
+  return env.HYPERDRIVE?.connectionString;
 }
 
 /**

@@ -186,22 +186,23 @@ describe("runWithRequestDb", () => {
         void db.$client;
         return new Response("never");
       }),
-    ).rejects.toThrow("DATABASE_URL is not set");
+    ).rejects.toThrow("No database connection string");
   });
 });
 
 describe("resolveConnectionString", () => {
-  it("uses DATABASE_URL when there is no Hyperdrive binding", () => {
-    expect(resolveConnectionString({ DATABASE_URL: LOCAL_A })).toBe(LOCAL_A);
+  it("uses the Hyperdrive binding's connection string", () => {
+    expect(resolveConnectionString({ HYPERDRIVE: { connectionString: LOCAL_B } })).toBe(LOCAL_B);
   });
 
-  it("prefers a Hyperdrive binding's connection string", () => {
+  // Postgres.js sends no TLS request for these URLs, so falling back to one
+  // would quietly send queries and results across the internet in the clear.
+  it("never falls back to a plain DATABASE_URL", () => {
     expect(
-      resolveConnectionString({
-        DATABASE_URL: LOCAL_A,
-        HYPERDRIVE: { connectionString: LOCAL_B },
-      }),
-    ).toBe(LOCAL_B);
+      resolveConnectionString({ DATABASE_URL: LOCAL_A } as Parameters<
+        typeof resolveConnectionString
+      >[0]),
+    ).toBeUndefined();
   });
 });
 
