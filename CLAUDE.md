@@ -4,7 +4,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 
 ## Data flow
 
-- **Generation**: `src/components/wizard.tsx` → `POST /api/generations` → `runGeneration` (`src/lib/generation/lifecycle.ts`): debit one credit, generate each shot through OpenRouter, upscale with sharp, return data URLs.
+- **Generation**: `src/components/wizard.tsx` → `POST /api/generations` → `runGeneration` (`src/lib/generation/lifecycle.ts`): debit one credit, generate each shot through OpenRouter, upscale (sharp under Next, the Cloudflare Images binding on the Worker), return data URLs.
 - **Purchase**: `POST /api/checkout` → Stripe Checkout → `/api/webhooks/stripe` → `runCheckoutFulfillment` (`src/lib/billing/checkout.ts`) → `grant()` → purchase email.
 - **Users**: the Clerk webhook and `ensureUser` (on authenticated routes) both write the `users` row, because either can arrive first.
 
