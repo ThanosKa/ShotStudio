@@ -1,29 +1,109 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not set");
-}
-
-declare global {
-  var __pgClient: ReturnType<typeof postgres> | undefined;
-}
-
-const client =
-  globalThis.__pgClient ??
-  postgres(connectionString, {
+function createClient(connectionString: string | undefined) {
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not set");
+  }
+  return postgres(connectionString, {
     prepare: false,
     max: 1,
     idle_timeout: 20,
     connect_timeout: 10,
     fetch_types: false,
   });
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__pgClient = client;
 }
 
-export const db = drizzle(client, { schema });
+function createDb(client: ReturnType<typeof createClient>) {
+  return drizzle(client, { schema });
+}
+
+type Db = ReturnType<typeof createDb>;
+type RequestScope = { connectionString: string | undefined; db?: Db };
+
+const requestScope = new AsyncLocalStorage<RequestScope>();
+
+/** The one place a Worker chooses its database: add a Hyperdrive binding and it wins. */
+export function resolveConnectionString(env: {
+  DATABASE_URL?: string;
+  HYPERDRIVE?: { connectionString: string };
+}): string | undefined {
+  return env.HYPERDRIVE?.connectionString ?? env.DATABASE_URL;
+}
+
+/**
+ * Runs one Worker request with its own database client, opened on first use.
+ * A Worker cannot reuse a socket across requests, so nothing may outlive this.
+ * The client closes once the response body ends or the reader cancels it,
+ * because streamed pages can still query after the Response is returned.
+ */
+export function runWithRequestDb(
+  connectionString: string | undefined,
+  ctx: { waitUntil(promise: Promise<unknown>): void },
+  handler: () => Promise<Response>,
+): Promise<Response> {
+  const scope: RequestScope = { connectionString };
+  const close = async () => scope.db?.$client.end({ timeout: 5 });
+
+  return requestScope.run(scope, async () => {
+    let response: Response;
+    try {
+      response = await handler();
+    } catch (err) {
+      ctx.waitUntil(close());
+      throw err;
+    }
+    // Only an open client or a page still rendering can need the wrap below,
+    // which costs CPU and loses the Content-Length of a fixed-size body.
+    const contentType = response.headers.get("content-type") ?? "";
+    const mayStillQuery =
+      scope.db !== undefined || /^text\/(html|x-component)/.test(contentType);
+    if (!response.body || response.headers.has("content-length") || !mayStillQuery) {
+      ctx.waitUntil(close());
+      return response;
+    }
+    const { readable, writable } = new TransformStream();
+    ctx.waitUntil(
+      response.body
+        .pipeTo(writable)
+        .catch(() => {}) // A reader that hangs up is not an error here.
+        .then(close),
+    );
+    return new Response(readable, response);
+  });
+}
+
+declare global {
+  var __pgClient: ReturnType<typeof postgres> | undefined;
+}
+
+let sharedDb: Db | undefined;
+
+function getSharedDb(): Db {
+  if (globalThis.navigator?.userAgent === "Cloudflare-Workers") {
+    throw new Error("db used outside a request on a Worker");
+  }
+  if (!sharedDb) {
+    const client = globalThis.__pgClient ?? createClient(process.env.DATABASE_URL);
+    if (process.env.NODE_ENV !== "production") {
+      globalThis.__pgClient = client;
+    }
+    sharedDb = createDb(client);
+  }
+  return sharedDb;
+}
+
+function currentDb(): Db {
+  const scope = requestScope.getStore();
+  if (!scope) return getSharedDb();
+  scope.db ??= createDb(createClient(scope.connectionString));
+  return scope.db;
+}
+
+/** Resolves on every access: the request's client on a Worker, a shared one under Node. */
+export const db = new Proxy({} as Db, {
+  get: (_target, property) => Reflect.get(currentDb(), property),
+});
 export { schema };
