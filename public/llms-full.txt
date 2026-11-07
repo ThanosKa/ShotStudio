@@ -79,11 +79,11 @@ ShotStudio does not persist images. This is a property of the architecture, not 
 - There is no object storage bucket (no S3 or equivalent).
 - There is no thumbnail cache.
 - Uploads are held in memory, passed to the image model, and the buffer is dropped.
-- Generated images are streamed back to the user's browser only. Once the tab is closed they are unrecoverable, including by ShotStudio.
+- Generated images are resized by Cloudflare's image service during the request, then streamed back to the user's browser only. Cloudflare's image storage is not used. Once the tab is closed they are unrecoverable, including by ShotStudio.
 - The database stores account records and credit transactions only.
 - There are no third-party analytics cookies and no advertising cookies.
 
-Sub-processors: Clerk (authentication), Stripe (payments), Supabase Postgres (accounts and transactions), Upstash Redis (webhook idempotency), OpenRouter / OpenAI (image generation), Resend (transactional email), Vercel (hosting).
+Sub-processors: Clerk (authentication), Stripe (payments), Supabase Postgres (accounts and transactions), Upstash Redis (webhook idempotency), OpenRouter / OpenAI (image generation), Resend (transactional email), Cloudflare (hosting and resizing generated images to App Store size).
 
 Full policy: https://shotstudio.dev/privacy
 
@@ -263,7 +263,7 @@ Hub: https://shotstudio.dev/screenshots-for
 - Category: App Store screenshot generator / mobile app marketing asset tool
 - Launched: 2026-05-12
 - Structure: independent, bootstrapped, single-developer product. No funding, no team accounts, no enterprise sales motion.
-- Stack: Next.js, Clerk, Stripe, Drizzle + Postgres, Upstash Redis, Resend, OpenRouter, Vercel.
+- Stack: Next.js, Clerk, Stripe, Drizzle + Postgres, Upstash Redis, Resend, OpenRouter, Cloudflare Workers, Cloudflare Images.
 - Contact: hello@shotstudio.dev
 - Machine-readable pricing: https://shotstudio.dev/pricing.md
 - Short context file: https://shotstudio.dev/llms.txt

@@ -40,7 +40,7 @@ export default function PrivacyPage() {
           ],
         }}
       />
-      <LegalPage title="Privacy Policy" updated="May 2026">
+      <LegalPage title="Privacy Policy" updated="November 2026">
       <p>
         ShotStudio is built privacy-first. Your uploaded screenshots and the
         images we generate from them are not persisted on our servers — they
@@ -60,6 +60,11 @@ export default function PrivacyPage() {
           Generated images are returned to your browser as temporary in-memory
           URLs and are unrecoverable once your tab closes. We have no
           generation-history feature, no thumbnail cache, and no images table.
+        </li>
+        <li>
+          Before they reach your browser, generated images pass through
+          Cloudflare&apos;s image service, which resizes them to App Store size
+          during the request. We do not use its image storage and keep no copy.
         </li>
         <li>
           We do not sell, share, or use your screenshots or generated outputs
@@ -103,7 +108,9 @@ export default function PrivacyPage() {
         <li>OpenRouter / OpenAI — image generation. Inputs and outputs pass
           through these services per their respective privacy policies.</li>
         <li>Resend — transactional email delivery.</li>
-        <li>Vercel — hosting and request logs.</li>
+        <li>Cloudflare — hosting, request logs, and resizing generated images
+          to App Store size. Generated images pass through this service per its
+          privacy policy.</li>
       </ul>
 
       <h2>Cookies</h2>

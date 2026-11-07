@@ -47,9 +47,9 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 ## Privacy
 
 - Zero image persistence: uploads pass through memory to the AI model and are dropped. No images table, no S3 bucket, no thumbnail cache. This is an architectural property, not a policy promise.
-- Generated images are returned to the user's browser only and are unrecoverable once the tab closes.
+- Generated images are resized by Cloudflare's image service during the request, then returned to the user's browser only, and are unrecoverable once the tab closes. Cloudflare's image storage is not used.
 - No third-party analytics or advertising cookies.
-- Sub-processors: Clerk (auth), Stripe (payments), Supabase Postgres (account and transaction data only — never images), Upstash Redis (idempotency), OpenRouter / OpenAI (image generation), Resend (email), Vercel (hosting).
+- Sub-processors: Clerk (auth), Stripe (payments), Supabase Postgres (account and transaction data only — never images), Upstash Redis (idempotency), OpenRouter / OpenAI (image generation), Resend (email), Cloudflare (hosting and resizing generated images to App Store size).
 - Privacy policy: https://shotstudio.dev/privacy
 
 ## Who it's for
@@ -107,7 +107,7 @@ Detailed, per-tool comparisons: https://shotstudio.dev/alternatives
 
 ## Technical facts
 
-- Stack: Next.js, Clerk (auth), Stripe (payments), Drizzle + Postgres, Resend (email), OpenRouter (image generation), Vercel (hosting).
+- Stack: Next.js, Clerk (auth), Stripe (payments), Drizzle + Postgres, Resend (email), OpenRouter (image generation), Cloudflare Workers (hosting), Cloudflare Images (image resizing).
 - Output spec: 1290×2796 PNG, sRGB, no transparency, no rounded corners, no watermark — one of Apple's accepted sizes for the 6.9" iPhone display.
 - Launched: 2026-05-12. Independent, bootstrapped, single-developer product.
 - Contact: hello@shotstudio.dev

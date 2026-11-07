@@ -48,7 +48,7 @@ jobs:
         with:
           version: 10
 
-      # No Node version is declared in the repo; 24 matches Vercel's default.
+      # No Node version is declared in the repo; the cf CLI needs 24.22 or later.
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
