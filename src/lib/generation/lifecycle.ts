@@ -11,7 +11,7 @@ import { logger } from "@/lib/logger";
 import { generateImage } from "@/lib/openrouter";
 import { STYLE_PRESETS, type StylePresetId } from "./presets";
 import { buildPrompt, type ShotRole } from "./prompts";
-import { upscaleToAppStore } from "./upscale";
+import { upscaleToAppStore } from "@/lib/generation/upscale";
 
 export type RunGenerationInput = {
   userId: string;
