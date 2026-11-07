@@ -3,3 +3,4 @@ onlyBuiltDependencies:
   - "@clerk/shared"
   - esbuild
   - unrs-resolver
+  - workerd

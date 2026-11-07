@@ -21,6 +21,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // vinext build output.
+    ".cloudflare/**",
+    ".vinext/**",
+    "dist/**",
     // Skill / agent script directories — own toolchains, not app code.
     ".agents/**",
     ".claude/**",

@@ -1,6 +1,9 @@
 import pino from "pino";
 
 const isDevelopment = process.env.NODE_ENV === "development";
+// Workers have no worker threads for transports, and pino's default destination
+// writes to fd 1 through the fs shim. Workers Logs captures console output.
+const isWorkers = globalThis.navigator?.userAgent === "Cloudflare-Workers";
 
 export function getLoggerConfig() {
   return {
@@ -50,7 +53,7 @@ export function getLoggerConfig() {
       ],
       censor: "[REDACTED]",
     },
-    transport: isDevelopment
+    transport: isDevelopment && !isWorkers
       ? {
           target: "pino-pretty",
           options: {
@@ -63,4 +66,11 @@ export function getLoggerConfig() {
   } satisfies pino.LoggerOptions;
 }
 
-export const logger = pino(getLoggerConfig());
+export const logger = isWorkers
+  ? pino(getLoggerConfig(), {
+      write(line) {
+        // eslint-disable-next-line no-console -- the one place logs reach the Workers runtime
+        console.log(line.trimEnd());
+      },
+    })
+  : pino(getLoggerConfig());
