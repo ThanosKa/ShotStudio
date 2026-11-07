@@ -37,3 +37,7 @@ The app runs on Cloudflare Workers through [vinext](https://github.com/cloudflar
 pnpm build:vinext
 pnpm exec cf deploy --prebuilt
 ```
+
+Both need Node 24.22 or newer. **Merging to `main` does not update the Worker**: production only changes when someone runs these two commands. CI only runs lint, type-check, tests and build.
+
+`shotstudio.dev` runs on the Worker. `www.shotstudio.dev` stays on Vercel for its redirect to the apex, so the domain must stay in the Vercel project until something else serves that redirect. The Vercel project is the fallback, and it still builds from `main`.
