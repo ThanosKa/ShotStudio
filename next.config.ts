@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 import { PRUNED } from "./src/lib/marketing/pruned-list";
 
 const nextConfig: NextConfig = {
+  // vinext otherwise streams generateMetadata output into the body, even for
+  // crawlers. This keeps titles and canonicals in the initial <head>.
+  htmlLimitedBots: /.*/,
   // Pruned programmatic pages (see src/lib/marketing/pruned.ts and PRUNED.md)
   // stay reachable for users but tell crawlers to drop them while still
   // following links. Deleting an entry from PRUNED reverses this.
