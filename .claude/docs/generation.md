@@ -20,11 +20,6 @@ Local numbers (Worker preview, 864x1536 inputs of 3.6-3.7 MB, 9.5-10.7 MB PNG ou
 - `workerd` CPU: 83-97 ms per shot, 95-115 ms for three shots. Over the free plan's 10 ms, far under the paid plan's limit. It includes local-only transport, and this is another machine.
 - Memory: `workerd` process grew 86-88 MB for one shot and 285-389 MB for three, against a 128 MB limit. That is the whole process, with local copies and no pressure to free memory, so it is not the Worker's measured usage. The data alive at once adds up to about 80-95 MB (three data URLs, their PNGs, the uploads), before the Worker's own baseline. This is close enough to the limit to need a real check.
 
-Still to prove on the deployed Worker, with a real Generation:
+One real Generation on the deployed Worker (2026-11-07, Workers Paid, cf-test): 200 in 24.4 s, 238 ms CPU, 7 MB response, three 1290x2796 8-bit RGB PNGs of 1.7-1.8 MB, one Credit debited, no `exceededCpu` or `exceededMemory`. The crop was proven on the deployed binding with a coordinate gradient (ticket 05).
 
-- Each Shot is exactly 1290x2796 and a real PNG, including enlarging from a smaller image.
-- The crop is centred and looks like today's output.
-- PNG file size, since the binding has no compression setting.
-- CPU per Generation in Cloudflare's logs, and whether the free plan can run it at all.
-- No `exceededMemory` outcome across three Shots, with realistic images. If it fails, reduce what the response holds in memory.
-- The binding works on this account with the free plan's 5,000 unique transformations a month. Past that it returns error `9422`, which fails the Shot and refunds the Credit.
+Still unproven on a Worker: the Refund after a failed Shot (tests only), and a reader hanging up mid-run. Cloudflare says tasks "may be canceled" on disconnect, and the debit is already committed by then, so that Generation would stay `pending` with no Refund. Past 5,000 unique transformations a month the binding returns error `9422`, which fails the Shot and refunds the Credit.
