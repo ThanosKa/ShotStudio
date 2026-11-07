@@ -25,7 +25,7 @@ export function BuyCreditsButton() {
         <DialogHeader>
           <DialogTitle className="text-2xl">Buy more credits</DialogTitle>
           <DialogDescription>
-            Each credit gets you a polished 4-image App Store screenshot set.
+            Each credit gets you a polished 3-image App Store screenshot set.
             Credits never expire. Failed generations refund automatically.
           </DialogDescription>
         </DialogHeader>
