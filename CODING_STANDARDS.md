@@ -4,7 +4,7 @@ Rules for server code that lint does not enforce. Writing code: every rule touch
 
 ## Logging
 
-- Log on the server through `@/lib/logger` (pino), never `console.*`. Client error boundaries (`src/app/error.tsx`, `src/app/global-error.tsx`) and CLIs in `scripts/` keep `console`.
+- Log on the server through `@/lib/logger` (pino), never `console.*`. Client error boundaries (`src/app/error.tsx`, `src/app/global-error.tsx`) and CLIs in `scripts/` keep `console`. So does the logger's own Workers destination (`src/lib/logger/console-line.ts`), which writes each pino line with the console method matching its level, because that is how logs reach Workers Logs.
 - First argument is a structured context object, second is a fixed message string: `log.warn({ userId }, "user not ready")`. Values go in the context, never interpolated into the message.
 - Put errors under the `err` key: `log.error({ err }, "checkout failed")`.
 - At the top of any handler or action, create a child logger (`logger.child({ action, ...ids })`) and reuse it.
