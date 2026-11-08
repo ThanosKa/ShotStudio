@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { APP_STORE_PORTRAIT_H, APP_STORE_PORTRAIT_W } from "./app-store-size";
 
-// Worker replacement for `upscale.ts`, which Workers cannot load. See the alias
+// Worker replacement for `upscale.ts`, which Workers cannot load. See the plugin
 // in `vite.config.ts`.
 export async function upscaleToAppStore(b64: string): Promise<Buffer> {
   const input = new Response(Buffer.from(b64, "base64")).body;

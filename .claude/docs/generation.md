@@ -1,6 +1,6 @@
 # Generation pipeline
 
-- `src/app/api/generations/route.ts` declares `export const maxDuration = 300` for the long-running image calls. Don't remove it: each shot gets two attempts of up to 120s.
+- `src/app/api/generations/route.ts` declares `export const maxDuration = 300` for the long-running image calls. Only Next on Vercel (the fallback) reads it; vinext ignores it, and a Worker has no wall-clock limit while the visitor stays connected. Don't remove it: each shot gets two attempts of up to 120s.
 - In development only the `hero_feature` shot runs (`ACTIVE_ROLES` in `src/lib/generation/lifecycle.ts`), so a dev set has 1 image; other environments, tests included, produce 3.
 - Any shot failing after its retry fails the whole generation: the row is marked `failed` and the one credit is refunded, in one transaction that only acts on a `pending` row (see `.claude/docs/credits.md`).
 
@@ -13,7 +13,7 @@
 
 ## Upscaling on the Worker
 
-`upscaleToAppStore` has two versions with the same signature: `upscale.ts` (sharp, for `next dev`, `next build` and Vitest) and `upscale.worker.ts` (Cloudflare Images binding). The alias in `vite.config.ts` swaps them for the Worker build only, so sharp is not in the Worker bundle.
+`upscaleToAppStore` has two versions with the same signature: `upscale.ts` (sharp, for `next dev`, `next build` and Vitest) and `upscale.worker.ts` (Cloudflare Images binding). The `workerUpscale` plugin in `vite.config.ts` swaps them for the Worker build only, whatever the import spelling, so sharp is not in the Worker bundle; `pnpm check:worker-bundle` fails if it ever gets in.
 
 Why the binding, not a WebAssembly library: Cloudflare documents all three needs (`fit: "cover"` enlarges and crops, the centre is the default crop point, PNG is a listed output format), and the decode and encode run in Cloudflare's service, not in the Worker's CPU and memory. Use `cover`, not `crop`: `crop` does not enlarge, and AI images arrive smaller than 1290x2796.
 

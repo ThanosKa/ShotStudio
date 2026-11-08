@@ -14,4 +14,4 @@ Rules for server code that lint does not enforce. Writing code: every rule touch
 - Wrap authenticated routes in `withAuthenticatedUser` (`src/lib/route-auth.ts`), which runs Clerk auth, the rate limit and `ensureUser`, and add the path to `isProtectedRoute` in `src/proxy.ts`.
 - Return errors with `jsonError(status, message)` (`src/lib/http.ts`). The client shows that message to the user as is, so write it as user-facing copy.
 - Domain functions return a `{ kind: ... }` outcome union (`GenerationOutcome`, `CheckoutFulfillmentOutcome`); the route switches on `kind` and maps each case to a status and a log line.
-- Declare `export const runtime = "nodejs"` and `export const dynamic = "force-dynamic"` on route handlers.
+- Declare `export const runtime = "nodejs"` and `export const dynamic = "force-dynamic"` on route handlers. Next (the Vercel fallback) reads both; on the Worker vinext only checks `runtime` for `"edge"`, so `"nodejs"` changes nothing there.
