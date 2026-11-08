@@ -7,8 +7,8 @@ export default defineConfig({
     compatibilityDate: "2026-11-07",
     compatibilityFlags: ["nodejs_compat"],
     observability: { enabled: true },
-    // Temporary test hostname: Clerk live keys reject workers.dev. Remove at cutover.
-    domains: ["cf-test.shotstudio.dev"],
+    // www stays on Vercel for its redirect to the apex.
+    domains: ["shotstudio.dev"],
     // Declaring a domain would otherwise switch workers.dev off.
     workersDev: true,
     assets: {
