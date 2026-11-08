@@ -1,5 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { z } from "zod";
+import { keepRequestAliveUntil } from "./db";
 import { logger } from "./logger";
 import { redis } from "./redis";
 
@@ -59,7 +60,10 @@ function buildLimiter(opts: {
   return {
     async limit(key) {
       try {
-        return await limiter.limit(key);
+        const { pending, ...result } = await limiter.limit(key);
+        // Upstash's analytics write; a Worker would drop it at the response's end.
+        keepRequestAliveUntil(pending);
+        return result;
       } catch (err) {
         // `timeout` only covers slow Redis, not thrown errors (quota exceeded,
         // bad token, REST proxy errors). Fail open so Redis can't take down routes.
