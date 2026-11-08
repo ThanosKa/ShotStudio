@@ -13,7 +13,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 ## Commands
 
 - Package manager: **pnpm**. Never run `npm` or `yarn`.
-- Before declaring done, run `pnpm lint`, `pnpm exec tsc --noEmit` and `pnpm test`. CI runs lint, type-check, tests and build on PRs into `main`, but check locally first.
+- Before declaring done, run `pnpm lint`, `pnpm exec tsc --noEmit` and `pnpm test`. CI runs lint, type-check, tests, the Next build, the Worker build (`pnpm build:vinext`) and `pnpm check:worker-bundle` on PRs into `main`, but check locally first.
 - `pnpm test` runs once; `pnpm test:watch` watches. Tests use in-memory PGlite, no real database.
 - The developer runs dev servers: ask them to start or restart `pnpm dev`, and never run it yourself.
 - Ask before any script that acts on whatever `.env.local` points at: `db:migrate`, `db:push`, `db:reset` (drops every table), `db:reconcile`, `test:user`.

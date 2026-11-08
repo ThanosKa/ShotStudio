@@ -69,3 +69,13 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      # The Worker build is what production runs. It builds cleanly even when
+      # sharp leaks into it or the Clerk key is missing, so check the bundle too.
+      - name: Worker build
+        run: pnpm build:vinext
+        env:
+          CLOUDFLARE_VITE_FORCE_LOCAL: "true"
+
+      - name: Check Worker bundle
+        run: pnpm check:worker-bundle

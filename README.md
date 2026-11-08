@@ -35,9 +35,22 @@ The app runs on Cloudflare Workers through [vinext](https://github.com/cloudflar
 
 ```bash
 pnpm build:vinext
+pnpm check:worker-bundle
 pnpm exec cf deploy --prebuilt
 ```
 
-Both need Node 24.22 or newer. **Merging to `main` does not update the Worker**: production only changes when someone runs these two commands. CI only runs lint, type-check, tests and build.
+All three need Node 24.22 or newer. This is the only deploy path. `check:worker-bundle` fails if sharp got into the Worker or the Clerk publishable key was not baked in, both of which build without an error. **Merging to `main` does not update the Worker**: production only changes when someone runs these commands. CI runs lint, type-check, tests, the Next build, the Worker build and the bundle check, but never deploys.
+
+The deploy also sets the Worker's Cron Trigger (every 5 minutes), which refunds Generations left `pending` by a run that was cut off (see `.claude/docs/generation.md`).
+
+To go back to an earlier version, read its id first (the newest deployment is the live one), then send all traffic to it:
+
+```bash
+pnpm exec cf workers deployments list --script-name shot-studio
+pnpm exec cf workers deployments create --script-name shot-studio --strategy percentage \
+  --versions '[{"version_id":"<version-id>","percentage":100}]'
+```
+
+Secrets, domains and the Cron Trigger belong to the Worker, not to a version, so they stay. A version older than the Cron Trigger has no `scheduled` handler: each run then fails in the logs and refunds nothing until the trigger is removed (dashboard: the Worker's Settings, Triggers, Cron Triggers) or a newer version is deployed.
 
 `shotstudio.dev` runs on the Worker. `www.shotstudio.dev` stays on Vercel for its redirect to the apex, so the domain must stay in the Vercel project until something else serves that redirect. The Vercel project is the fallback, and it still builds from `main`.
