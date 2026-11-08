@@ -6,6 +6,7 @@ import {
   runWithJobDb,
   runWithRequestDb,
 } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 // `vitest.setup.ts` replaces `@/lib/db` with PGlite. These tests need the real
 // module. Clients are never asked to query, so postgres.js opens no socket, and
@@ -112,6 +113,21 @@ describe("runWithRequestDb", () => {
     await response.body!.cancel();
     await settled();
     expect(await isEnded(client)).toBe(true);
+  });
+
+  it("logs, at debug, a response stream that stopped early instead of hiding it", async () => {
+    const { ctx, settled } = fakeCtx();
+    const debug = vi.spyOn(logger, "debug");
+    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+      void db.$client;
+      return new Response(new ReadableStream({ pull: () => new Promise(() => {}) }));
+    });
+
+    await response.body!.cancel(new Error("reader gone"));
+    await settled();
+
+    expect(debug).toHaveBeenCalledWith(expect.objectContaining({ err: expect.anything() }), expect.any(String));
+    debug.mockRestore();
   });
 
   it("closes the client when the response has no body", async () => {

@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { logger } from "@/lib/logger";
 import { isWorkersRuntime } from "@/lib/runtime";
 import * as schema from "./schema";
 
@@ -114,7 +115,9 @@ export function runWithRequestDb(
     ctx.waitUntil(
       response.body
         .pipeTo(writable)
-        .catch(() => {}) // A reader that hangs up is not an error here.
+        // Usually a reader that hung up, which is not an error here; at debug
+        // level so a stream that really fails can still be found.
+        .catch((err: unknown) => logger.debug({ err }, "response stream stopped early"))
         .then(close),
     );
     return new Response(readable, response);
