@@ -85,6 +85,24 @@ describe("runCheckoutFulfillment", () => {
     expect(arg.newBalance).toBe(5);
   });
 
+  // Stripe retries for up to 3 days and the Redis mark lasts 24 h, so a replay
+  // of an already-granted session must not tell the customer "you bought" twice.
+  test("already_granted: a replayed session grants nothing and sends no second email", async () => {
+    await ensureUser("u_buy", "u_buy@test");
+    await runCheckoutFulfillment({ session: sessionFor(), eventId: "evt_1" });
+    vi.mocked(sendCreditsPurchasedEmail).mockClear();
+
+    const outcome = await runCheckoutFulfillment({ session: sessionFor(), eventId: "evt_1" });
+
+    expect(outcome.kind).toBe("already_granted");
+    expect(vi.mocked(sendCreditsPurchasedEmail)).not.toHaveBeenCalled();
+    const [u] = await db
+      .select({ credits: users.credits })
+      .from(users)
+      .where(eq(users.id, "u_buy"));
+    expect(u.credits).toBe(5);
+  });
+
   test("unknown_pack: no grant, no email", async () => {
     await ensureUser("u_pkg", "u_pkg@test");
     vi.mocked(sendCreditsPurchasedEmail).mockClear();

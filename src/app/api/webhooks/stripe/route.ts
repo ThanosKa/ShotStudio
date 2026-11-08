@@ -105,6 +105,9 @@ async function handleEvent(event: Stripe.Event, scoped: Logger): Promise<Respons
           "checkout fulfilled",
         );
         return new Response("OK", { status: 200 });
+      case "already_granted":
+        scoped.info({ userId: outcome.userId }, "checkout already fulfilled");
+        return new Response("OK", { status: 200 });
       case "invalid_metadata":
         scoped.error({ missing: outcome.missing }, "missing session metadata");
         return new Response("OK", { status: 200 });

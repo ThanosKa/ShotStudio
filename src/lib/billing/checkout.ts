@@ -63,6 +63,7 @@ export type CheckoutFulfillmentOutcome =
       newBalance: number;
       emailSent: boolean;
     }
+  | { kind: "already_granted"; userId: string; balance: number }
   | { kind: "invalid_metadata"; missing: "userId" | "packageId" }
   | { kind: "unknown_pack"; packageId: string }
   | { kind: "user_not_ready"; userId: string };
@@ -109,7 +110,12 @@ export async function runCheckoutFulfillment(
     }
   }
 
-  const newBalance = await grant(userId, pack.credits, session.id);
+  const { granted, balance: newBalance } = await grant(userId, pack.credits, session.id);
+  if (!granted) {
+    // A replay of a session that already got its credits: no second email.
+    log.info({ balance: newBalance }, "credits already granted for this session");
+    return { kind: "already_granted", userId, balance: newBalance };
+  }
   log.info({ creditsAdded: pack.credits, newBalance }, "credits granted");
 
   let emailSent = false;

@@ -178,7 +178,7 @@ describe("credit accounting on a fresh database", () => {
 
     // Purchase (Growth pack = 5).
     const afterGrant = await grant("acct", 5, "cs_test_reconcile_1");
-    expect(afterGrant).toBe(5);
+    expect(afterGrant).toEqual({ granted: true, balance: 5 });
 
     // Failure refund.
     const afterRefund = await refund("acct", 1, { reason: "generation_failed" });
@@ -206,9 +206,9 @@ describe("credit accounting on a fresh database", () => {
     const b = await grant("acct2", 2, "cs_dup");
     const c = await grant("acct2", 12, "cs_other");
 
-    expect(a).toBe(2);
-    expect(b).toBe(2);
-    expect(c).toBe(14);
+    expect(a).toEqual({ granted: true, balance: 2 });
+    expect(b).toEqual({ granted: false, balance: 2 });
+    expect(c).toEqual({ granted: true, balance: 14 });
 
     const ledger = await db
       .select()

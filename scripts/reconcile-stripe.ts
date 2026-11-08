@@ -220,7 +220,7 @@ async function main() {
     }
     try {
       if (plan.email) await ensureUser(plan.userId, plan.email);
-      const balance = await grant(plan.userId, plan.credits, plan.sessionId);
+      const { balance } = await grant(plan.userId, plan.credits, plan.sessionId);
       granted++;
       log(`${label}  → balance ${balance}`);
     } catch (err) {

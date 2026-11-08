@@ -50,13 +50,14 @@ export async function refund(
 
 /**
  * Idempotent on `stripePaymentId` via the unique index. If the same payment id
- * is granted twice, the second call is a no-op and returns the current balance.
+ * is granted twice, the second call changes nothing and returns
+ * `granted: false` with the current balance.
  */
 export async function grant(
   userId: string,
   n: number,
   stripePaymentId: string,
-) {
+): Promise<{ granted: boolean; balance: number }> {
   return db.transaction(async (tx) => {
     const inserted = await tx
       .insert(transactions)
@@ -81,7 +82,7 @@ export async function grant(
         .where(eq(users.id, userId))
         .limit(1);
       if (!u) throw new UserNotFoundError(userId);
-      return u.credits;
+      return { granted: false, balance: u.credits };
     }
 
     const updated = await tx
@@ -91,6 +92,6 @@ export async function grant(
       .returning({ credits: users.credits });
 
     if (updated.length === 0) throw new UserNotFoundError(userId);
-    return updated[0].credits;
+    return { granted: true, balance: updated[0].credits };
   });
 }

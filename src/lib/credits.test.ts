@@ -12,8 +12,8 @@ describe("grant", () => {
     const a = await grant("u1", 10, "evt_X");
     const b = await grant("u1", 10, "evt_X");
 
-    expect(a).toBe(10);
-    expect(b).toBe(10);
+    expect(a).toEqual({ granted: true, balance: 10 });
+    expect(b).toEqual({ granted: false, balance: 10 });
 
     const txs = await db
       .select()
