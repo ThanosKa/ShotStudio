@@ -108,16 +108,17 @@ export default function PrivacyPage() {
         <li>OpenRouter / OpenAI — image generation. Inputs and outputs pass
           through these services per their respective privacy policies.</li>
         <li>Resend — transactional email delivery.</li>
-        <li>Cloudflare — hosting, request logs, and resizing generated images
-          to App Store size. Generated images pass through this service per its
-          privacy policy.</li>
+        <li>Cloudflare — hosting, request logs, page-view analytics (Web
+          Analytics), and resizing generated images to App Store size.
+          Generated images pass through this service per its privacy policy.</li>
       </ul>
 
       <h2>Cookies</h2>
       <p>
         ShotStudio uses cookies only as needed for authenticated sessions
-        (managed by Clerk) and Stripe Checkout. We do not use third-party
-        analytics or advertising cookies.
+        (managed by Clerk) and Stripe Checkout. We count page views with
+        Cloudflare Web Analytics, which sets no cookies and does not track you
+        across sites. We do not use analytics or advertising cookies.
       </p>
 
       <h2>Your rights</h2>
