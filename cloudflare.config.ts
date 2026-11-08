@@ -1,4 +1,4 @@
-import { bindings, defineConfig, defineWorker } from "cf/config";
+import { bindings, defineConfig, defineWorker, triggers } from "cf/config";
 
 export default defineConfig({
   worker: defineWorker({
@@ -11,6 +11,8 @@ export default defineConfig({
     domains: ["shotstudio.dev"],
     // Declaring a domain would otherwise switch workers.dev off.
     workersDev: true,
+    // Every 5 minutes, refund Generations left `pending` (worker/index.ts `scheduled`).
+    triggers: [triggers.scheduled({ schedule: "*/5 * * * *" })],
     assets: {
       htmlHandling: "none",
       notFoundHandling: "none",

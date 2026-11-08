@@ -1,5 +1,6 @@
 import vinext from "vinext/server/fetch-handler";
-import { resolveConnectionString, runWithRequestDb } from "@/lib/db";
+import { resolveConnectionString, runWithJobDb, runWithRequestDb } from "@/lib/db";
+import { refundAbandonedGenerations } from "@/lib/generation";
 
 export * from "vinext/server/fetch-handler";
 
@@ -21,6 +22,12 @@ const worker = {
       if (!FILE_URL.test(new URL(request.url).pathname)) throw err;
       return new Response("Not found", { status: 404 });
     }
+  },
+
+  // The Cron Trigger in `cloudflare.config.ts`: refunds Generations whose run
+  // was cancelled before it could record an outcome.
+  async scheduled(_controller: unknown, env: Env, ctx: Context) {
+    await runWithJobDb(resolveConnectionString(env), ctx, () => refundAbandonedGenerations());
   },
 };
 

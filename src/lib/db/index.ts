@@ -21,7 +21,15 @@ function createDb(client: ReturnType<typeof createClient>) {
 }
 
 type Db = ReturnType<typeof createDb>;
-type RequestScope = { connectionString: string | undefined; db?: Db };
+type WaitUntil = { waitUntil(promise: Promise<unknown>): void };
+type RequestScope = {
+  connectionString: string | undefined;
+  ctx: WaitUntil;
+  db?: Db;
+  /** Work that must finish before the client closes (see keepRequestAliveUntil). */
+  pending: Promise<void>[];
+  closed: boolean;
+};
 
 const requestScope = new AsyncLocalStorage<RequestScope>();
 
@@ -36,19 +44,53 @@ export function resolveConnectionString(env: {
   return env.HYPERDRIVE?.connectionString;
 }
 
+function openScope(connectionString: string | undefined, ctx: WaitUntil) {
+  const scope: RequestScope = { connectionString, ctx, pending: [], closed: false };
+  const close = async () => {
+    // Work can hand over more work while it runs, so wait until none is added.
+    for (let seen = -1; seen !== scope.pending.length; ) {
+      seen = scope.pending.length;
+      await Promise.all(scope.pending);
+    }
+    scope.closed = true;
+    await scope.db?.$client.end({ timeout: 5 });
+  };
+  return { scope, close };
+}
+
+/**
+ * Runs a Worker job that has no Response, such as a Cron Trigger, with its own
+ * database client, closed once the job and its kept-alive work have finished.
+ */
+export function runWithJobDb<T>(
+  connectionString: string | undefined,
+  ctx: WaitUntil,
+  job: () => Promise<T>,
+): Promise<T> {
+  const { scope, close } = openScope(connectionString, ctx);
+  return requestScope.run(scope, async () => {
+    try {
+      return await job();
+    } finally {
+      await close();
+    }
+  });
+}
+
 /**
  * Runs one Worker request with its own database client, opened on first use.
  * A Worker cannot reuse a socket across requests, so nothing may outlive this.
  * The client closes once the response body ends or the reader cancels it,
- * because streamed pages can still query after the Response is returned.
+ * because streamed pages can still query after the Response is returned, and
+ * not before every promise handed to `keepRequestAliveUntil` has settled.
+ * After that, using `db` in this request throws.
  */
 export function runWithRequestDb(
   connectionString: string | undefined,
-  ctx: { waitUntil(promise: Promise<unknown>): void },
+  ctx: WaitUntil,
   handler: () => Promise<Response>,
 ): Promise<Response> {
-  const scope: RequestScope = { connectionString };
-  const close = async () => scope.db?.$client.end({ timeout: 5 });
+  const { scope, close } = openScope(connectionString, ctx);
 
   return requestScope.run(scope, async () => {
     let response: Response;
@@ -78,6 +120,23 @@ export function runWithRequestDb(
   });
 }
 
+/**
+ * Keeps `work` running on a Worker after the response is sent or the visitor
+ * hangs up (through `waitUntil`, which Cloudflare honours for about 30 seconds
+ * after a disconnect), and keeps this request's database client open for it.
+ * Under Node there is no request scope and nothing to do: the process keeps running.
+ */
+export function keepRequestAliveUntil(work: Promise<unknown>): void {
+  const scope = requestScope.getStore();
+  if (!scope) return;
+  const settled = work.then(
+    () => {},
+    () => {},
+  );
+  scope.pending.push(settled);
+  scope.ctx.waitUntil(settled);
+}
+
 declare global {
   var __pgClient: ReturnType<typeof postgres> | undefined;
 }
@@ -101,6 +160,9 @@ function getSharedDb(): Db {
 function currentDb(): Db {
   const scope = requestScope.getStore();
   if (!scope) return getSharedDb();
+  if (scope.closed) {
+    throw new Error("db used after the request's database client closed");
+  }
   scope.db ??= createDb(createClient(scope.connectionString));
   return scope.db;
 }

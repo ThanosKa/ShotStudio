@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { db } from "@/lib/db";
+import { refundAbandonedGenerations } from "@/lib/generation";
 
 // `vitest.setup.ts` replaces `@/lib/db` with PGlite. The entry needs the real one.
 vi.unmock("@/lib/db");
@@ -7,6 +9,8 @@ const vinextFetch = vi.hoisted(() => vi.fn());
 vi.mock("vinext/server/fetch-handler", () => ({
   default: { fetch: vinextFetch },
 }));
+
+vi.mock("@/lib/generation", () => ({ refundAbandonedGenerations: vi.fn() }));
 
 import worker from "./index";
 
@@ -45,5 +49,21 @@ describe("Worker entry", () => {
 
     expect(response.status).toBe(200);
     expect(await response.text()).toBe("png");
+  });
+});
+
+describe("Worker Cron Trigger", () => {
+  it("refunds abandoned Generations with a database client of its own, on Hyperdrive", async () => {
+    let database: unknown;
+    vi.mocked(refundAbandonedGenerations).mockImplementation(async () => {
+      database = db.$client.options.database;
+      return 0;
+    });
+    const env = { HYPERDRIVE: { connectionString: "postgres://nobody@127.0.0.1:1/via_hyperdrive" } };
+
+    await worker.scheduled({}, env, ctx);
+
+    expect(refundAbandonedGenerations).toHaveBeenCalledTimes(1);
+    expect(database).toBe("via_hyperdrive");
   });
 });

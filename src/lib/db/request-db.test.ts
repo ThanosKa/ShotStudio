@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { db, resolveConnectionString, runWithRequestDb } from "@/lib/db";
+import {
+  db,
+  keepRequestAliveUntil,
+  resolveConnectionString,
+  runWithJobDb,
+  runWithRequestDb,
+} from "@/lib/db";
 
 // `vitest.setup.ts` replaces `@/lib/db` with PGlite. These tests need the real
 // module. Clients are never asked to query, so postgres.js opens no socket, and
@@ -15,6 +21,16 @@ function fakeCtx() {
     ctx: { waitUntil: (p: Promise<unknown>) => void pending.push(p) },
     settled: () => Promise.all(pending),
   };
+}
+
+// postgres.js rejects with CONNECTION_ENDED, without touching the network,
+// once its client has been ended. That is how these tests observe a close.
+async function isEnded(client: { unsafe(query: string): PromiseLike<unknown> }) {
+  const outcome = await Promise.race([
+    Promise.resolve(client.unsafe("select 1")).catch((err: { code?: string }) => err.code),
+    new Promise((resolve) => setTimeout(() => resolve("still open"), 50)),
+  ]);
+  return outcome === "CONNECTION_ENDED";
 }
 
 afterEach(() => {
@@ -49,16 +65,6 @@ describe("runWithRequestDb", () => {
     expect(seen.aDatabase).toBe("request_a");
     expect(seen.bDatabase).toBe("request_b");
   });
-
-  // postgres.js rejects with CONNECTION_ENDED, without touching the network,
-  // once its client has been ended. That is how these tests observe a close.
-  async function isEnded(client: { unsafe(query: string): PromiseLike<unknown> }) {
-    const outcome = await Promise.race([
-      Promise.resolve(client.unsafe("select 1")).catch((err: { code?: string }) => err.code),
-      new Promise((resolve) => setTimeout(() => resolve("still open"), 50)),
-    ]);
-    return outcome === "CONNECTION_ENDED";
-  }
 
   it("keeps the client open until the response body has been read, then closes it", async () => {
     const { ctx, settled } = fakeCtx();
@@ -176,6 +182,69 @@ describe("runWithRequestDb", () => {
     expect(await isEnded(client)).toBe(true);
   });
 
+  // A Worker cancels a request's unfinished work when the visitor hangs up, unless
+  // it was handed to waitUntil. A Generation's Refund must survive that.
+  it("keeps work handed to keepRequestAliveUntil running, with an open client, after the reader hangs up", async () => {
+    const { ctx, settled } = fakeCtx();
+    const waitedOn: Promise<unknown>[] = [];
+    const recordingCtx = {
+      waitUntil: (p: Promise<unknown>) => {
+        waitedOn.push(p);
+        ctx.waitUntil(p);
+      },
+    };
+    let finishWork!: () => void;
+    let clientInWork!: typeof db.$client;
+    let openDuringWork = false;
+    const response = await runWithRequestDb(LOCAL_A, recordingCtx, async () => {
+      const work = (async () => {
+        await new Promise<void>((r) => (finishWork = r));
+        clientInWork = db.$client;
+        openDuringWork = !(await isEnded(clientInWork));
+      })();
+      keepRequestAliveUntil(work);
+      return new Response(new ReadableStream({ pull: () => new Promise(() => {}) }), {
+        headers: { "content-type": "application/json" },
+      });
+    });
+
+    await response.body!.cancel();
+    const handedOver = waitedOn.length;
+    finishWork();
+    await settled();
+
+    expect(handedOver).toBeGreaterThan(0);
+    expect(openDuringWork).toBe(true);
+    expect(await isEnded(clientInWork)).toBe(true);
+  });
+
+  it("refuses the database once the request's client has closed, instead of opening one that never closes", async () => {
+    const { ctx, settled } = fakeCtx();
+    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+      const stream = new ReadableStream({
+        async pull(controller) {
+          await new Promise((r) => setTimeout(r, 5));
+          let outcome = "opened a client";
+          try {
+            void db.$client;
+          } catch (err) {
+            outcome = (err as Error).message;
+          }
+          controller.enqueue(new TextEncoder().encode(outcome));
+          controller.close();
+        },
+      });
+      return new Response(stream, { headers: { "content-type": "application/json" } });
+    });
+
+    await settled();
+    expect(await response.text()).toMatch(/after the request's database client closed/);
+  });
+
+  it("does nothing with keepRequestAliveUntil outside a request, as under Node", async () => {
+    expect(() => keepRequestAliveUntil(Promise.resolve())).not.toThrow();
+  });
+
   it("does not need a connection string until the database is used", async () => {
     const { ctx } = fakeCtx();
     const response = await runWithRequestDb(undefined, ctx, async () => new Response("public"));
@@ -187,6 +256,33 @@ describe("runWithRequestDb", () => {
         return new Response("never");
       }),
     ).rejects.toThrow("No database connection string");
+  });
+});
+
+describe("runWithJobDb", () => {
+  it("gives a scheduled job its own client and closes it when the job ends", async () => {
+    const { ctx } = fakeCtx();
+    let client!: typeof db.$client;
+    const result = await runWithJobDb(LOCAL_B, ctx, async () => {
+      client = db.$client;
+      return 7;
+    });
+
+    expect(result).toBe(7);
+    expect(client.options.database).toBe("request_b");
+    expect(await isEnded(client)).toBe(true);
+  });
+
+  it("closes the client and rethrows when the job throws", async () => {
+    const { ctx } = fakeCtx();
+    let client!: typeof db.$client;
+    await expect(
+      runWithJobDb(LOCAL_A, ctx, async () => {
+        client = db.$client;
+        throw new Error("job failed");
+      }),
+    ).rejects.toThrow("job failed");
+    expect(await isEnded(client)).toBe(true);
   });
 });
 

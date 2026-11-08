@@ -2,7 +2,13 @@
 
 - `src/app/api/generations/route.ts` declares `export const maxDuration = 300` for the long-running image calls. Don't remove it: each shot gets two attempts of up to 120s.
 - In development only the `hero_feature` shot runs (`ACTIVE_ROLES` in `src/lib/generation/lifecycle.ts`), so a dev set has 1 image; other environments, tests included, produce 3.
-- Any shot failing after its retry fails the whole generation: the row is marked `failed` and the one credit is refunded (see `.claude/docs/credits.md`).
+- Any shot failing after its retry fails the whole generation: the row is marked `failed` and the one credit is refunded, in one transaction that only acts on a `pending` row (see `.claude/docs/credits.md`).
+
+## When the run is cut off
+
+- On a Worker, `runGeneration` hands its whole run to the request's `waitUntil` (`keepRequestAliveUntil` in `src/lib/db/index.ts`), which also keeps the request's database client open until it ends. Cloudflare keeps such work alive for about 30 seconds after the visitor hangs up, so most runs (a normal one takes about 24 s) still record their outcome and refund on failure.
+- Anything that outlives even that (a slow OpenRouter, a Worker killed for CPU or memory) leaves the row `pending`. The Worker's Cron Trigger (every 5 minutes, `scheduled` in `worker/index.ts`) runs `refundAbandonedGenerations`, which fails and refunds rows still `pending` 10 minutes after they started. Both paths fail and refund only a row that is still `pending`, so a Generation is never refunded twice.
+- A run that finishes after the visitor left still costs its Credit, as on Vercel: images are never stored, so they are lost with the tab.
 - Images travel as data URLs in the response and are never stored; `generations` rows hold metadata only. The privacy page publicly promises this.
 
 ## Upscaling on the Worker
@@ -22,4 +28,4 @@ Local numbers (Worker preview, 864x1536 inputs of 3.6-3.7 MB, 9.5-10.7 MB PNG ou
 
 One real Generation on the deployed Worker (2026-11-07, Workers Paid, cf-test): 200 in 24.4 s, 238 ms CPU, 7 MB response, three 1290x2796 8-bit RGB PNGs of 1.7-1.8 MB, one Credit debited, no `exceededCpu` or `exceededMemory`. The crop was proven on the deployed binding with a coordinate gradient (ticket 05).
 
-Still unproven on a Worker: the Refund after a failed Shot (tests only), and a reader hanging up mid-run. Cloudflare says tasks "may be canceled" on disconnect, and the debit is already committed by then, so that Generation would stay `pending` with no Refund. Past 5,000 unique transformations a month the binding returns error `9422`, which fails the Shot and refunds the Credit.
+Still unproven on a Worker: the Refund after a failed Shot, the run surviving a reader hanging up, and the Cron Trigger's sweep (tests only, against PGlite). Past 5,000 unique transformations a month the binding returns error `9422`, which fails the Shot and refunds the Credit: then every Generation fails until the month ends, so the account needs paid Images before that volume.

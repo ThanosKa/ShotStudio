@@ -1,11 +1,8 @@
-import { eq, sql } from "drizzle-orm";
+import { and, asc, eq, lt, sql } from "drizzle-orm";
 import type { Logger } from "pino";
 import { InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
-import { db } from "@/lib/db";
-import {
-  markGenerationComplete,
-  markGenerationFailed,
-} from "@/lib/db/queries";
+import { db, keepRequestAliveUntil } from "@/lib/db";
+import { markGenerationComplete } from "@/lib/db/queries";
 import { generations, transactions, users } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { generateImage } from "@/lib/openrouter";
@@ -154,7 +151,85 @@ async function runShot(
   throw lastError;
 }
 
-export async function runGeneration(
+/**
+ * Fails a `pending` Generation and refunds its Credit in one transaction.
+ * Returns false, and changes nothing, when the row is no longer `pending`: the
+ * other path (the run itself or the abandoned sweep) already settled it.
+ */
+async function failAndRefund(
+  generation: { id: string; userId: string },
+  failureReason: string,
+  refundReason: "generation_failed" | "generation_abandoned",
+): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    const failed = await tx
+      .update(generations)
+      .set({
+        status: "failed",
+        failureReason: failureReason.slice(0, 1000),
+        completedAt: new Date(),
+      })
+      .where(and(eq(generations.id, generation.id), eq(generations.status, "pending")))
+      .returning({ id: generations.id });
+    if (failed.length === 0) return false;
+    await refund(generation.userId, 1, { reason: refundReason, generationId: generation.id }, tx);
+    return true;
+  });
+}
+
+/**
+ * A run lasts at most about 4 minutes (two 120 s attempts per shot, in
+ * parallel), and a Worker keeps it at most ~30 s after a disconnect. A row
+ * still `pending` after this long has no run left to settle it.
+ */
+const ABANDONED_AFTER_MS = 10 * 60 * 1000;
+const SWEEP_BATCH = 100;
+
+/**
+ * Refunds Generations whose run was stopped before it recorded an outcome
+ * (a Worker cancelled on disconnect, or killed for CPU or memory). Runs from the
+ * Worker's Cron Trigger. Returns how many it refunded.
+ */
+export async function refundAbandonedGenerations(
+  cutoff: Date = new Date(Date.now() - ABANDONED_AFTER_MS),
+): Promise<number> {
+  const log = logger.child({ action: "generation.refund_abandoned" });
+  const abandoned = await db
+    .select({ id: generations.id, userId: generations.userId })
+    .from(generations)
+    .where(and(eq(generations.status, "pending"), lt(generations.createdAt, cutoff)))
+    .orderBy(asc(generations.createdAt))
+    .limit(SWEEP_BATCH);
+
+  let refunded = 0;
+  for (const generation of abandoned) {
+    try {
+      const done = await failAndRefund(
+        generation,
+        "Abandoned: no outcome was recorded",
+        "generation_abandoned",
+      );
+      if (done) refunded++;
+    } catch (err) {
+      log.error({ err, generationId: generation.id }, "abandoned generation refund failed");
+    }
+  }
+  if (refunded > 0) log.warn({ refunded }, "refunded abandoned generations");
+  return refunded;
+}
+
+/**
+ * On a Worker the whole run is handed to the request's `waitUntil`, so the
+ * Refund on failure still happens when the visitor closes the tab mid-run.
+ * Anything that outlives even that is caught by `refundAbandonedGenerations`.
+ */
+export function runGeneration(input: RunGenerationInput): Promise<GenerationOutcome> {
+  const run = runGenerationToEnd(input);
+  keepRequestAliveUntil(run);
+  return run;
+}
+
+async function runGenerationToEnd(
   input: RunGenerationInput,
 ): Promise<GenerationOutcome> {
   const log = logger.child({
@@ -212,16 +287,13 @@ export async function runGeneration(
   const failed = results.filter((r) => r.status === "rejected");
   if (failed.length > 0) {
     const reason = `Generation failed: ${failed.length}/${ACTIVE_ROLES.length} shots failed`;
-    await markGenerationFailed(generationId, reason);
     try {
-      await refund(input.userId, 1, {
-        reason: "generation_failed",
-        generationId,
-      });
+      await failAndRefund({ id: generationId, userId: input.userId }, reason, "generation_failed");
     } catch (refundErr) {
+      // The row stays `pending`, so the abandoned sweep refunds it later.
       shotLog.error(
         { err: refundErr },
-        "inline refund failed; manual refund required",
+        "inline refund failed; the abandoned-generation sweep will retry it",
       );
     }
     return { kind: "failed_and_refunded", reason };

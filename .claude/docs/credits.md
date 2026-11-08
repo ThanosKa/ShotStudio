@@ -6,7 +6,7 @@ Silent bugs here cost real money. Always add tests for changes to `src/lib/credi
 
 - Generations: `debitAndStartGeneration` (private to `src/lib/generation/lifecycle.ts`, reached through `runGeneration`) atomically debits one credit, writes the `usage` transaction and inserts the `pending` generation row.
 - Purchases: `grant` from `src/lib/credits.ts`.
-- Failures: `refund` from `src/lib/credits.ts`.
+- Failures: `refund` from `src/lib/credits.ts`. A failed or abandoned Generation is refunded inside the transaction that moves its row from `pending` to `failed` (`refund(..., tx)`), so the Refund happens exactly once whichever path gets there first.
 
 All three are wrapped in `db.transaction()`. Every balance change goes through them; do not bypass them.
 

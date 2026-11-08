@@ -16,12 +16,19 @@ export class UserNotFoundError extends Error {
   }
 }
 
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/**
+ * Pass `within` to make the Refund part of a caller's transaction (it runs as a
+ * savepoint), so it commits or rolls back together with the caller's own writes.
+ */
 export async function refund(
   userId: string,
   n: number,
   metadata?: Record<string, unknown>,
+  within?: Tx,
 ) {
-  return db.transaction(async (tx) => {
+  return (within ?? db).transaction(async (tx) => {
     const updated = await tx
       .update(users)
       .set({ credits: sql`${users.credits} + ${n}` })

@@ -17,6 +17,8 @@ vi.mock("@/lib/db", () => ({
     return currentDb;
   },
   schema,
+  // Under Node there is no request to keep alive; tests check the hand-over.
+  keepRequestAliveUntil: vi.fn(),
 }));
 
 // 1×1 transparent PNG in base64. Lets sharp.upscaleToAppStore run on real
