@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { isWorkersRuntime } from "@/lib/runtime";
 import * as schema from "./schema";
 
 function createClient(connectionString: string | undefined) {
@@ -144,7 +145,7 @@ declare global {
 let sharedDb: Db | undefined;
 
 function getSharedDb(): Db {
-  if (globalThis.navigator?.userAgent === "Cloudflare-Workers") {
+  if (isWorkersRuntime()) {
     throw new Error("db used outside a request on a Worker");
   }
   if (!sharedDb) {
