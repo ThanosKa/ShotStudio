@@ -39,7 +39,7 @@ pnpm check:worker-bundle
 pnpm exec cf deploy --prebuilt
 ```
 
-All three need Node 24.22 or newer. This is the only deploy path. `check:worker-bundle` fails if sharp got into the Worker or the Clerk publishable key was not baked in, both of which build without an error. **Merging to `main` does not update the Worker**: production only changes when someone runs these commands. CI runs lint, type-check, tests, the Next build, the Worker build and the bundle check, but never deploys.
+All three need Node 24.22 or newer. `check:worker-bundle` fails if sharp got into the Worker or the Clerk publishable key was not baked in, both of which build without an error. **Merging to `main` updates the Worker**: `.github/workflows/deploy.yml` runs these commands once CI passes on `main`. If `drizzle/` changed it stops: apply the migration, then press Run workflow in the Actions tab. Run the commands yourself only to deploy by hand. CI runs lint, type-check, tests, the Next build, the Worker build and the bundle check; the separate `deploy.yml` deploys once CI passes.
 
 The deploy also sets the Worker's Cron Trigger (every 5 minutes), which refunds Generations left `pending` by a run that was cut off (see `.claude/docs/generation.md`).
 
