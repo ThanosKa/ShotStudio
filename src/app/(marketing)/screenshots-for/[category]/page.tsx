@@ -100,7 +100,6 @@ export default async function CategoryPage({
               url,
               name: title,
               description,
-              primaryImage: `${url}/opengraph-image`,
             }),
             softwareApplicationSchema(),
             breadcrumbSchema([

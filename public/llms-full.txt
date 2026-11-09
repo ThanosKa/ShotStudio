@@ -111,6 +111,7 @@ Full policy: https://shotstudio.dev/privacy
 | **Screenshots.pro** | Subscription | $19/mo Standard, $49/mo Extended | Template editor with localization and API | High-volume shippers, localized stores, CI pipelines |
 | **Shotbot** | Free tier + subscription | Free with daily frame cap | Native iOS/macOS/visionOS framing app | Share Sheet and Shortcuts workflows |
 | **AppLaunchpad** | Free tier + subscription | Free (10 templates, limited exports); Pro $15/mo or $10/mo billed annually (as of 2026-11-06) | Browser template editor for App Store and Google Play | Both stores, iPad sizes, localization |
+| **AppScreens** | Free tier + subscription | Free (1 saved project, up to 5 screens); Pro $25/mo or $99/yr; Scale $50/mo or $180/yr (as of 2026-11-09) | Online screenshot editor with AI captions, 80+ languages and one-click App Store Connect upload | Localized listings, both stores, frequent updates |
 
 Honest framing: ShotStudio is not the cheapest option (AppMockUp Studio is free) and not the most capable (Rotato does 3D and video, Screenshots.pro does localization and API). ShotStudio's claim is narrower: the fastest path from raw screenshots to spec-correct polished App Store shots at a $7 one-time floor, with nothing stored.
 
@@ -205,6 +206,20 @@ For iPhone-only App Store shots without a subscription, ShotStudio is $7 one-tim
 
 **Does AppLaunchpad export the right App Store sizes?**
 Yes. AppLaunchpad says it covers all required App Store and Google Play sizes, including the latest iPhones and iPads, and Pro scales one design to every size automatically. ShotStudio outputs 1290×2796, one of Apple's accepted 6.9" iPhone sizes, and nothing else: no iPad, no Android.
+
+### AppScreens (https://shotstudio.dev/alternatives/appscreens)
+
+**Is AppScreens worth it for indie iOS developers?**
+If you localize, ship on both stores, or update your listing often, AppScreens Pro does all of it in one editor and uploads to App Store Connect for you. For an iPhone-only indie shipping once or twice a year, Pro is a subscription for a one-night job, and you still lay out every screenshot yourself.
+
+**How much does AppScreens cost?**
+As of 2026-11-09, AppScreens' pricing page lists a Free plan at $0 (1 saved project, up to 5 screens), Pro at $25/mo billed monthly or $99 a year billed annually, and Scale at $50/mo or $180 a year. There is no one-time plan: its FAQ suggests subscribing for a month and cancelling the renewal.
+
+**What's a good alternative to AppScreens?**
+For iPhone-only App Store shots without a subscription, ShotStudio is $7 one-time for two sets of three 1290×2796 shots, with the headline written from your pitch and nothing stored. AppMockUp Studio is the free option if you are happy to edit templates by hand. AppLaunchpad is a cheaper subscription editor for both stores.
+
+**Does AppScreens write the screenshot captions for you?**
+Partly. AppScreens offers AI caption suggestions on the free plan and a fuller AI caption toolkit on Pro, but you place them into a layout you build. ShotStudio writes the headline from your pitch and renders it into each finished shot, so there is no layout step and no caption to edit afterwards.
 
 ---
 

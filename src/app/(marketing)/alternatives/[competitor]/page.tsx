@@ -85,7 +85,6 @@ export default async function CompetitorAlternativesPage({
               url,
               name: title,
               description,
-              primaryImage: `${url}/opengraph-image`,
               about: {
                 "@type": "SoftwareApplication",
                 name: data.name,
