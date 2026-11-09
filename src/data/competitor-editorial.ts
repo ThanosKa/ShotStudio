@@ -122,6 +122,22 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
       "indie-games",
     ],
   },
+  appscreens: {
+    anchor: "AppScreens alternatives",
+    quickAnswer:
+      "AppScreens is an online screenshot editor for the App Store and Google Play, with a free plan, Pro at $25/mo billed monthly or $99 a year billed annually, and Scale at $50/mo or $180 a year (pricing page, checked 2026-11-09). Pro adds localization into 80+ languages, one-click upload to App Store Connect and Google Play, every device size and AI captions; the layout is still yours to build, and there is no one-time plan.",
+    switchSteps: [
+      "Export the three iPhone screens you would have placed in an AppScreens template; ShotStudio takes the same PNG or JPEG files.",
+      "Type your app name and the one-line pitch from your App Store description. The headline is written from it and rendered into each shot.",
+      "Download three 1290×2796 PNGs in one ZIP for $7 one-time, with no renewal to cancel. Keep AppScreens if you need localized or Google Play sets.",
+    ],
+    categorySlugs: [
+      "fitness-apps",
+      "finance-apps",
+      "vpn-apps",
+      "running-apps",
+    ],
+  },
 };
 
 export function competitorAnchor(slug: string, name: string): string {

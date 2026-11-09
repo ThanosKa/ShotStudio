@@ -43,10 +43,11 @@ const REVISED = {
   // 2026-11-04: /screenshots-for/indie-games un-pruned (1 click while noindexed);
   // home, pricing and the category hub now link it (hub count 9 -> 10).
   // 2026-11-06: new /alternatives/applaunchpad; the alternatives hub lists it.
+  // 2026-11-09: new /alternatives/appscreens; the alternatives hub lists it.
   home: "2026-11-04",
   pricing: "2026-11-04",
   screenshotsForHub: "2026-11-04",
-  alternativesHub: "2026-11-06",
+  alternativesHub: "2026-11-09",
   blogHub: "2026-07-29",
   privacy: "2026-07-29",
   terms: "2026-07-29",
@@ -62,17 +63,18 @@ const REVISED = {
 const CATEGORY_REVISED: Record<string, string> = {
   // 2026-10-01: sibling blocks and compared-tool lists no longer link pruned pages.
   // 2026-10-31: H1 casing + removed false click-to-edit claim.
-  "fitness-apps": "2026-10-31",
-  "finance-apps": "2026-10-31",
-  "education-apps": "2026-10-31",
-  "music-apps": "2026-10-31",
-  "weather-apps": "2026-10-31",
-  "vpn-apps": "2026-10-31",
-  "pet-care-apps": "2026-10-31",
-  "running-apps": "2026-10-31",
-  "ai-chatbot-apps": "2026-10-31",
-  // 2026-11-04: un-pruned (noindex removed, back in the sitemap and hubs).
-  "indie-games": "2026-11-04",
+  "fitness-apps": "2026-11-09",
+  "finance-apps": "2026-11-09",
+  "education-apps": "2026-11-09",
+  "music-apps": "2026-11-09",
+  "weather-apps": "2026-11-09",
+  "vpn-apps": "2026-11-09",
+  "pet-care-apps": "2026-11-09",
+  "running-apps": "2026-11-09",
+  "ai-chatbot-apps": "2026-11-09",
+  // 2026-11-04: indie-games un-pruned (noindex removed, back in the sitemap and hubs).
+  // 2026-11-09: dropped the 404ing primaryImageOfPage from the WebPage schema.
+  "indie-games": "2026-11-09",
 };
 
 /** Per-slug overrides. Add an entry when you rewrite one competitor page. */
@@ -81,11 +83,15 @@ const COMPETITOR_REVISED: Record<string, string> = {
   // 2026-10-31: removed false click-to-edit / unlimited-regenerate claims.
   // 2026-11-02: FAQ relabels 1290×2796 as a 6.9" size.
   // 2026-11-06: "other alternatives" block lists AppLaunchpad; preset copy fixed (lookup, not AI).
-  appmockup: "2026-11-06",
-  previewed: "2026-11-06",
-  shotbot: "2026-11-06",
+  // 2026-11-09: "other alternatives" block lists AppScreens; dropped the 404ing
+  // primaryImageOfPage from the WebPage schema.
+  appmockup: "2026-11-09",
+  previewed: "2026-11-09",
+  shotbot: "2026-11-09",
   // 2026-11-06: new page (pricing checked on theapplaunchpad.com/pricing that day).
-  applaunchpad: "2026-11-06",
+  applaunchpad: "2026-11-09",
+  // 2026-11-09: new page (pricing checked on appscreens.com/pricing that day).
+  appscreens: "2026-11-09",
 };
 
 /**

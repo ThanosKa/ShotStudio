@@ -257,6 +257,44 @@ export const COMPETITORS: Competitor[] = [
       },
     ],
   },
+  {
+    slug: "appscreens",
+    name: "AppScreens",
+    positioning: "An online App Store and Google Play screenshot editor with AI captions, localization into 80+ languages and direct upload to App Store Connect, sold as a monthly or annual subscription (pricing checked 2026-11-09).",
+    pricingModel: "Free tier + subscription",
+    pricingNote: "Free ($0, 1 saved project, up to 5 screens) · Pro $25/mo billed monthly or $99/yr billed annually · Scale $50/mo or $180/yr (as of 2026-11-09, appscreens.com/pricing).",
+    primaryWeakness: "There is no one-time plan: AppScreens' own FAQ says to subscribe for a month and cancel the renewal if you only need one release, and you still build the layout yourself.",
+    honestStrengths: [
+      "Localization into 80+ languages and one-click upload to App Store Connect and Google Play on Pro, which ShotStudio does not offer at all.",
+      "Covers both stores and many devices from one design: iPhone, iPad, Apple Watch, Mac and Android sizes on Pro.",
+      "AI caption suggestions even on the free plan, plus AI restyling and 3D device frames on Pro.",
+    ],
+    featureGaps: [
+      "Subscription for a job most indies do once or twice a year: $25 for a single month, or $99 a year on the annual plan.",
+      "An editor, not a generator: you pick the template, place each screen and arrange the layers yourself.",
+      "The free plan keeps 1 saved project with up to 5 screens and watermarks the Pro features you preview; its pricing page marks the large Dynamic Island iPhone size as subscription-only.",
+      "Projects are saved in your AppScreens account; ShotStudio never stores your screenshots.",
+    ],
+    whenTheyAreRight: "If you localize your listing, ship to Google Play or iPad as well as iPhone, or update screenshots every month and want them uploaded to App Store Connect for you, AppScreens Pro covers ground ShotStudio deliberately doesn't.",
+    faq: [
+      {
+        q: "Is AppScreens worth it for indie iOS developers?",
+        a: "If you localize, ship on both stores, or update your listing often, AppScreens Pro does all of it in one editor and uploads to App Store Connect for you. For an iPhone-only indie shipping once or twice a year, Pro is a subscription for a one-night job, and you still lay out every screenshot yourself.",
+      },
+      {
+        q: "How much does AppScreens cost?",
+        a: "As of 2026-11-09, AppScreens' pricing page lists a Free plan at $0 (1 saved project, up to 5 screens), Pro at $25/mo billed monthly or $99 a year billed annually, and Scale at $50/mo or $180 a year. There is no one-time plan: its FAQ suggests subscribing for a month and cancelling the renewal.",
+      },
+      {
+        q: "What's a good alternative to AppScreens?",
+        a: "For iPhone-only App Store shots without a subscription, ShotStudio is $7 one-time for two sets of three 1290×2796 shots, with the headline written from your pitch and nothing stored. AppMockUp Studio is the free option if you are happy to edit templates by hand. AppLaunchpad is a cheaper subscription editor for both stores.",
+      },
+      {
+        q: "Does AppScreens write the screenshot captions for you?",
+        a: "Partly. AppScreens offers AI caption suggestions on the free plan and a fuller AI caption toolkit on Pro, but you place them into a layout you build. ShotStudio writes the headline from your pitch and renders it into each finished shot, so there is no layout step and no caption to edit afterwards.",
+      },
+    ],
+  },
 ];
 
 export function getCompetitorBySlug(slug: string): Competitor | undefined {

@@ -259,6 +259,11 @@ export function categorySnippet(category: Category): Snippet {
  * push these past 60 chars. The brand is folded into the title instead.
  */
 const COMPETITOR_SNIPPETS: Record<string, Snippet> = {
+  appscreens: {
+    title: "AppScreens alternatives — ShotStudio, $7 one-time",
+    description:
+      "AppScreens Pro is $25/mo or $99/yr. ShotStudio turns three uploads into three polished 1290×2796 App Store shots for $7 one-time, no subscription.",
+  },
   appmockup: {
     title: "AppMockUp alternatives — ShotStudio, $7 one-time",
     description:
