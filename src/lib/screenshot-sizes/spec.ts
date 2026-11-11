@@ -3,14 +3,17 @@
  *
  * Sources (fetched 2026-10-01 with WebFetch; the Apple page was re-fetched
  * and read verbatim after a first summarised pass disagreed with it, so the
- * numbers below are the verbatim ones):
+ * numbers below are the verbatim ones. Apple's page re-read verbatim on
+ * 2026-11-11 after its October 2026 update: it added the 1512x2316 11" iPad
+ * size and a "Required device sizes" section naming the medium Dynamic Island
+ * iPhone display, our 6.3" row):
  *  - Apple: https://developer.apple.com/help/app-store-connect/reference/screenshot-specifications
  *  - Google Play: https://support.google.com/googleplay/android-developer/answer/9866151
  *
  * Scope: iPhone and iPad for the App Store; phone and tablet rules for Google
- * Play. Mac, Apple TV, Vision Pro, Apple Watch, iPhone Duo (not yet uploadable
- * per Apple) and the Wear OS / TV / Automotive / XR Play surfaces are left out
- * on purpose: the tool does not claim anything it has not verified.
+ * Play. Mac, Apple TV, Vision Pro, Apple Watch, iPhone Duo (listed by Apple
+ * since October 2026, required from April 2027) and the Wear OS / TV /
+ * Automotive / XR Play surfaces are left out of the checker on purpose.
  *
  * When Apple or Google change a page, edit this file and the fetch date above.
  */
@@ -65,6 +68,8 @@ const APPLE_DISPLAYS: readonly AppleDisplay[] = [
       { width: 1179, height: 2556 },
       { width: 1206, height: 2622 },
     ],
+    requirement:
+      "Apple's required device sizes ask for at least one screenshot for this display (iPhone with Dynamic Island, medium display)",
   },
   {
     display: '6.1"',
@@ -104,6 +109,7 @@ const APPLE_DISPLAYS: readonly AppleDisplay[] = [
     family: "iPad",
     sizes: [
       { width: 1488, height: 2266 },
+      { width: 1512, height: 2316 },
       { width: 1668, height: 2420 },
       { width: 1668, height: 2388 },
       { width: 1640, height: 2360 },
