@@ -136,6 +136,11 @@ export default function ScreenshotSizesToolPage() {
               <li>
                 The pixel size must match one of the sizes listed below exactly.
               </li>
+              <li>
+                If your UI is the same across sizes, Apple says you only need
+                screenshots for the highest required resolution: App Store
+                Connect scales them down for the smaller displays.
+              </li>
               {APPLE_REQUIREMENTS.map((r) => (
                 <li key={`${r.family}-${r.display}`}>
                   {r.family} {r.display}: {r.text}.

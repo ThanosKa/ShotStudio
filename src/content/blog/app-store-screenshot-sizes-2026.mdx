@@ -1,50 +1,144 @@
 ---
 title: "App Store screenshot sizes 2026: the full spec"
-description: "iPhone needs one 6.9\" set: 1290×2796, 1260×2736 or 1320×2868, PNG or JPEG, no transparency. The 2026 App Store screenshot sizes and what gets rejected."
+description: "Every App Store screenshot size Apple lists in November 2026 for iPhone, iPad, Mac, TV, Vision Pro and Watch, which are required, and what gets rejected."
 publishedAt: "2026-05-10"
-updatedAt: "2026-11-02"
+updatedAt: "2026-11-11"
 heroImage: "/blog/screenshot-sizes-hero.png"
 ---
 
-If you're shipping an iOS app to the App Store in 2026, the screenshot spec you actually have to meet is short: **one set for the 6.9" iPhone display, at 1290×2796, 1260×2736 or 1320×2868 pixels portrait, PNG or JPEG, no transparency**. Apple accepts all three sizes for that display class; 1290×2796 is the most common because most templates and tools (ShotStudio included) export it.
+App Store screenshots are PNG or JPEG, with no transparency, 1 to 10 per device size, and the pixel size has to match one of Apple's listed sizes exactly. For iPhone, Apple's largest display class (iPhone with Dynamic Island, large display) takes **1260×2736, 1290×2796 or 1320×2868 portrait**; 1290×2796 is the most common because most templates and tools (ShotStudio included) export it.
 
-Everything else on the App Store Connect screenshot help page is either optional, derived from this size, or only applies if you're shipping iPad or macOS builds. This post is the version of that spec written by someone who's actually submitted apps, with the failure modes baked in.
+Apple updated its screenshot specification in October 2026: the page now drops the inch labels, adds a "Required device sizes" section, and lists the new iPhone Duo. This post walks through the current page, with every size for every Apple device below, and the failure modes we see most.
 
-## The required spec, in one table
+## The iPhone spec, in one table
 
-| Property | Value |
-|---|---|
-| Resolution | 1290×2796, 1260×2736 or 1320×2868 (portrait), or the same sizes in landscape |
-| Device | iPhone 6.9" display |
-| Color space | sRGB or P3 (sRGB strongly recommended) |
-| Transparency | Not allowed |
-| File format | PNG or JPEG |
-| Maximum file size | 8 MB per image |
-| Rounded corners | Don't add them — the App Store renders rounded corners itself |
-| Status bar | Don't fake one — App Store strips it |
-| Quantity | 1–10 screenshots per locale, per device size |
+<div className="mt-6 overflow-x-auto">
+<table className="w-full border-collapse text-left text-body-lg">
+<thead>
+<tr>
+<th className="border-b py-3 pr-4 font-semibold">Property</th>
+<th className="border-b py-3 pr-4 font-semibold">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Resolution</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1290×2796, 1260×2736 or 1320×2868 (portrait), or the same sizes in landscape</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Device</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Dynamic Island, large display (6.9")</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Color space</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">sRGB or P3 (sRGB strongly recommended)</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Transparency</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Not allowed</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">File format</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">PNG or JPEG</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Maximum file size</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">8 MB per image</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Rounded corners</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Don't add them — the App Store renders rounded corners itself</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Status bar</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Don't fake one — App Store strips it</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Quantity</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1–10 screenshots per locale, per device size</td>
+</tr>
+</tbody>
+</table>
+</div>
 
 Want to check a folder of screenshots against this spec, and against Google Play's limits too? The free [App Store and Google Play screenshot size checker](/tools/app-store-screenshot-sizes) validates each image in your browser and can pad or crop it to a required size.
 
-## Why the 6.9" set is the one that matters
+## Which iPhone sizes are required
 
-Apple's screenshot specification lists one row of sizes per display class: 6.9", 6.5", 6.3", 6.1", 5.5" and 4.7" for iPhone. Only the 6.5" row carries a requirement, and it reads: *"Required if the app runs on iPhone and screenshots for the 6.9" display are not provided."* Upload a 6.9" set and you don't need the 6.5" one. Skip the 6.9" set and you have to upload 6.5" screenshots (1284×2778 or 1242×2688) instead.
+Apple's page (as of 2026-11-11) says three things that decide what you upload:
 
-The 6.9" class accepts three sizes, and any of them passes:
+1. Under "Required device sizes": *"iPhone: At least one screenshot for iPhone with Dynamic Island (medium display)."* That is the 1179×2556 / 1206×2622 class (iPhone 17, 17 Pro, 16 Pro and similar), called 6.3" in older guides.
+2. Under "Display scaling": *"If your app's user interface is consistent across multiple device sizes and localizations, you only need to provide screenshots for the highest required resolution. App Store Connect automatically scales them down for smaller device sizes."*
+3. Each smaller class carries a fallback note. For the medium Dynamic Island display: *"If screenshots with the accepted sizes aren't provided, scaled screenshots for iPhone with Face ID (large display) are used."* And the Face ID large display row is still *"Required if app runs on iPhone and screenshots for iPhone with Dynamic Island (large display) aren't provided."*
 
-| 6.9" size (portrait) | Notes |
-|---|---|
-| 1320×2868 | The largest accepted size |
-| 1290×2796 | The size most templates and generators export |
-| 1260×2736 | The smallest accepted 6.9" size |
+The required line and the fallback notes pull in different directions, so before you submit, open your version page in App Store Connect and check which iPhone slots it marks as needing screenshots. If you want zero ambiguity, upload a set for the medium Dynamic Island display as well as your large-display set.
 
-You can check any file against every display class with the [screenshot size checker](/tools/app-store-screenshot-sizes).
+## Every iPhone screenshot size
+
+Apple now names each class by display type instead of inches. The inch labels most guides still use are in brackets.
+
+<div className="mt-6 overflow-x-auto">
+<table className="w-full border-collapse text-left text-body-lg">
+<thead>
+<tr>
+<th className="border-b py-3 pr-4 font-semibold">Display class</th>
+<th className="border-b py-3 pr-4 font-semibold">Portrait sizes (landscape is the same, swapped)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Dynamic Island, large display (6.9")</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1260×2736, 1290×2796, 1320×2868</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Face ID, large display (6.5")</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1284×2778, 1242×2688</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Dynamic Island, medium display (6.3")</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1179×2556, 1206×2622</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Face ID, medium display (6.1")</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1170×2532, 1125×2436, 1080×2340</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Home Button, large display (5.5")</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1242×2208</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Home Button, medium display (4.7")</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">750×1334</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Home Button, 4" display</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">640×1096 (no status bar), 640×1136 (with status bar)</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone with Home Button, 3.5" display</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">640×920 (no status bar), 640×960 (with status bar)</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone Duo, outer display</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1398×2034</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPhone Duo, inner display</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">2007×2853 (landscape 2853×2007)</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+iPhone Duo is new: Apple says *"Starting in April 2027, screenshots will be required for any app using the iOS 27.1 SDK or later."*
+
+You can check any file against every iPhone and iPad class with the [screenshot size checker](/tools/app-store-screenshot-sizes).
 
 ## The failure modes I see most often
 
 These are the reasons indie iOS apps get rejected or rendered weirdly on the carousel:
 
-- **A size from the wrong row.** 1284×2778 is a valid 6.5" size, but it is not a 6.9" size. Drop it into the 6.9" slot in App Store Connect and the upload fails. Match the file to the display slot you're filling.
+- **A size from the wrong row.** 1284×2778 is a valid Face ID large-display (6.5") size, but it is not a Dynamic Island large-display (6.9") size. Drop it into the wrong slot in App Store Connect and the upload fails. Match the file to the display slot you're filling.
 - **PNG with transparency baked in.** Even one alpha-channel pixel kills the upload. Flatten to a solid background before exporting.
 - **Status bar drawn on top.** Apple strips and re-renders the status bar. If you draw one, it'll get stripped and the bottom of your image will end up taller than expected. Don't include it.
 - **Round corners drawn on the screenshot.** Same story — the App Store applies its own corner radius. If you draw them, you get a double-radius effect.
@@ -63,22 +157,72 @@ You can hand-build screenshots in Figma using community templates — most of th
 
 The faster option is [ShotStudio](/) — three raw simulator screenshots in, three polished 1290×2796 shots back, in under a minute. It pre-selects a personality preset (Friendly, Professional, Minimal, or Bold) from your category and writes the headline from your one-line app pitch. The marketing background and palette match your actual app's theme — sampled from your uploads so a light app stays light. $7 one-time, never stored, auto-refund if a shot fails. If you want to see it applied to your category, browse the [persona pages](/screenshots-for) — fitness, finance, VPN, running and more, each with the dos and don'ts that matter for that audience.
 
-## What about iPad, Apple Watch, Mac?
+## iPad, Mac, Apple TV, Vision Pro and Apple Watch sizes
 
-This post is iPhone-only on purpose. Apple still requires separate uploads for:
+From the same Apple page, as of 2026-11-11. Each platform needs its own upload if your app runs on it.
 
-- **iPad 13"**: 2064×2752 or 2048×2732 portrait (required if the app runs on iPad)
-- **Apple Watch**: depends on series
-- **Mac**: 1280×800 minimum
+<div className="mt-6 overflow-x-auto">
+<table className="w-full border-collapse text-left text-body-lg">
+<thead>
+<tr>
+<th className="border-b py-3 pr-4 font-semibold">Device</th>
+<th className="border-b py-3 pr-4 font-semibold">Accepted sizes</th>
+<th className="border-b py-3 pr-4 font-semibold">Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPad 13"</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">2064×2752, 2048×2732 portrait</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Required if the app runs on iPad</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPad 12.9"</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">2048×2732 portrait</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Falls back to scaled 13" screenshots</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPad 11"</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1488×2266, 1512×2316, 1668×2420, 1668×2388, 1640×2360 portrait</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Falls back to scaled 13" screenshots</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">iPad 10.5"</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1668×2224 portrait</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Falls back to scaled 12.9" screenshots</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Mac</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1280×800, 1440×900, 2560×1600 or 2880×1800 (16:10)</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Required for Mac apps</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Apple TV</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1920×1080 or 3840×2160</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Required for Apple TV apps</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Apple Vision Pro</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">3840×2160</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Required for Apple Vision Pro</td>
+</tr>
+<tr>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Apple Watch</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">422×514 (Ultra 4, Ultra 3), 410×502 (Ultra 2, Ultra), 416×496 (Series 12, 11, 10), 396×484 (Series 9, 8, 7), 368×448 (Series 6, 5, 4, SE), 312×390 (Series 3, 2, 1)</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Required for Apple Watch apps; use the same size across all localizations</td>
+</tr>
+</tbody>
+</table>
+</div>
 
-If you're shipping a universal iPhone + iPad app, you need both sets. ShotStudio v1 outputs iPhone portrait only, at 1290×2796 (a 6.9" size) — Google Play and iPad export are explicitly out of scope for v1.
+ShotStudio v1 outputs iPhone portrait only, at 1290×2796 (a Dynamic Island large-display size). iPad, Mac and Google Play export are out of scope for v1.
 
 ## TL;DR
 
-- For iPhone, submit one **6.9" set: 1290×2796, 1260×2736 or 1320×2868 portrait, PNG or JPEG, no transparency**.
-- 1–10 screenshots per locale; the first three carry all the conversion weight.
+- PNG or JPEG, no transparency, 1–10 screenshots per device size; the first three carry the conversion weight.
+- Largest iPhone class: **1290×2796, 1260×2736 or 1320×2868 portrait**.
+- Since October 2026 Apple's "Required device sizes" names the medium Dynamic Island display (1179×2556 or 1206×2622); check your App Store Connect version page for the slots it marks as required.
 - Don't draw a status bar. Don't draw rounded corners.
-- With a 6.9" set you don't need a 6.5" set; without one, the 6.5" set is required.
-- iPad, Apple Watch and Mac still need their own uploads.
+- iPad, Mac, Apple TV, Vision Pro and Apple Watch need their own uploads; iPhone Duo screenshots become required from April 2027.
 
 Need to ship by tomorrow morning? [Generate three polished shots in under a minute](/sign-up) — no subscription, $7 once. The full breakdown of the three credit packs is on the [ShotStudio pricing page](/pricing), and if you're still shortlisting tools, the [App Store screenshot tool alternatives](/alternatives) index compares AppMockUp, Previewed, Rotato, Shotbot and Screenshots.pro on price and on how much layout work they leave you.

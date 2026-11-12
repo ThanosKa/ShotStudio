@@ -250,7 +250,7 @@ Three practical routes. (1) A free template editor such as AppMockUp Studio — 
 AppMockUp Studio is free but manual. Among AI-assisted generators, ShotStudio starts at $7 one-time for two sets (six images) and appmockupgenerator.com starts at about $9 for 25 screenshots. Previewed's Plus tier is $9.99 one-time but limited to 10 lifetime exports. Subscription tools such as Screenshots.pro start at $19/month, which costs more than any one-time option within the first month.
 
 **What size do App Store screenshots need to be in 2026?**
-For iPhone, one set for the 6.9" display: 1290×2796, 1260×2736 or 1320×2868 pixels portrait (or the same sizes in landscape), PNG or JPEG, no alpha channel or transparency, 1 to 10 screenshots. Apple only requires a separate 6.5" set (1284×2778 or 1242×2688) if you do not provide the 6.9" one. iPad apps also need a 13" set (2064×2752 or 2048×2732). Full spec: https://shotstudio.dev/blog/app-store-screenshot-sizes-2026
+PNG or JPEG, no alpha channel or transparency, 1 to 10 screenshots per device size, in one of Apple's exact sizes. The largest iPhone class (iPhone with Dynamic Island, large display, the 6.9" class) takes 1290×2796, 1260×2736 or 1320×2868 portrait. Since its October 2026 update, Apple's "Required device sizes" lists at least one screenshot for iPhone with Dynamic Island (medium display), 1179×2556 or 1206×2622, while also saying App Store Connect scales the highest-resolution set down for smaller displays; check which slots your App Store Connect version page marks as required. iPad apps also need a 13" set (2064×2752 or 2048×2732). iPhone Duo screenshots become required from April 2027. Full spec: https://shotstudio.dev/blog/app-store-screenshot-sizes-2026
 
 ---
 
