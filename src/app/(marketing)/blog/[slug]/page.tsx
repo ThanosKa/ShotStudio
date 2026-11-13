@@ -276,7 +276,7 @@ export default async function BlogPostPage({
                 >
                   App Store screenshot tool alternatives
                 </Link>{" "}
-                — AppMockUp, Previewed, Rotato, Shotbot and Screenshots.pro
+                — AppMockUp, Previewed, Shotbot, AppLaunchpad and AppScreens
                 compared honestly.
               </li>
             </ul>
