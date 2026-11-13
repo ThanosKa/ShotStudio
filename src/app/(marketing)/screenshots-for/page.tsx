@@ -152,7 +152,7 @@ export default function CategoriesHubPage() {
               label: "App Store screenshot tool alternatives",
               eyebrow: "Compare",
               description:
-                "AppMockUp, Previewed, Rotato, Shotbot and Screenshots.pro — what each does well and where it stops fitting an indie launch.",
+                "AppMockUp, Previewed, Shotbot, AppLaunchpad and AppScreens — what each does well and where it stops fitting an indie launch.",
             },
           ]}
         />

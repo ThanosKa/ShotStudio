@@ -25,7 +25,7 @@ import { APP_URL } from "@/lib/utils";
 
 const TITLE = "App Store screenshot tools compared";
 const DESCRIPTION =
-  "AppMockUp, Previewed, Rotato, Shotbot, Screenshots.pro — what each does well, where each falls short for a once-a-year launch, and where ShotStudio fits.";
+  "AppMockUp, Previewed, Shotbot, AppLaunchpad and AppScreens compared: pricing, what each does well, where each falls short for a once-a-year launch, and where ShotStudio fits.";
 
 export const metadata: Metadata = hubMetadata({
   title: TITLE,

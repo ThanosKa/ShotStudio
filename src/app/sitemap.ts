@@ -44,11 +44,13 @@ const REVISED = {
   // home, pricing and the category hub now link it (hub count 9 -> 10).
   // 2026-11-06: new /alternatives/applaunchpad; the alternatives hub lists it.
   // 2026-11-09: new /alternatives/appscreens; the alternatives hub lists it.
+  // 2026-11-13: hub descriptions name the five indexed competitors (not the
+  // pruned Rotato / Screenshots.pro) on the alternatives, category and blog hubs.
   home: "2026-11-04",
   pricing: "2026-11-04",
-  screenshotsForHub: "2026-11-04",
-  alternativesHub: "2026-11-09",
-  blogHub: "2026-07-29",
+  screenshotsForHub: "2026-11-13",
+  alternativesHub: "2026-11-13",
+  blogHub: "2026-11-13",
   privacy: "2026-07-29",
   terms: "2026-07-29",
   /** /tools/app-store-screenshot-sizes, new 2026-10-01; 2026-11-11 Apple's October 2026 spec update. */

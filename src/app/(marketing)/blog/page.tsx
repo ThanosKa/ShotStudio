@@ -123,7 +123,7 @@ export default function BlogIndexPage() {
               label: "App Store screenshot tool alternatives",
               eyebrow: "Compare",
               description:
-                "AppMockUp, Previewed, Rotato, Shotbot and Screenshots.pro, with the honest case for each.",
+                "AppMockUp, Previewed, Shotbot, AppLaunchpad and AppScreens, with the honest case for each.",
             },
             {
               href: "/pricing",
