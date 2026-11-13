@@ -33,8 +33,6 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 - Marketing copy, blog posts or SEO pages → read `.agents/product-marketing.md`; code wins on product facts
 - Pruning or restoring a `/screenshots-for` or `/alternatives` URL → read "How pruning works" in `PRUNED.md`
 
-The `backend` skill also came from another project (`@repo/database`, `validatedActionWithUser`): this repo's code and docs win over it.
-
 ## Scope
 
 Out of scope for v1, so push back on requests that drift here: subscriptions, refund UI, persistent generation history, team accounts, public API, i18n, dashboard theme switching (it is dark-only), Google Play or multi-device output. The free size checker at `/tools/app-store-screenshot-sizes` is marketing, not product output.
