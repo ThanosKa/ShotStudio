@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { grant } from "@/lib/credits";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { ensureUser } from "@/lib/db/queries";
+import { createUserIfAbsent } from "@/lib/db/queries";
 import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
 import { logger } from "@/lib/logger";
 import { getCreditPackage } from "@/lib/packages";
@@ -95,19 +95,22 @@ export async function runCheckoutFulfillment(
   const pack = getCreditPackage(packageId);
   if (!pack) return { kind: "unknown_pack", packageId };
 
+  // The Stripe email never changes an existing User's email: it only creates
+  // the row when the Clerk webhook and JIT User Sync have not run yet.
   const checkoutEmail = session.customer_details?.email ?? null;
-  if (checkoutEmail) {
-    await ensureUser(userId, checkoutEmail);
-  } else {
-    const [existing] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-    if (!existing) {
+  if (checkoutEmail) await createUserIfAbsent(userId, checkoutEmail);
+  const [existing] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (!existing) {
+    if (checkoutEmail) {
+      log.warn("user row absent and checkout email belongs to another user — Clerk webhook race");
+    } else {
       log.warn("user row absent and no checkout email — Clerk webhook race");
-      return { kind: "user_not_ready", userId };
     }
+    return { kind: "user_not_ready", userId };
   }
 
   const { granted, balance: newBalance } = await grant(userId, pack.credits, session.id);

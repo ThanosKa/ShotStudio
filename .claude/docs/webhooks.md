@@ -17,6 +17,12 @@ Preserve all of these on any change:
 - For Stripe, on handler error or any non-2xx answer (such as `user_not_ready`) the route deletes the claim so Stripe's retry is processed. If writing `done` fails after success, the route still answers 200; the claim expires and `grant()` makes a retry harmless.
 - Failures a retry cannot fix (`invalid_metadata`, `unknown_pack`) log an error and return 200.
 
+## Stripe email
+
+- Fulfilment never changes the email of an existing User. With no User row yet, it creates one with the Stripe email through `createUserIfAbsent`, which never updates a row and creates nothing when another User already has that email.
+- No row and no Stripe email, or no row and a Stripe email that belongs to another User: `user_not_ready`, so Stripe retries until the Clerk webhook or JIT User Sync has created the row. Log the case and the User id, never the email.
+- The purchase email still goes to the Stripe email.
+
 ## Clerk events
 
 - `user.created` sends the welcome email only when the insert created the row.

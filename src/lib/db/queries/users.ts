@@ -28,6 +28,19 @@ export async function ensureUser(userId: string, email: string) {
     });
 }
 
+/**
+ * Inserts the User row with 0 Credits, or does nothing: it never updates an
+ * existing row, and an email that already belongs to another User creates
+ * nothing instead of throwing. For an email that is not the User Email's
+ * source (the Stripe payment email); `ensureUser` overwrites the email instead.
+ */
+export async function createUserIfAbsent(userId: string, email: string) {
+  await db
+    .insert(users)
+    .values({ id: userId, email, credits: 0 })
+    .onConflictDoNothing();
+}
+
 export async function getEmailAndEnsureUser(
   userId: string,
 ): Promise<string | null> {
