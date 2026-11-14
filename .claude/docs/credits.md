@@ -4,11 +4,13 @@ Silent bugs here cost real money. Always add tests for changes to `src/lib/credi
 
 ## Debit before AI, refund on failure
 
-- Generations: `debitAndStartGeneration` (private to `src/lib/generation/lifecycle.ts`, reached through `runGeneration`) atomically debits one credit, writes the `usage` transaction and inserts the `pending` generation row.
-- Purchases: `grant` from `src/lib/credits.ts`.
-- Failures: `refund` from `src/lib/credits.ts`. A failed or abandoned Generation is refunded inside the transaction that moves its row from `pending` to `failed` (`refund(..., tx)`), so the Refund happens exactly once whichever path gets there first.
+The Credit Ledger (`src/lib/credits.ts`) is the only writer of `users.credits` and `transactions`, through its three movements:
 
-All three are wrapped in `db.transaction()`. Every balance change goes through them; do not bypass them.
+- Generations: `debit`. It takes one Credit and writes the `usage` Transaction directly inside the caller's transaction (`within` is required, no savepoint). `runGeneration` (`src/lib/generation/lifecycle.ts`) opens that transaction, calls `debit(..., tx)` and inserts the `pending` generation row in it, so the Debit never happens without the Generation it pays for.
+- Purchases: `grant`.
+- Failures: `refund`. A failed or abandoned Generation is refunded inside the transaction that moves its row from `pending` to `failed` (`refund(..., tx)`), so the Refund happens exactly once whichever path gets there first.
+
+Each runs in a database transaction: `grant` opens its own, `refund` opens its own or a savepoint in the caller's, and `debit` uses the caller's. Every balance change goes through them; do not bypass them.
 
 ## `grant()` ON CONFLICT requires the partial-index `WHERE`
 
