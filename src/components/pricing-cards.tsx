@@ -7,15 +7,10 @@ import {
   CREDIT_PACKAGE_LIST,
   type CreditPackageId,
   formatPriceUSD,
+  packBlurb,
 } from "@/lib/packages";
 import { parseApiError } from "@/lib/http";
 import { pluralize } from "@/lib/utils";
-
-const BLURBS: Record<CreditPackageId, string> = {
-  starter: "One App Store set",
-  growth: "Four sets — for iterating",
-  studio: "Ten sets — for portfolios",
-};
 
 export function PricingCards() {
   const [busy, setBusy] = useState<CreditPackageId | null>(null);
@@ -56,7 +51,7 @@ export function PricingCards() {
           <Card key={p.id} className="flex h-full flex-col">
             <CardHeader>
               <CardTitle className="text-heading-sm">{p.name}</CardTitle>
-              <CardDescription>{BLURBS[p.id]}</CardDescription>
+              <CardDescription>{packBlurb(p)}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col justify-between gap-8 pb-6">
               <div>
