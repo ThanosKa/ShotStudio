@@ -1,6 +1,6 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import type { Logger } from "pino";
-import { ensureUser } from "@/lib/db/queries";
+import { getEmailAndEnsureUser } from "@/lib/db/queries";
 import { jsonError } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import { rateLimitHeaders, type LimitResult } from "@/lib/ratelimit";
@@ -42,9 +42,7 @@ export async function withAuthenticatedUser(
     });
   }
 
-  const user = await currentUser();
-  const email = user?.emailAddresses[0]?.emailAddress ?? null;
-  if (email) await ensureUser(userId, email);
+  const email = await getEmailAndEnsureUser(userId);
 
   return handler({ userId, email, log: scoped });
 }
