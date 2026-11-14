@@ -1,9 +1,9 @@
-import { and, asc, eq, lt, sql } from "drizzle-orm";
+import { and, asc, eq, lt } from "drizzle-orm";
 import type { Logger } from "pino";
-import { InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
+import { debit, InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
 import { db, keepRequestAliveUntil } from "@/lib/db";
 import { markGenerationComplete } from "@/lib/db/queries";
-import { generations, transactions, users } from "@/lib/db/schema";
+import { generations } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { generateImage } from "@/lib/openrouter";
 import { STYLE_PRESETS, type StylePresetId } from "./presets";
@@ -49,36 +49,15 @@ function validateScreenshots(
 }
 
 /**
- * Atomic: decrement one credit, write the matching `usage` Transaction, and
- * insert the Pending Generation row in one DB transaction. Throws
+ * Atomic: the Credit Ledger's Debit (one Credit and its `usage` Transaction)
+ * and the Pending Generation row, in one DB transaction. Throws
  * InsufficientCreditsError or UserNotFoundError; never partially applied.
  */
 async function debitAndStartGeneration(
   input: Omit<RunGenerationInput, "pitch" | "audience" | "screenshots">,
 ): Promise<{ generationId: string }> {
   return db.transaction(async (tx) => {
-    const updated = await tx
-      .update(users)
-      .set({ credits: sql`${users.credits} - 1` })
-      .where(sql`${users.id} = ${input.userId} AND ${users.credits} >= 1`)
-      .returning({ credits: users.credits });
-
-    if (updated.length === 0) {
-      const [exists] = await tx
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.id, input.userId))
-        .limit(1);
-      if (!exists) throw new UserNotFoundError(input.userId);
-      throw new InsufficientCreditsError();
-    }
-
-    await tx.insert(transactions).values({
-      userId: input.userId,
-      type: "usage",
-      amount: -1,
-      metadata: { reason: "generation" },
-    });
+    await debit(input.userId, { reason: "generation" }, tx);
 
     const [row] = await tx
       .insert(generations)
