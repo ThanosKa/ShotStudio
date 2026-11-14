@@ -28,6 +28,9 @@ export async function POST(req: NextRequest) {
         scoped.info({ userId }, "user inserted");
         if (outcome.welcome.sent) {
           scoped.info({ userId, emailId: outcome.welcome.emailId }, "welcome email sent");
+        } else if (outcome.welcome.thrown) {
+          scoped.error({ err: outcome.welcome.err }, "clerk webhook handler failed");
+          return new Response("Handler error", { status: 500 });
         } else {
           scoped.error({ err: outcome.welcome.err, userId }, "welcome email failed");
         }

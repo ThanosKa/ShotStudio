@@ -38,6 +38,15 @@ describe("applyClerkEvent", () => {
     });
   });
 
+  it("reports a rejected welcome email as thrown, after the row is inserted", async () => {
+    const err = new Error("network");
+    welcome.mockRejectedValueOnce(err);
+    expect(await applyClerkEvent(created("u5", "e@example.com"))).toEqual({
+      kind: "created",
+      welcome: { sent: false, err, thrown: true },
+    });
+  });
+
   it("skips events it cannot act on", async () => {
     expect(await applyClerkEvent(created("u3"))).toEqual({ kind: "skipped", reason: "no_email" });
     expect(await applyClerkEvent(ev("user.updated", { id: "u3", email_addresses: [] }))).toEqual({

@@ -6,7 +6,7 @@ import { users } from "@/lib/db/schema";
 import { sendWelcomeEmail } from "@/lib/emails/welcome";
 
 export type ClerkEventOutcome =
-  | { kind: "created"; welcome: { sent: true; emailId?: string } | { sent: false; err: unknown } }
+  | { kind: "created"; welcome: { sent: true; emailId?: string } | { sent: false; err: unknown; thrown?: true } }
   | { kind: "already_exists" }
   | { kind: "upserted" }
   | { kind: "anonymized" }
@@ -15,7 +15,8 @@ export type ClerkEventOutcome =
 
 /**
  * Applies a verified Clerk event to the `users` table. Throws only on database
- * errors, which the route turns into 500 so Clerk retries.
+ * errors. A welcome email that rejects comes back in the outcome (`thrown`), so
+ * the route can log the insert before answering 500.
  */
 export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutcome> {
   if (evt.type === "user.created") {
@@ -30,15 +31,21 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
       .returning({ id: users.id });
     if (inserted.length === 0) return { kind: "already_exists" };
 
-    const { data, error } = await sendWelcomeEmail({
-      to: email,
-      userId: id,
-      firstName: first_name,
-    });
-    return {
-      kind: "created",
-      welcome: error ? { sent: false, err: error } : { sent: true, emailId: data?.id },
-    };
+    try {
+      const { data, error } = await sendWelcomeEmail({
+        to: email,
+        userId: id,
+        firstName: first_name,
+      });
+      return {
+        kind: "created",
+        welcome: error ? { sent: false, err: error } : { sent: true, emailId: data?.id },
+      };
+    } catch (err) {
+      // The row is already inserted; report the rejection so the route can log
+      // the insert first and then answer 500, as it always has.
+      return { kind: "created", welcome: { sent: false, err, thrown: true } };
+    }
   }
 
   if (evt.type === "user.updated") {
