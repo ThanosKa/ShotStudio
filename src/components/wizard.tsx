@@ -478,7 +478,7 @@ function StepScreenshots({
             <span className="text-muted-foreground"> / 3</span>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            PNG or JPEG · max 10 MB each. Each role tells the AI which feature
+            PNG or JPEG. Each role tells the AI which feature
             to highlight.
           </p>
         </div>

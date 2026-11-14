@@ -239,7 +239,7 @@ export default async function CategoryPage({
             {
               n: "01",
               title: "Upload three screenshots",
-              body: "Hero feature, differentiator, one more. PNG or JPEG, up to 10 MB. Never written to disk.",
+              body: "Hero feature, differentiator, one more. PNG or JPEG. Never written to disk.",
             },
             {
               n: "02",
