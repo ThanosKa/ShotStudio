@@ -5,7 +5,9 @@
  *   Phase 1 — Clerk  → `users` rows (id + email), credits start at 0.
  *   Phase 2 — Stripe → `transactions` rows of type `purchase`, and the matching
  *                      credit grant, replayed through the SAME `grant()` used
- *                      by the webhook, keyed on the Checkout Session id.
+ *                      by the webhook, keyed on the Checkout Session id. The
+ *                      Stripe email only creates a User row that is missing;
+ *                      it never changes an existing User's email.
  *
  * Why `grant()` and not raw inserts: `grant()` is idempotent on
  * `transactions.stripe_payment_id` via the PARTIAL unique index, so this script
@@ -33,7 +35,7 @@
 import { createClerkClient } from "@clerk/nextjs/server";
 import type Stripe from "stripe";
 import { grant } from "@/lib/credits";
-import { ensureUser } from "@/lib/db/queries";
+import { createUserIfAbsent, ensureUser } from "@/lib/db/queries";
 import { CREDIT_PACKAGE_LIST, getCreditPackage } from "@/lib/packages";
 import { stripe } from "@/lib/stripe";
 
@@ -219,7 +221,7 @@ async function main() {
       continue;
     }
     try {
-      if (plan.email) await ensureUser(plan.userId, plan.email);
+      if (plan.email) await createUserIfAbsent(plan.userId, plan.email);
       const { balance } = await grant(plan.userId, plan.credits, plan.sessionId);
       granted++;
       log(`${label}  → balance ${balance}`);
