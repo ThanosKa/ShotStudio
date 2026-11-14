@@ -2,7 +2,7 @@ const STEPS = [
   {
     n: "01",
     title: "Upload three screenshots",
-    body: "Drop your hero feature, your differentiator, and one more. PNG or JPEG, up to 10 MB each. They never touch our disk.",
+    body: "Drop your hero feature, your differentiator, and one more. PNG or JPEG. They never touch our disk.",
   },
   {
     n: "02",
