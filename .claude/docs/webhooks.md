@@ -25,6 +25,8 @@ Preserve all of these on any change:
 
 ## Clerk events
 
+The route only verifies the event and maps the outcome to a log line and a status; `applyClerkEvent` (`src/lib/identity/user-sync.ts`) does the database and email work. It throws only on database errors; a welcome email that rejects comes back in the outcome (`thrown`) and the route answers 500.
+
 - `user.created` sends the welcome email only when the insert created the row.
 - `user.updated` upserts through `ensureUser`, because it can arrive before `user.created`.
 - `user.deleted` anonymizes the row instead of deleting it: `transactions.user_id` is `ON DELETE RESTRICT` to preserve financial records.
