@@ -2,7 +2,6 @@ import { and, asc, eq, lt } from "drizzle-orm";
 import type { Logger } from "pino";
 import { debit, InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
 import { db, keepRequestAliveUntil } from "@/lib/db";
-import { markGenerationComplete } from "@/lib/db/queries";
 import { generations } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { generateImage } from "@/lib/openrouter";
@@ -128,6 +127,14 @@ async function runShot(
   }
   log.error({ err: lastError, role }, "shot exhausted retries");
   throw lastError;
+}
+
+/** Only a `pending` row completes: one already failed and refunded stays so. */
+async function markGenerationComplete(generationId: string) {
+  await db
+    .update(generations)
+    .set({ status: "complete", completedAt: new Date() })
+    .where(and(eq(generations.id, generationId), eq(generations.status, "pending")));
 }
 
 /**
