@@ -8,6 +8,8 @@ export type CreditPackage = {
   priceCents: number;
   stripePriceId: string | undefined;
   featured?: boolean;
+  /** Short phrase shown after the Set count on the pricing card. */
+  purpose?: string;
 };
 
 export const CREDIT_PACKAGES: Record<CreditPackageId, CreditPackage> = {
@@ -23,6 +25,7 @@ export const CREDIT_PACKAGES: Record<CreditPackageId, CreditPackage> = {
     name: "Growth",
     credits: 5,
     priceCents: 1700,
+    purpose: "for iterating",
     stripePriceId: process.env.STRIPE_PRICE_GROWTH,
     featured: true,
   },
@@ -31,6 +34,7 @@ export const CREDIT_PACKAGES: Record<CreditPackageId, CreditPackage> = {
     name: "Studio",
     credits: 12,
     priceCents: 3700,
+    purpose: "for portfolios",
     stripePriceId: process.env.STRIPE_PRICE_STUDIO,
   },
 };
@@ -49,4 +53,10 @@ export function getCreditPackage(id: string): CreditPackage | null {
     return CREDIT_PACKAGES[id as CreditPackageId];
   }
   return null;
+}
+
+/** One Credit is one Set, so the count comes from the pack's own Credits. */
+export function packBlurb(pack: Pick<CreditPackage, "credits" | "purpose">): string {
+  const sets = `${pack.credits} ${pack.credits === 1 ? "set" : "sets"}`;
+  return pack.purpose ? `${sets} — ${pack.purpose}` : sets;
 }
