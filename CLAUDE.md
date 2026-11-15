@@ -29,7 +29,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 - Schema, migrations, DB scripts or DB-backed tests → read `.claude/docs/database.md`
 - Styling → read `.doc/DESIGN.md`; tokens live in `src/app/globals.css`
 - User-facing errors, toasts or empty states → read `.doc/ux-writing.md`; it came from another project, so apply its copy rules and ignore its paths and i18n
-- Domain terms → read `.doc/CONTEXT.md`; its Generation section is stale (four shots, Title Shot, Tagline, old presets), so `src/lib/generation/` wins
+- Domain terms → read `GLOSSARY.md`
 - Marketing copy, blog posts or SEO pages → read `.agents/product-marketing.md`; code wins on product facts
 - Pruning or restoring a `/screenshots-for` or `/alternatives` URL → read "How pruning works" in `PRUNED.md`
 
