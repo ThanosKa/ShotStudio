@@ -1,9 +1,8 @@
+import { currentUser } from "@clerk/nextjs/server";
 import type { WebhookEvent } from "@clerk/nextjs/webhooks";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { ensureUser } from "@/lib/db/queries";
 import { users } from "@/lib/db/schema";
-import { sendWelcomeEmail } from "@/lib/emails/welcome";
 
 export type ClerkEventOutcome =
   | { kind: "created"; welcome: { sent: true; emailId?: string } | { sent: false; err: unknown; thrown?: true } }
@@ -24,6 +23,46 @@ export function pickUserEmail(input: {
   const { addresses, primaryId } = input;
   const primary = primaryId ? addresses.find((a) => a.id === primaryId) : undefined;
   return (primary ?? addresses[0])?.email ?? null;
+}
+
+/**
+ * Just-in-time user sync — Clerk's recommended pattern over webhooks.
+ * Idempotent: safe to call on every authenticated page load and from server
+ * routes before any credit operation, to close the Clerk-vs-Stripe webhook race.
+ * https://clerk.com/blog/just-in-time-api-requests-are-replacing-webhooks
+ */
+export async function ensureUser(userId: string, email: string) {
+  await db
+    .insert(users)
+    .values({ id: userId, email, credits: 0 })
+    .onConflictDoUpdate({
+      target: users.id,
+      set: { email: sql`excluded.email` },
+    });
+}
+
+/**
+ * Inserts the User row with 0 Credits, or does nothing: it never updates an
+ * existing row, and an email that already belongs to another User creates
+ * nothing instead of throwing. For an email that is not the User Email's
+ * source (the Stripe payment email); `ensureUser` overwrites the email instead.
+ */
+export async function createUserIfAbsent(userId: string, email: string) {
+  await db
+    .insert(users)
+    .values({ id: userId, email, credits: 0 })
+    .onConflictDoNothing();
+}
+
+/** JIT User Sync for the signed-in user. Call AFTER the rate limit. */
+export async function syncSignedInUser(userId: string): Promise<string | null> {
+  const user = await currentUser();
+  const email = pickUserEmail({
+    addresses: user?.emailAddresses.map((a) => ({ id: a.id, email: a.emailAddress })) ?? [],
+    primaryId: user?.primaryEmailAddressId,
+  });
+  if (email) await ensureUser(userId, email);
+  return email;
 }
 
 /**
@@ -48,6 +87,9 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
     if (inserted.length === 0) return { kind: "already_exists" };
 
     try {
+      // Loaded here, not at the top: the Resend client throws at import without
+      // its API key, and every signed-in route imports this module.
+      const { sendWelcomeEmail } = await import("@/lib/emails/welcome");
       const { data, error } = await sendWelcomeEmail({
         to: email,
         userId: id,

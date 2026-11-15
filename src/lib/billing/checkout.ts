@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { grant } from "@/lib/credits";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { createUserIfAbsent } from "@/lib/db/queries";
+import { createUserIfAbsent } from "@/lib/identity/user-sync";
 import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
 import { logger } from "@/lib/logger";
 import { getCreditPackage } from "@/lib/packages";

@@ -6,7 +6,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 
 - **Generation**: `src/components/wizard.tsx` → `POST /api/generations` → `runGeneration` (`src/lib/generation/lifecycle.ts`): debit one credit, generate each shot through OpenRouter, upscale (sharp under Next, the Cloudflare Images binding on the Worker), return data URLs.
 - **Purchase**: `POST /api/checkout` → Stripe Checkout → `/api/webhooks/stripe` → `runCheckoutFulfillment` (`src/lib/billing/checkout.ts`) → `grant()` → purchase email.
-- **Users**: the Clerk webhook and `ensureUser` (on authenticated routes) both write the `users` row, because either can arrive first. Checkout fulfilment only creates a missing row with the Stripe email (`createUserIfAbsent`) and never changes an existing User's email.
+- **Users**: User Sync (`src/lib/identity/user-sync.ts`) owns every write to the `users` row: the Clerk webhook and `ensureUser` (on authenticated routes) both write the `users` row, because either can arrive first. Checkout fulfilment only creates a missing row with the Stripe email (`createUserIfAbsent`) and never changes an existing User's email.
 
 `src/app/home/` is the signed-in app; `src/app/(marketing)/` is the public SEO site, fed by `src/data/`. `src/proxy.ts` is the Next 16 middleware file, where Clerk guards routes. `emails/` holds templates; `src/lib/emails/` sends them.
 

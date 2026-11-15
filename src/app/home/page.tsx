@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { BuyCreditsPanel } from "@/components/buy-credits-panel";
 import { Wizard } from "@/components/wizard";
-import { getEmailAndEnsureUser, getUserCredits } from "@/lib/db/queries";
+import { getUserCredits } from "@/lib/db/queries";
+import { syncSignedInUser } from "@/lib/identity/user-sync";
 
 export const metadata: Metadata = {
   title: "Studio",
@@ -15,7 +16,7 @@ export default async function HomePage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  await getEmailAndEnsureUser(userId);
+  await syncSignedInUser(userId);
 
   const credits = await getUserCredits(userId);
 
