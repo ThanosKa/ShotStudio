@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { pickUserEmail } from "@/lib/identity/user-sync";
 
 export const getUserCredits = cache(async (userId: string): Promise<number> => {
   const row = await db.query.users.findFirst({
@@ -45,7 +46,7 @@ export async function getEmailAndEnsureUser(
   userId: string,
 ): Promise<string | null> {
   const user = await currentUser();
-  const email = user?.emailAddresses[0]?.emailAddress ?? null;
+  const email = pickUserEmail(user?.emailAddresses.map((a) => a.emailAddress) ?? []);
   if (email) await ensureUser(userId, email);
   return email;
 }
