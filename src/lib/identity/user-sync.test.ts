@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebhookEvent } from "@clerk/nextjs/webhooks";
 import { sendWelcomeEmail } from "@/lib/emails/welcome";
-import { applyClerkEvent } from "./user-sync";
+import { applyClerkEvent, pickUserEmail } from "./user-sync";
 
 vi.mock("@/lib/emails/welcome", () => ({ sendWelcomeEmail: vi.fn() }));
 const welcome = vi.mocked(sendWelcomeEmail);
@@ -70,5 +70,15 @@ describe("applyClerkEvent", () => {
     ).toEqual({ kind: "upserted" });
     expect(await applyClerkEvent(ev("user.deleted", { id: "u4", deleted: true }))).toEqual({ kind: "anonymized" });
     expect(await applyClerkEvent(ev("user.deleted", { id: "nobody", deleted: true }))).toEqual({ kind: "no_row" });
+  });
+});
+
+describe("pickUserEmail", () => {
+  it("returns the first address as it is", () => {
+    expect(pickUserEmail(["A@Example.com", "b@example.com"])).toBe("A@Example.com");
+  });
+
+  it("returns null for an empty list", () => {
+    expect(pickUserEmail([])).toBeNull();
   });
 });

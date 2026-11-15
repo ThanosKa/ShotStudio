@@ -13,6 +13,11 @@ export type ClerkEventOutcome =
   | { kind: "no_row" }
   | { kind: "skipped"; reason: "no_email" | "no_id" | "not_deleted" | "unhandled_type" };
 
+/** The User Email rule: the first address as it is, or null when there is none. */
+export function pickUserEmail(addresses: readonly string[]): string | null {
+  return addresses[0] ?? null;
+}
+
 /**
  * Applies a verified Clerk event to the `users` table. Throws only on database
  * errors. A welcome email that rejects comes back in the outcome (`thrown`), so
@@ -21,7 +26,7 @@ export type ClerkEventOutcome =
 export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutcome> {
   if (evt.type === "user.created") {
     const { id, email_addresses, first_name } = evt.data;
-    const email = email_addresses[0]?.email_address;
+    const email = pickUserEmail(email_addresses.map((a) => a.email_address));
     if (!email) return { kind: "skipped", reason: "no_email" };
 
     const inserted = await db
@@ -50,7 +55,7 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
 
   if (evt.type === "user.updated") {
     const { id, email_addresses } = evt.data;
-    const email = email_addresses[0]?.email_address;
+    const email = pickUserEmail(email_addresses.map((a) => a.email_address));
     if (!email) return { kind: "skipped", reason: "no_email" };
     // Upsert: an "updated" event can arrive before "created", and the first
     // signed-in request (JIT User Sync) may not have run yet either.
