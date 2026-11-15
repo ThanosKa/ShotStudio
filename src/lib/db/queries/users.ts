@@ -46,7 +46,10 @@ export async function getEmailAndEnsureUser(
   userId: string,
 ): Promise<string | null> {
   const user = await currentUser();
-  const email = pickUserEmail(user?.emailAddresses.map((a) => a.emailAddress) ?? []);
+  const email = pickUserEmail({
+    addresses: user?.emailAddresses.map((a) => ({ id: a.id, email: a.emailAddress })) ?? [],
+    primaryId: user?.primaryEmailAddressId,
+  });
   if (email) await ensureUser(userId, email);
   return email;
 }

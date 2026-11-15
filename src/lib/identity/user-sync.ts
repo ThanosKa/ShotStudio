@@ -13,9 +13,17 @@ export type ClerkEventOutcome =
   | { kind: "no_row" }
   | { kind: "skipped"; reason: "no_email" | "no_id" | "not_deleted" | "unhandled_type" };
 
-/** The User Email rule: the first address as it is, or null when there is none. */
-export function pickUserEmail(addresses: readonly string[]): string | null {
-  return addresses[0] ?? null;
+/**
+ * The User Email rule: the address whose id is the primary address id; else
+ * the first address; null when there is none. Addresses are kept as they are.
+ */
+export function pickUserEmail(input: {
+  addresses: readonly { id: string; email: string }[];
+  primaryId?: string | null;
+}): string | null {
+  const { addresses, primaryId } = input;
+  const primary = primaryId ? addresses.find((a) => a.id === primaryId) : undefined;
+  return (primary ?? addresses[0])?.email ?? null;
 }
 
 /**
@@ -25,8 +33,11 @@ export function pickUserEmail(addresses: readonly string[]): string | null {
  */
 export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutcome> {
   if (evt.type === "user.created") {
-    const { id, email_addresses, first_name } = evt.data;
-    const email = pickUserEmail(email_addresses.map((a) => a.email_address));
+    const { id, email_addresses, first_name, primary_email_address_id } = evt.data;
+    const email = pickUserEmail({
+      addresses: email_addresses.map((a) => ({ id: a.id, email: a.email_address })),
+      primaryId: primary_email_address_id,
+    });
     if (!email) return { kind: "skipped", reason: "no_email" };
 
     const inserted = await db
@@ -54,8 +65,11 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
   }
 
   if (evt.type === "user.updated") {
-    const { id, email_addresses } = evt.data;
-    const email = pickUserEmail(email_addresses.map((a) => a.email_address));
+    const { id, email_addresses, primary_email_address_id } = evt.data;
+    const email = pickUserEmail({
+      addresses: email_addresses.map((a) => ({ id: a.id, email: a.email_address })),
+      primaryId: primary_email_address_id,
+    });
     if (!email) return { kind: "skipped", reason: "no_email" };
     // Upsert: an "updated" event can arrive before "created", and the first
     // signed-in request (JIT User Sync) may not have run yet either.
