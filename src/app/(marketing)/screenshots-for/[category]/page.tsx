@@ -16,7 +16,7 @@ import {
   webPageSchema,
   websiteSchema,
 } from "@/lib/marketing/schema";
-import { categorySnippet } from "@/lib/marketing/meta";
+import { categorySnippet, socialMetadata } from "@/lib/marketing/meta";
 import { CATEGORIES, getCategoryBySlug } from "@/data/categories";
 import { COMPETITORS } from "@/data/competitors";
 import { isCompetitorPruned } from "@/lib/marketing/pruned";
@@ -50,11 +50,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: `/screenshots-for/${data.slug}` },
-    openGraph: {
+    ...socialMetadata({
       title: `${title} — ShotStudio`,
       description,
       url: `${APP_URL}/screenshots-for/${data.slug}`,
-    },
+    }),
   };
 }
 
