@@ -36,6 +36,7 @@ import { createClerkClient } from "@clerk/nextjs/server";
 import type Stripe from "stripe";
 import { grant } from "@/lib/credits";
 import { createUserIfAbsent, ensureUser } from "@/lib/db/queries";
+import { pickUserEmail } from "@/lib/identity/user-sync";
 import { CREDIT_PACKAGE_LIST, getCreditPackage } from "@/lib/packages";
 import { stripe } from "@/lib/stripe";
 
@@ -107,10 +108,10 @@ async function phase1BackfillClerkUsers(): Promise<{
     if (page.data.length === 0) break;
 
     for (const user of page.data) {
-      const email =
-        user.primaryEmailAddress?.emailAddress ??
-        user.emailAddresses[0]?.emailAddress ??
-        null;
+      const email = pickUserEmail({
+        addresses: user.emailAddresses.map((a) => ({ id: a.id, email: a.emailAddress })),
+        primaryId: user.primaryEmailAddressId,
+      });
       if (!email) {
         skipped++;
         log(`  skip  ${user.id} — no email address on the Clerk record`);

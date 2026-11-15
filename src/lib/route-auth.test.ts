@@ -77,6 +77,23 @@ describe("withAuthenticatedUser", () => {
     expect(await rowOf("u_2")).toMatchObject({ id: "u_2", email: "a@test", credits: 0 });
   });
 
+  it("keeps Clerk's primary address when it is not the first", async () => {
+    clerk.auth.mockResolvedValue({ userId: "u_4" });
+    clerk.currentUser.mockResolvedValue({
+      emailAddresses: [
+        { id: "idn_1", emailAddress: "first@test" },
+        { id: "idn_2", emailAddress: "primary@test" },
+      ],
+      primaryEmailAddressId: "idn_2",
+    });
+    const handler = vi.fn(async () => new Response("ok"));
+
+    await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed) }, handler);
+
+    expect(handler).toHaveBeenCalledWith(expect.objectContaining({ userId: "u_4", email: "primary@test" }));
+    expect(await rowOf("u_4")).toMatchObject({ email: "primary@test" });
+  });
+
   it("writes no row and hands the handler null when Clerk has no email", async () => {
     clerk.auth.mockResolvedValue({ userId: "u_3" });
     clerk.currentUser.mockResolvedValue(clerkUser());
