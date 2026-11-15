@@ -70,7 +70,9 @@ async function runShot(
     } catch (err) {
       lastError = err;
       log.warn({ err, role, attempt }, "shot attempt failed");
-      await new Promise((r) => setTimeout(r, 500 + Math.random() * 500));
+      if (attempt === 0) {
+        await new Promise((r) => setTimeout(r, 500 + Math.random() * 500));
+      }
     }
   }
   log.error({ err: lastError, role }, "shot exhausted retries");

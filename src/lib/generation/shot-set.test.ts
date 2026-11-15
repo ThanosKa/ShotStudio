@@ -1,3 +1,4 @@
+import { setTimeout as realSleep } from "node:timers/promises";
 import pino from "pino";
 import sharp from "sharp";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -53,6 +54,7 @@ describe("generateSet", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.useRealTimers();
   });
 
@@ -143,4 +145,42 @@ describe("generateSet", () => {
     expect(outcome).toEqual({ kind: "failed", failed: 1, total: 3 });
     expect(callsFor("data:ref-2")).toHaveLength(2);
   });
+  test("a Shot Role whose two attempts both fail settles after the single wait between them", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+    vi.mocked(generateImage).mockImplementation(async ({ referenceImages }) => {
+      if (referenceImages![0] === "data:ref-2") throw new Error("down");
+      return solidPng();
+    });
+    let settled: Awaited<ReturnType<typeof generateSet>> | undefined;
+    void generateSet(brief, log).then((o) => {
+      settled = o;
+    });
+
+    await vi.advanceTimersByTimeAsync(1000);
+    // The other two Shots upscale with real sharp work; wait for it in real time.
+    for (let i = 0; i < 100 && !settled; i++) await realSleep(50);
+
+    expect(settled).toEqual({ kind: "failed", failed: 1, total: 3 });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  test.each([
+    [0, 500],
+    [0.999, 999.5],
+  ])(
+    "the wait between the first and second attempt is between 0.5 and 1 s (random %s)",
+    async (random, waitMs) => {
+      vi.spyOn(Math, "random").mockReturnValue(random);
+      vi.mocked(generateImage).mockImplementation(async ({ referenceImages }) => {
+        if (referenceImages![0] === "data:ref-1") throw new Error("down");
+        return solidPng();
+      });
+      void generateSet(brief, log);
+
+      await vi.advanceTimersByTimeAsync(Math.floor(waitMs) - 1);
+      expect(callsFor("data:ref-1")).toHaveLength(1);
+      await vi.advanceTimersByTimeAsync(2);
+      expect(callsFor("data:ref-1")).toHaveLength(2);
+    },
+  );
 });
