@@ -18,7 +18,7 @@ export type ClerkEventOutcome =
  * the first address; null when there is none. Addresses are kept as they are.
  */
 export function pickUserEmail(input: {
-  addresses: readonly { id?: string; email: string }[];
+  addresses: readonly { id: string; email: string }[];
   primaryId?: string | null;
 }): string | null {
   const { addresses, primaryId } = input;
