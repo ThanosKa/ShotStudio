@@ -1,8 +1,9 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import type { WebhookEvent } from "@clerk/nextjs/webhooks";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import { logger } from "@/lib/logger";
 
 export type ClerkEventOutcome =
   | { kind: "created"; welcome: { sent: true; emailId?: string } | { sent: false; err: unknown; thrown?: true } }
@@ -32,13 +33,98 @@ export function pickUserEmail(input: {
  * https://clerk.com/blog/just-in-time-api-requests-are-replacing-webhooks
  */
 export async function ensureUser(userId: string, email: string) {
-  await db
-    .insert(users)
-    .values({ id: userId, email, credits: 0 })
-    .onConflictDoUpdate({
-      target: users.id,
-      set: { email: sql`excluded.email` },
-    });
+  await withEmailReleased(userId, email, () =>
+    db
+      .insert(users)
+      .values({ id: userId, email, credits: 0 })
+      .onConflictDoUpdate({
+        target: users.id,
+        set: { email: sql`excluded.email` },
+      }),
+  );
+}
+
+/**
+ * Runs a write of `email` onto `userId`'s row. If another User row holds that
+ * email, asks Clerk about that row's account: a deleted (not found) account is
+ * anonymized, and a live one that no longer lists the address gets its current
+ * User Email; then the write runs again. Otherwise the write's error stands.
+ */
+async function withEmailReleased<T>(userId: string, email: string, write: () => Promise<T>): Promise<T> {
+  try {
+    return await write();
+  } catch (err) {
+    if (!isUniqueViolation(err) || !(await releaseEmail(userId, email))) throw err;
+    return write();
+  }
+}
+
+/** Postgres unique_violation, raised by the driver or wrapped by Drizzle. */
+function isUniqueViolation(err: unknown): boolean {
+  let e = err;
+  for (let depth = 0; depth < 5 && typeof e === "object" && e !== null; depth++) {
+    if ((e as { code?: unknown }).code === "23505") return true;
+    e = (e as { cause?: unknown }).cause;
+  }
+  return false;
+}
+
+/** Clerk's 404, which is how its Backend API answers for a deleted user. */
+function isClerkNotFound(err: unknown): boolean {
+  // The check Clerk's own `isClerkAPIResponseError` makes, without importing
+  // `@clerk/nextjs/errors`, which pulls in client hooks.
+  const e = err as { constructor?: { kind?: unknown }; status?: unknown } | null;
+  return e?.constructor?.kind === "ClerkAPIResponseError" && e.status === 404;
+}
+
+/** True when another User row held `email` and no longer does. */
+async function releaseEmail(userId: string, email: string): Promise<boolean> {
+  const [holder] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.email, email), ne(users.id, userId)));
+  if (!holder) return false;
+  const log = logger.child({ action: "release_email", userId, releasedFromUserId: holder.id });
+
+  let account;
+  try {
+    account = await (await clerkClient()).users.getUser(holder.id);
+  } catch (err) {
+    if (!isClerkNotFound(err)) {
+      // Nothing is released on a failed lookup; the caller fails and retries.
+      log.warn({ err }, "email holder lookup failed");
+      return false;
+    }
+    await anonymizeUser(holder.id);
+    log.info({ reason: "clerk_user_not_found" }, "email released from another user");
+    return true;
+  }
+
+  const addresses = account.emailAddresses.map((a) => ({ id: a.id, email: a.emailAddress }));
+  if (addresses.some((a) => a.email.toLowerCase() === email.toLowerCase())) return false;
+  const current = pickUserEmail({ addresses, primaryId: account.primaryEmailAddressId });
+  // A live account with no email at all keeps the row: there is nothing to refresh it to.
+  if (!current) return false;
+  await db.update(users).set({ email: current }).where(eq(users.id, holder.id));
+  log.info({ reason: "email_no_longer_on_clerk_user" }, "email released from another user");
+  return true;
+}
+
+/**
+ * User Anonymization: the row stays, because `transactions.user_id` is
+ * ON DELETE RESTRICT; its email becomes a placeholder and its Stripe customer
+ * id is cleared. Returns whether a row matched.
+ */
+async function anonymizeUser(id: string): Promise<boolean> {
+  const result = await db
+    .update(users)
+    .set({
+      email: `deleted+${id}@anonymized.local`,
+      stripeCustomerId: sql`null`,
+    })
+    .where(eq(users.id, id))
+    .returning({ id: users.id });
+  return result.length > 0;
 }
 
 /**
@@ -79,11 +165,13 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
     });
     if (!email) return { kind: "skipped", reason: "no_email" };
 
-    const inserted = await db
-      .insert(users)
-      .values({ id, email, credits: 0 })
-      .onConflictDoNothing({ target: users.id })
-      .returning({ id: users.id });
+    const inserted = await withEmailReleased(id, email, () =>
+      db
+        .insert(users)
+        .values({ id, email, credits: 0 })
+        .onConflictDoNothing({ target: users.id })
+        .returning({ id: users.id }),
+    );
     if (inserted.length === 0) return { kind: "already_exists" };
 
     try {
@@ -127,15 +215,7 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
     const { id, deleted } = evt.data;
     if (!id) return { kind: "skipped", reason: "no_id" };
     if (deleted === false) return { kind: "skipped", reason: "not_deleted" };
-    const result = await db
-      .update(users)
-      .set({
-        email: `deleted+${id}@anonymized.local`,
-        stripeCustomerId: sql`null`,
-      })
-      .where(eq(users.id, id))
-      .returning({ id: users.id });
-    return result.length > 0 ? { kind: "anonymized" } : { kind: "no_row" };
+    return (await anonymizeUser(id)) ? { kind: "anonymized" } : { kind: "no_row" };
   }
 
   return { kind: "skipped", reason: "unhandled_type" };
