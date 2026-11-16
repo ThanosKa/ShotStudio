@@ -6,7 +6,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 
 - **Generation**: `src/components/wizard.tsx` → `POST /api/generations` → `runGeneration` (`src/lib/generation/lifecycle.ts`): debit one credit, generate each shot through OpenRouter, upscale (sharp under Next, the Cloudflare Images binding on the Worker), return data URLs.
 - **Purchase**: `POST /api/checkout` → Stripe Checkout → `/api/webhooks/stripe` → `runCheckoutFulfillment` (`src/lib/billing/checkout.ts`) → `grant()` → purchase email.
-- **Users**: the Clerk webhook and `ensureUser` (on authenticated routes) both write the `users` row, because either can arrive first.
+- **Users**: User Sync (`src/lib/identity/user-sync.ts`) owns creating the `users` row and writing its email (`src/lib/credits.ts` changes only the credits column): the Clerk webhook and `ensureUser` (on authenticated routes) both write the `users` row, because either can arrive first. Checkout fulfilment only creates a missing row with the Stripe email (`createUserIfAbsent`) and never changes an existing User's email.
 
 `src/app/home/` is the signed-in app; `src/app/(marketing)/` is the public SEO site, fed by `src/data/`. `src/proxy.ts` is the Next 16 middleware file, where Clerk guards routes. `emails/` holds templates; `src/lib/emails/` sends them.
 
@@ -29,7 +29,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 - Schema, migrations, DB scripts or DB-backed tests → read `.claude/docs/database.md`
 - Styling → read `.doc/DESIGN.md`; tokens live in `src/app/globals.css`
 - User-facing errors, toasts or empty states → read `.doc/ux-writing.md`; it came from another project, so apply its copy rules and ignore its paths and i18n
-- Domain terms → read `.doc/CONTEXT.md`; its Generation section is stale (four shots, Title Shot, Tagline, old presets), so `src/lib/generation/` wins
+- Domain terms → read `GLOSSARY.md`
 - Marketing copy, blog posts or SEO pages → read `.agents/product-marketing.md`; code wins on product facts
 - Pruning or restoring a `/screenshots-for` or `/alternatives` URL → read "How pruning works" in `PRUNED.md`
 

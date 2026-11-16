@@ -16,7 +16,44 @@ export class UserNotFoundError extends Error {
   }
 }
 
-type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/**
+ * Takes one Credit and writes a `usage` Transaction of -1, directly inside the
+ * caller's transaction (no savepoint): a Debit never happens alone, only
+ * together with the Generation it pays for. Throws InsufficientCreditsError or
+ * UserNotFoundError. Returns the new balance.
+ */
+export async function debit(
+  userId: string,
+  metadata: Record<string, unknown>,
+  within: Tx,
+): Promise<number> {
+  const updated = await within
+    .update(users)
+    .set({ credits: sql`${users.credits} - 1` })
+    .where(sql`${users.id} = ${userId} AND ${users.credits} >= 1`)
+    .returning({ credits: users.credits });
+
+  if (updated.length === 0) {
+    const [exists] = await within
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    if (!exists) throw new UserNotFoundError(userId);
+    throw new InsufficientCreditsError();
+  }
+
+  await within.insert(transactions).values({
+    userId,
+    type: "usage",
+    amount: -1,
+    metadata,
+  });
+
+  return updated[0].credits;
+}
 
 /**
  * Pass `within` to make the Refund part of a caller's transaction (it runs as a

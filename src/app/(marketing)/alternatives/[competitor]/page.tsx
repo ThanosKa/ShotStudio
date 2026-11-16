@@ -15,7 +15,7 @@ import {
   webPageSchema,
   websiteSchema,
 } from "@/lib/marketing/schema";
-import { competitorSnippet } from "@/lib/marketing/meta";
+import { competitorSnippet, socialMetadata } from "@/lib/marketing/meta";
 import { COMPETITORS, getCompetitorBySlug } from "@/data/competitors";
 import { indexableCompetitors } from "@/lib/marketing/pruned";
 import {
@@ -44,11 +44,11 @@ export async function generateMetadata({
     title: { absolute: title },
     description,
     alternates: { canonical: `/alternatives/${data.slug}` },
-    openGraph: {
+    ...socialMetadata({
       title,
       description,
       url: `${APP_URL}/alternatives/${data.slug}`,
-    },
+    }),
   };
 }
 

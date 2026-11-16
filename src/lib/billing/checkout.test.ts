@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
 import { describe, expect, test, vi } from "vitest";
 import { db } from "@/lib/db";
-import { ensureUser } from "@/lib/db/queries";
+import { ensureUser } from "@/lib/identity/user-sync";
 import { transactions, users } from "@/lib/db/schema";
 import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
 import { stripe } from "@/lib/stripe";
@@ -208,5 +208,94 @@ describe("createCheckoutSession", () => {
 
     expect(outcome).toEqual({ kind: "unknown_pack", packageId: "enterprise" });
     expect(vi.mocked(stripe.checkout.sessions.create)).not.toHaveBeenCalled();
+  });
+});
+
+// The Stripe payment email is not an identity source: a purchase never changes
+// the User Email, and it only seeds a new row when no User row exists yet.
+describe("runCheckoutFulfillment and the User Email", () => {
+  function paidWith(email: string) {
+    return sessionFor({
+      customer_details: { email, name: "John Doe" } as Stripe.Checkout.Session["customer_details"],
+    });
+  }
+
+  async function userRow(userId: string) {
+    const [u] = await db
+      .select({ email: users.email, credits: users.credits })
+      .from(users)
+      .where(eq(users.id, userId));
+    return u;
+  }
+
+  test("an existing User who pays with another email gets the Credits and keeps their email", async () => {
+    await ensureUser("u_buy", "a@test");
+    vi.mocked(sendCreditsPurchasedEmail).mockClear();
+
+    const outcome = await runCheckoutFulfillment({
+      session: paidWith("b@test"),
+      eventId: "evt_other_email",
+    });
+
+    expect(outcome).toMatchObject({ kind: "ok", creditsGranted: 5, newBalance: 5 });
+    expect(await userRow("u_buy")).toEqual({ email: "a@test", credits: 5 });
+
+    expect(vi.mocked(sendCreditsPurchasedEmail)).toHaveBeenCalledTimes(1);
+    const arg = vi.mocked(sendCreditsPurchasedEmail).mock.calls[0][0];
+    expect(arg.to).toBe("b@test");
+    expect(arg.stripeEventId).toBe("evt_other_email");
+  });
+
+  test("an existing User who pays with another User's email gets the Credits and neither email changes", async () => {
+    await ensureUser("u_buy", "a@test");
+    await ensureUser("u_other", "b@test");
+
+    const outcome = await runCheckoutFulfillment({
+      session: paidWith("b@test"),
+      eventId: "evt_clash_existing",
+    });
+
+    expect(outcome).toMatchObject({ kind: "ok", creditsGranted: 5, newBalance: 5 });
+    expect(await userRow("u_buy")).toEqual({ email: "a@test", credits: 5 });
+    expect(await userRow("u_other")).toEqual({ email: "b@test", credits: 0 });
+  });
+
+  test("with no User row and a free Stripe email, the row is created with that email and the Credits are Granted", async () => {
+    const outcome = await runCheckoutFulfillment({
+      session: paidWith("new@test"),
+      eventId: "evt_new_row",
+    });
+
+    expect(outcome).toMatchObject({ kind: "ok", creditsGranted: 5, newBalance: 5 });
+    expect(await userRow("u_buy")).toEqual({ email: "new@test", credits: 5 });
+  });
+
+  test("with no User row and a Stripe email owned by another User, the outcome is user_not_ready and nothing is written", async () => {
+    await ensureUser("u_other", "b@test");
+    vi.mocked(sendCreditsPurchasedEmail).mockClear();
+
+    const outcome = await runCheckoutFulfillment({
+      session: paidWith("b@test"),
+      eventId: "evt_clash_absent",
+    });
+
+    expect(outcome).toEqual({ kind: "user_not_ready", userId: "u_buy" });
+    expect(await userRow("u_buy")).toBeUndefined();
+    expect(await userRow("u_other")).toEqual({ email: "b@test", credits: 0 });
+    expect(await db.select().from(transactions)).toHaveLength(0);
+    expect(vi.mocked(sendCreditsPurchasedEmail)).not.toHaveBeenCalled();
+  });
+
+  test("once User Sync has created the buyer's row, Stripe's retry Grants the Credits", async () => {
+    await ensureUser("u_other", "b@test");
+    const session = paidWith("b@test");
+    await runCheckoutFulfillment({ session, eventId: "evt_retry" });
+
+    await ensureUser("u_buy", "a@test");
+    const retry = await runCheckoutFulfillment({ session, eventId: "evt_retry" });
+
+    expect(retry).toMatchObject({ kind: "ok", creditsGranted: 5, newBalance: 5 });
+    expect(await userRow("u_buy")).toEqual({ email: "a@test", credits: 5 });
+    expect(await userRow("u_other")).toEqual({ email: "b@test", credits: 0 });
   });
 });

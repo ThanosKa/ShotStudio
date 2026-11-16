@@ -1,14 +1,10 @@
-import { and, asc, eq, lt, sql } from "drizzle-orm";
-import type { Logger } from "pino";
-import { InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
+import { and, asc, eq, lt } from "drizzle-orm";
+import { debit, InsufficientCreditsError, refund, UserNotFoundError } from "@/lib/credits";
 import { db, keepRequestAliveUntil } from "@/lib/db";
-import { markGenerationComplete } from "@/lib/db/queries";
-import { generations, transactions, users } from "@/lib/db/schema";
+import { generations } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
-import { generateImage } from "@/lib/openrouter";
-import { STYLE_PRESETS, type StylePresetId } from "./presets";
-import { buildPrompt, type ShotRole } from "./prompts";
-import { upscaleToAppStore } from "@/lib/generation/upscale";
+import type { StylePresetId } from "./presets";
+import { generateSet } from "./shot-set";
 
 export type RunGenerationInput = {
   userId: string;
@@ -49,36 +45,15 @@ function validateScreenshots(
 }
 
 /**
- * Atomic: decrement one credit, write the matching `usage` Transaction, and
- * insert the Pending Generation row in one DB transaction. Throws
+ * Atomic: the Credit Ledger's Debit (one Credit and its `usage` Transaction)
+ * and the Pending Generation row, in one DB transaction. Throws
  * InsufficientCreditsError or UserNotFoundError; never partially applied.
  */
 async function debitAndStartGeneration(
   input: Omit<RunGenerationInput, "pitch" | "audience" | "screenshots">,
 ): Promise<{ generationId: string }> {
   return db.transaction(async (tx) => {
-    const updated = await tx
-      .update(users)
-      .set({ credits: sql`${users.credits} - 1` })
-      .where(sql`${users.id} = ${input.userId} AND ${users.credits} >= 1`)
-      .returning({ credits: users.credits });
-
-    if (updated.length === 0) {
-      const [exists] = await tx
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.id, input.userId))
-        .limit(1);
-      if (!exists) throw new UserNotFoundError(input.userId);
-      throw new InsufficientCreditsError();
-    }
-
-    await tx.insert(transactions).values({
-      userId: input.userId,
-      type: "usage",
-      amount: -1,
-      metadata: { reason: "generation" },
-    });
+    await debit(input.userId, { reason: "generation" }, tx);
 
     const [row] = await tx
       .insert(generations)
@@ -95,60 +70,12 @@ async function debitAndStartGeneration(
   });
 }
 
-const ROLES: ShotRole[] = [
-  "hero_feature",
-  "differentiator",
-  "another_feature",
-];
-
-// In dev, run just one shot (hero_feature) to save time and cost while iterating.
-const ACTIVE_ROLES: ShotRole[] =
-  process.env.NODE_ENV === "development" ? ["hero_feature"] : ROLES;
-
-const REF_INDEX: Record<ShotRole, number> = {
-  hero_feature: 0,
-  differentiator: 1,
-  another_feature: 2,
-};
-
-async function runShot(
-  role: ShotRole,
-  ctx: {
-    appName: string;
-    pitch: string;
-    audience?: string;
-    category: string;
-    stylePreset: StylePresetId;
-    screenshotDataUrls: [string, string, string];
-  },
-  log: Logger,
-): Promise<string> {
-  const preset = STYLE_PRESETS[ctx.stylePreset];
-  const prompt = buildPrompt({
-    appName: ctx.appName,
-    pitch: ctx.pitch,
-    audience: ctx.audience,
-    category: ctx.category,
-    role,
-    preset,
-  });
-  const idx = REF_INDEX[role];
-  const referenceImages = [ctx.screenshotDataUrls[idx]];
-
-  let lastError: unknown;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const b64 = await generateImage({ prompt, referenceImages, imageSize: "1K" });
-      const png = await upscaleToAppStore(b64);
-      return `data:image/png;base64,${png.toString("base64")}`;
-    } catch (err) {
-      lastError = err;
-      log.warn({ err, role, attempt }, "shot attempt failed");
-      await new Promise((r) => setTimeout(r, 500 + Math.random() * 500));
-    }
-  }
-  log.error({ err: lastError, role }, "shot exhausted retries");
-  throw lastError;
+/** Only a `pending` row completes: one already failed and refunded stays so. */
+async function markGenerationComplete(generationId: string) {
+  await db
+    .update(generations)
+    .set({ status: "complete", completedAt: new Date() })
+    .where(and(eq(generations.id, generationId), eq(generations.status, "pending")));
 }
 
 /**
@@ -267,26 +194,20 @@ async function runGenerationToEnd(
   // Release ~5MB-per-file File handles before the long-running shot calls.
   (input.screenshots as File[]).length = 0;
 
-  const results = await Promise.allSettled(
-    ACTIVE_ROLES.map((role) =>
-      runShot(
-        role,
-        {
-          appName: input.appName,
-          pitch: input.pitch,
-          audience: input.audience,
-          category: input.category,
-          stylePreset: input.stylePreset,
-          screenshotDataUrls,
-        },
-        shotLog,
-      ),
-    ),
+  const set = await generateSet(
+    {
+      appName: input.appName,
+      pitch: input.pitch,
+      audience: input.audience,
+      category: input.category,
+      stylePreset: input.stylePreset,
+      referenceScreenshots: screenshotDataUrls,
+    },
+    shotLog,
   );
 
-  const failed = results.filter((r) => r.status === "rejected");
-  if (failed.length > 0) {
-    const reason = `Generation failed: ${failed.length}/${ACTIVE_ROLES.length} shots failed`;
+  if (set.kind === "failed") {
+    const reason = `Generation failed: ${set.failed}/${set.total} shots failed`;
     try {
       await failAndRefund({ id: generationId, userId: input.userId }, reason, "generation_failed");
     } catch (refundErr) {
@@ -303,6 +224,6 @@ async function runGenerationToEnd(
   return {
     kind: "ok",
     generationId,
-    imageUrls: results.map((r) => (r as PromiseFulfilledResult<string>).value),
+    imageUrls: set.shots,
   };
 }

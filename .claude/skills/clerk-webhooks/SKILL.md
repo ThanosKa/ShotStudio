@@ -54,15 +54,15 @@ export async function POST(req: NextRequest) {
   }
 
   if (evt.type === 'user.created') {
-    const { id, email_addresses, first_name, last_name } = evt.data
-    const email = email_addresses[0]?.email_address
+    const { id, email_addresses, primary_email_address_id, first_name, last_name } = evt.data
+    const email = email_addresses.find((a) => a.id === primary_email_address_id)?.email_address
     const name = `${first_name ?? ''} ${last_name ?? ''}`.trim()
     await db.users.create({ data: { clerkId: id, email, name } })
   }
 
   if (evt.type === 'user.updated') {
-    const { id, email_addresses, first_name, last_name } = evt.data
-    const email = email_addresses[0]?.email_address
+    const { id, email_addresses, primary_email_address_id, first_name, last_name } = evt.data
+    const email = email_addresses.find((a) => a.id === primary_email_address_id)?.email_address
     await db.users.update({ where: { clerkId: id }, data: { email, first_name, last_name } })
   }
 
@@ -114,8 +114,8 @@ export async function POST(req: NextRequest) {
   // Step 2: Listen for user.created event
   if (evt.type === 'user.created') {
     // Step 3: Extract user email and name from webhook payload
-    const { id, email_addresses, first_name, last_name } = evt.data
-    const email = email_addresses[0]?.email_address
+    const { id, email_addresses, primary_email_address_id, first_name, last_name } = evt.data
+    const email = email_addresses.find((a) => a.id === primary_email_address_id)?.email_address
     const name = `${first_name ?? ''} ${last_name ?? ''}`.trim()
 
     // Step 4: Call Resend API to send welcome email
@@ -247,15 +247,15 @@ app.post('/webhooks/clerk', express.raw({ type: 'application/json' }), async (re
   }
 
   if (evt.type === 'user.created') {
-    const { id, email_addresses, first_name, last_name } = evt.data
-    const email = email_addresses[0]?.email_address
+    const { id, email_addresses, primary_email_address_id, first_name, last_name } = evt.data
+    const email = email_addresses.find((a) => a.id === primary_email_address_id)?.email_address
     const name = `${first_name ?? ''} ${last_name ?? ''}`.trim()
     console.log(`New user: ${name} (${email})`)
   }
 
   if (evt.type === 'user.updated') {
-    const { id, email_addresses } = evt.data
-    const email = email_addresses[0]?.email_address
+    const { id, email_addresses, primary_email_address_id } = evt.data
+    const email = email_addresses.find((a) => a.id === primary_email_address_id)?.email_address
     console.log(`User updated: ${id}, email: ${email}`)
   }
 
@@ -275,7 +275,7 @@ app.post('/webhooks/clerk', express.raw({ type: 'application/json' }), async (re
 ```typescript
 const {
   id,                  // Clerk user ID
-  email_addresses,     // array; [0].email_address is primary email
+  email_addresses,     // array; the primary is the one whose id equals primary_email_address_id (not necessarily [0]). In this repo use pickUserEmail (src/lib/identity/user-sync.ts)
   first_name,
   last_name,
   image_url,

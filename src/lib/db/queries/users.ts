@@ -1,6 +1,5 @@
 import { cache } from "react";
-import { currentUser } from "@clerk/nextjs/server";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 
@@ -11,28 +10,3 @@ export const getUserCredits = cache(async (userId: string): Promise<number> => {
   });
   return row?.credits ?? 0;
 });
-
-/**
- * Just-in-time user sync — Clerk's recommended pattern over webhooks.
- * Idempotent: safe to call on every authenticated page load and from server
- * routes before any credit operation, to close the Clerk-vs-Stripe webhook race.
- * https://clerk.com/blog/just-in-time-api-requests-are-replacing-webhooks
- */
-export async function ensureUser(userId: string, email: string) {
-  await db
-    .insert(users)
-    .values({ id: userId, email, credits: 0 })
-    .onConflictDoUpdate({
-      target: users.id,
-      set: { email: sql`excluded.email` },
-    });
-}
-
-export async function getEmailAndEnsureUser(
-  userId: string,
-): Promise<string | null> {
-  const user = await currentUser();
-  const email = user?.emailAddresses[0]?.emailAddress ?? null;
-  if (email) await ensureUser(userId, email);
-  return email;
-}

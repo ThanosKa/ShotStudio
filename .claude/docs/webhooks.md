@@ -17,8 +17,26 @@ Preserve all of these on any change:
 - For Stripe, on handler error or any non-2xx answer (such as `user_not_ready`) the route deletes the claim so Stripe's retry is processed. If writing `done` fails after success, the route still answers 200; the claim expires and `grant()` makes a retry harmless.
 - Failures a retry cannot fix (`invalid_metadata`, `unknown_pack`) log an error and return 200.
 
+## Stripe email
+
+- Fulfilment never changes the email of an existing User. With no User row yet, it creates one with the Stripe email through `createUserIfAbsent`, which never updates a row and creates nothing when another User already has that email.
+- No row and no Stripe email, or no row and a Stripe email that belongs to another User: `user_not_ready`, so Stripe retries until the Clerk webhook or JIT User Sync has created the row. Log the case and the User id, never the email.
+- The purchase email still goes to the Stripe email.
+
 ## Clerk events
+
+The route only verifies the event and maps the outcome to a log line and a status; `applyClerkEvent` (`src/lib/identity/user-sync.ts`) does the database and email work. It throws only on database errors; a welcome email that rejects comes back in the outcome (`thrown`) and the route answers 500.
 
 - `user.created` sends the welcome email only when the insert created the row.
 - `user.updated` upserts through `ensureUser`, because it can arrive before `user.created`.
 - `user.deleted` anonymizes the row instead of deleting it: `transactions.user_id` is `ON DELETE RESTRICT` to preserve financial records.
+
+## A reused email
+
+An email belongs to the live Clerk account that holds it now. When User Sync writes a User's email (`ensureUser`, so JIT User Sync and `user.updated`, and the `user.created` insert) and another User row holds that email, it asks Clerk for that row's account:
+
+- Not found (Clerk answers 404 for a deleted user): the row gets User Anonymization, as on `user.deleted`; its Credits, Transactions and Generations stay on it.
+- Found, but no longer listing the address: the row's email is refreshed to that account's User Email (`pickUserEmail`).
+- Found and still owning the address, found with no email at all, or the lookup fails: nothing changes and the write's error stands, so the request answers 500 and Clerk retries.
+
+Each release logs one line, "email released from another user", with both User ids and the reason, never the email. Credits never move between Users. `createUserIfAbsent` (checkout fulfilment) does not release anything: a Stripe email held by another User still answers `user_not_ready`.

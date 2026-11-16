@@ -1,7 +1,7 @@
 # Generation pipeline
 
 - `src/app/api/generations/route.ts` declares `export const maxDuration = 300` for the long-running image calls. Only Next on Vercel (the fallback) reads it; vinext ignores it, and a Worker has no wall-clock limit while the visitor stays connected. Don't remove it: each shot gets two attempts of up to 120s.
-- In development only the `hero_feature` shot runs (`ACTIVE_ROLES` in `src/lib/generation/lifecycle.ts`), so a dev set has 1 image; other environments, tests included, produce 3.
+- In development only the `hero_feature` shot runs (`ACTIVE_ROLES` in `src/lib/generation/shot-set.ts`), so a dev set has 1 image; other environments, tests included, produce 3.
 - Any shot failing after its retry fails the whole generation: the row is marked `failed` and the one credit is refunded, in one transaction that only acts on a `pending` row (see `.claude/docs/credits.md`).
 
 ## When the run is cut off

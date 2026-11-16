@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, test, vi } from "vitest";
 import { db, keepRequestAliveUntil } from "@/lib/db";
-import { ensureUser } from "@/lib/db/queries";
+import { ensureUser } from "@/lib/identity/user-sync";
 import { generations, transactions, users } from "@/lib/db/schema";
 import { generateImage } from "@/lib/openrouter";
 import { refundAbandonedGenerations, runGeneration } from "./lifecycle";
