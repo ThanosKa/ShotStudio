@@ -2,6 +2,10 @@
 
 Routes: `src/app/api/webhooks/stripe/route.ts` and `src/app/api/webhooks/clerk/route.ts`.
 
+## Transactional email on the Worker
+
+Route handlers on the Worker run under the `react-server` condition, where `react-dom/server` is a stub that throws, so react-email's `render` fails there. `src/lib/emails/templates.ts` builds the welcome and purchase emails as plain strings instead. `templates.test.ts` renders `emails/*.tsx` with react-email under Node and requires the same HTML and text, so change both together; `react-server.test.ts` sends both emails under the `react-server` condition with Resend's HTTP call stubbed.
+
 ## Idempotency
 
 Preserve all of these on any change:
