@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { describe, expect, test, vi } from "vitest";
 import { db } from "@/lib/db";
-import { ensureUser } from "@/lib/db/queries";
+import { ensureUser } from "@/lib/identity/user-sync";
 import { users } from "@/lib/db/schema";
 import { generateImage } from "@/lib/openrouter";
 import { upscaleToAppStore } from "@/lib/generation/upscale";

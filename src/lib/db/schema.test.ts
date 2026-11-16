@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 import { db } from "@/lib/db";
 import { grant, refund } from "@/lib/credits";
-import { ensureUser } from "@/lib/db/queries";
+import { ensureUser } from "@/lib/identity/user-sync";
 import { transactions, users } from "@/lib/db/schema";
 import { STYLE_PRESET_IDS } from "@/lib/generation/presets";
 
