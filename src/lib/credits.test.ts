@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 import { db } from "@/lib/db";
 import { transactions, users } from "@/lib/db/schema";
-import { ensureUser } from "@/lib/db/queries";
+import { ensureUser } from "@/lib/identity/user-sync";
 import {
   debit,
   grant,

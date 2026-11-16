@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { describe, expect, test } from "vitest";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { createUserIfAbsent, ensureUser } from "./users";
+import { createUserIfAbsent, ensureUser } from "@/lib/identity/user-sync";
 
 async function rowOf(userId: string) {
   const [u] = await db
