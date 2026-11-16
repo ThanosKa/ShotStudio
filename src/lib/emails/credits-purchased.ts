@@ -1,6 +1,6 @@
-import CreditsPurchasedEmail from "../../../emails/credits-purchased";
 import { APP_URL, pluralize } from "../utils";
 import { sendTransactional } from "./send";
+import { creditsPurchasedEmail } from "./templates";
 
 export async function sendCreditsPurchasedEmail(params: {
   to: string;
@@ -12,7 +12,7 @@ export async function sendCreditsPurchasedEmail(params: {
   amountFormatted: string;
 }) {
   return sendTransactional({
-    element: CreditsPurchasedEmail({
+    email: creditsPurchasedEmail({
       firstName: params.firstName,
       packageName: params.packageName,
       creditsAdded: params.creditsAdded,
