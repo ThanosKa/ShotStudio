@@ -1,6 +1,6 @@
 # Credit accounting
 
-Silent bugs here cost real money. Always add tests for changes to `src/lib/credits.ts`, `src/lib/db/queries/`, `debitAndStartGeneration` or `src/lib/billing/checkout.ts`.
+Silent bugs here cost real money. Always add tests for changes to `src/lib/credits.ts`, `src/lib/db/queries/`, `src/lib/identity/user-sync.ts`, `debitAndStartGeneration` or `src/lib/billing/checkout.ts`.
 
 ## Debit before AI, refund on failure
 

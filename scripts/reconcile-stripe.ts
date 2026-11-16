@@ -35,8 +35,7 @@
 import { createClerkClient } from "@clerk/nextjs/server";
 import type Stripe from "stripe";
 import { grant } from "@/lib/credits";
-import { createUserIfAbsent, ensureUser } from "@/lib/db/queries";
-import { pickUserEmail } from "@/lib/identity/user-sync";
+import { createUserIfAbsent, ensureUser, pickUserEmail } from "@/lib/identity/user-sync";
 import { CREDIT_PACKAGE_LIST, getCreditPackage } from "@/lib/packages";
 import { stripe } from "@/lib/stripe";
 
