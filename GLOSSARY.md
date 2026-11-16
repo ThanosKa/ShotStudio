@@ -34,7 +34,7 @@ ShotStudio is a single-tenant, one-time-pay tool that turns three raw mobile scr
 - **User** — An authenticated Clerk identity with a mirrored `users` row holding the Credit balance. Single-tenant: no orgs, no teams. _Avoid_ "account", "customer" (Stripe Customer is a different thing).
 - **User Email** — The email stored on the User row: Clerk's primary email address, or the first address when no primary is set. Stripe's payment email is written only when no User row exists yet. _Avoid_ "billing email", "contact email".
 - **JIT User Sync** — The `ensureUser` upsert called on every authenticated entry point so a User row exists before any Billing or Generation work; closes the Clerk-vs-Stripe webhook race. _Avoid_ "user provisioning", "user bootstrap".
-- **User Anonymization** — On Clerk `user.deleted`, replacing email with `deleted+<id>@anonymized.local` and nulling `stripeCustomerId` instead of deleting the row, to preserve the financial audit trail. _Avoid_ "user deletion", "user purge".
+- **User Anonymization** — On Clerk `user.deleted`, or when a new User's email is held by a row whose Clerk account no longer exists, replacing email with `deleted+<id>@anonymized.local` and nulling `stripeCustomerId` instead of deleting the row, to preserve the financial audit trail. _Avoid_ "user deletion", "user purge".
 
 ## Relationships
 

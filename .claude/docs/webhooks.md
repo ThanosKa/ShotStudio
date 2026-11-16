@@ -30,3 +30,13 @@ The route only verifies the event and maps the outcome to a log line and a statu
 - `user.created` sends the welcome email only when the insert created the row.
 - `user.updated` upserts through `ensureUser`, because it can arrive before `user.created`.
 - `user.deleted` anonymizes the row instead of deleting it: `transactions.user_id` is `ON DELETE RESTRICT` to preserve financial records.
+
+## A reused email
+
+An email belongs to the live Clerk account that holds it now. When User Sync writes a User's email (`ensureUser`, so JIT User Sync and `user.updated`, and the `user.created` insert) and another User row holds that email, it asks Clerk for that row's account:
+
+- Not found (Clerk answers 404 for a deleted user): the row gets User Anonymization, as on `user.deleted`; its Credits, Transactions and Generations stay on it.
+- Found, but no longer listing the address: the row's email is refreshed to that account's User Email (`pickUserEmail`).
+- Found and still owning the address, found with no email at all, or the lookup fails: nothing changes and the write's error stands, so the request answers 500 and Clerk retries.
+
+Each release logs one line, "email released from another user", with both User ids and the reason, never the email. Credits never move between Users. `createUserIfAbsent` (checkout fulfilment) does not release anything: a Stripe email held by another User still answers `user_not_ready`.
