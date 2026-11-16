@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server";
 import type { Logger } from "pino";
 import type Stripe from "stripe";
 import { runCheckoutFulfillment } from "@/lib/billing/checkout";
+import { type DeliveryResult, runStripeEventOnce } from "@/lib/billing/stripe-event-once";
 import { logger } from "@/lib/logger";
-import { redis } from "@/lib/redis";
 import { stripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -14,13 +14,6 @@ const WEBHOOK_SECRET: string = (() => {
   if (!v) throw new Error("STRIPE_WEBHOOK_SECRET is not set");
   return v;
 })();
-
-// Two-step claim on `stripe:event:<id>`. "processing" is short-lived, so a
-// Worker stopped mid-fulfilment (no catch block runs) frees the event for
-// Stripe's retry. "done" is written only after success. `grant()` stays the
-// guard against double credit if two deliveries ever overlap.
-const PROCESSING_TTL_SECONDS = 120;
-const DONE_TTL_SECONDS = 60 * 60 * 24;
 
 export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID();
@@ -43,46 +36,36 @@ export async function POST(req: NextRequest) {
 
   const scoped = log.child({ eventId: event.id, eventType: event.type });
 
-  const idemKey = `stripe:event:${event.id}`;
-  if (redis) {
-    const claimed = await redis.set(idemKey, "processing", {
-      nx: true,
-      ex: PROCESSING_TTL_SECONDS,
-    });
-    if (claimed !== "OK") {
-      // Anything but "processing" is a finished event; "1" is the old format.
-      const state = await redis.get(idemKey);
-      if (state === "processing" || state === null) {
-        scoped.info("event already being processed — letting Stripe retry");
-        return new Response("Already processing", { status: 409 });
-      }
-      scoped.debug("duplicate event — already processed");
-      return new Response("OK", { status: 200 });
-    }
-  }
-
-  let response: Response;
+  // Only an error from the handler (or from deleting its claim) is logged here;
+  // a Redis error while claiming leaves the route unlogged, as it always has.
+  let handlerFailed = false;
+  let delivery: DeliveryResult<Response>;
   try {
-    response = await handleEvent(event, scoped);
+    delivery = await runStripeEventOnce(
+      event.id,
+      () =>
+        handleEvent(event, scoped).catch((err: unknown) => {
+          handlerFailed = true;
+          throw err;
+        }),
+      scoped,
+    );
   } catch (err) {
-    if (redis) await redis.del(idemKey);
+    if (!handlerFailed) throw err;
     scoped.error({ err }, "stripe webhook handler failed");
     return new Response("Handler error", { status: 500 });
   }
 
-  if (redis) {
-    try {
-      if (response.ok) {
-        await redis.set(idemKey, "done", { ex: DONE_TTL_SECONDS });
-      } else {
-        await redis.del(idemKey);
-      }
-    } catch (err) {
-      // The claim expires by itself; a retry then finds grant() already applied.
-      scoped.warn({ err }, "could not record the event's outcome in redis");
-    }
+  switch (delivery.kind) {
+    case "in_progress":
+      scoped.info("event already being processed — letting Stripe retry");
+      return new Response("Already processing", { status: 409 });
+    case "duplicate":
+      scoped.debug("duplicate event — already processed");
+      return new Response("OK", { status: 200 });
+    case "ran":
+      return delivery.result;
   }
-  return response;
 }
 
 async function handleEvent(event: Stripe.Event, scoped: Logger): Promise<Response> {
