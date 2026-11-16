@@ -184,7 +184,7 @@ export const COMPETITORS: Competitor[] = [
     name: "Shotbot",
     positioning: "A native iOS, macOS, and visionOS app that frames screenshots with Share Sheet, Shortcuts, and iCloud sync.",
     pricingModel: "Free tier + subscription",
-    pricingNote: "Free with daily-frame limit + Unlimited subscription via Apple in-app purchase.",
+    pricingNote: "Free with a daily frame limit · paid plans are Apple in-app subscriptions; the US App Store lists an annual subscription at $4.99 (as of 2026-11-16).",
     primaryWeakness: "Lives inside the Apple ecosystem — beautiful Share Sheet integration, but the free tier hits a daily-frame cap at exactly the moment you're trying to ship, and the paid tier is another subscription.",
     honestStrengths: [
       "Native Share Sheet, Shortcuts, and widget integration on iOS, macOS, and visionOS — friction-free if you live in Apple's stack.",
@@ -206,15 +206,15 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Is Shotbot free?",
-        a: "Yes, there's a free tier — but with a daily frame limit. The Unlimited tier is a subscription via Apple in-app purchase; exact pricing varies by region. The daily cap on the free tier tends to hit exactly when you're trying to ship a screenshot set on submission day.",
+        a: "Yes, there's a free tier — but with a daily frame limit. The Unlimited plan is a subscription via Apple in-app purchase; the US App Store lists an annual subscription at $4.99 as of 2026-11-16. The daily cap on the free tier tends to hit exactly when you're trying to ship a screenshot set on submission day.",
       },
       {
         q: "What's a good alternative to Shotbot?",
         a: "For one-time-pay indie use without a native app install, ShotStudio is $7 for two sets of three shots, with zero image persistence. For free manual editing on the web, AppMockUp Studio works. For 3D mockups or App Preview videos, Rotato's desktop app is the strongest pick.",
       },
       {
-        q: "Does Shotbot output the correct 1290×2796 spec?",
-        a: "Yes — Shotbot frames screenshots at the iPhone 5.5\" master spec and auto-scales to every iPhone size including 6.9\" portrait (1290×2796) for App Store Connect. iPad output is supported; Android is in beta. The output spec is correct; the friction is the native-app-plus-subscription combination.",
+        q: "Does Shotbot output App Store screenshot sizes?",
+        a: "Shotbot puts screenshots into device frames for iPhone, iPad, Mac and Apple Watch; its App Store listing (as of 2026-11-16) doesn't list App Store export sizes. Before you upload, check each PNG's pixel size against Apple's list, for example with the free size checker at shotstudio.dev/tools/app-store-screenshot-sizes. ShotStudio exports 1290×2796, one of Apple's accepted iPhone sizes.",
       },
     ],
   },

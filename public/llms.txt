@@ -23,7 +23,7 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 
 ## What it does
 
-- **Input:** 3 raw mobile screenshots (PNG/JPEG, up to 10 MB each), an app name, a one-sentence pitch, and an iOS App Store category.
+- **Input:** 3 raw mobile screenshots (PNG or JPEG), an app name, a one-sentence pitch, and an iOS App Store category.
 - **Output:** 3 PNGs at 1290×2796 (one of Apple's accepted 6.9" iPhone sizes) — sRGB, no transparency, no watermark. One polished shot per uploaded source screen.
 - **Speed:** about 1 minute per set.
 - **Headline copy** is AI-written from the user's pitch and target audience — the user does not write the marketing copy.

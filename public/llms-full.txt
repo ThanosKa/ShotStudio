@@ -50,7 +50,7 @@ Rules that apply to every pack:
 
 **Does:**
 
-- Accepts 3 raw mobile screenshots per set (PNG or JPEG, up to 10 MB each).
+- Accepts 3 raw mobile screenshots per set (PNG or JPEG).
 - Outputs 3 PNGs at 1290×2796, sRGB, no transparency, no rounded corners, no watermark.
 - Writes the headline copy with AI from the user's one-sentence pitch and stated target audience.
 - Applies one of four personality presets — Friendly, Professional, Minimal, Bold — which control typography and headline voice only. The preset is auto-selected from the App Store category and can be overridden.
@@ -109,7 +109,7 @@ Full policy: https://shotstudio.dev/privacy
 | **Previewed** | Free + one-time + subscription | $9.99 one-time Plus, capped at 10 exports | Mockup editor with 3D snapshots and promo video | Needs 3D or a promo video too |
 | **Rotato** | One-time, desktop app | Higher tier (~$99 historically) | 3D mockup and animation desktop app | App Preview videos, designer-grade control |
 | **Screenshots.pro** | Subscription | $19/mo Standard, $49/mo Extended | Template editor with localization and API | High-volume shippers, localized stores, CI pipelines |
-| **Shotbot** | Free tier + subscription | Free with daily frame cap | Native iOS/macOS/visionOS framing app | Share Sheet and Shortcuts workflows |
+| **Shotbot** | Free tier + subscription | Free with daily frame cap; annual subscription listed at $4.99 (US App Store, 2026-11-16) | Native iOS/macOS/visionOS framing app | Share Sheet and Shortcuts workflows |
 | **AppLaunchpad** | Free tier + subscription | Free (10 templates, limited exports); Pro $15/mo or $10/mo billed annually (as of 2026-11-06) | Browser template editor for App Store and Google Play | Both stores, iPad sizes, localization |
 | **AppScreens** | Free tier + subscription | Free (1 saved project, up to 5 screens); Pro $25/mo or $99/yr; Scale $50/mo or $180/yr (as of 2026-11-09) | Online screenshot editor with AI captions, 80+ languages and one-click App Store Connect upload | Localized listings, both stores, frequent updates |
 
@@ -185,13 +185,13 @@ Yes — Rotato includes App Store templates and exports at up to 8K resolution a
 If you live in the Apple ecosystem and want Share Sheet, Shortcuts, and iCloud sync for screenshot framing as part of your daily workflow, Shotbot's native integration is unmatched. For a once-a-year App Store launch, a browser tool is less friction than a native app plus subscription.
 
 **Is Shotbot free?**
-Yes, there's a free tier — but with a daily frame limit. The Unlimited tier is a subscription via Apple in-app purchase; exact pricing varies by region. The daily cap on the free tier tends to hit exactly when you're trying to ship a screenshot set on submission day.
+Yes, there's a free tier — but with a daily frame limit. The Unlimited plan is a subscription via Apple in-app purchase; the US App Store lists an annual subscription at $4.99 as of 2026-11-16. The daily cap on the free tier tends to hit exactly when you're trying to ship a screenshot set on submission day.
 
 **What's a good alternative to Shotbot?**
 For one-time-pay indie use without a native app install, ShotStudio is $7 for two sets of three shots, with zero image persistence. For free manual editing on the web, AppMockUp Studio works. For 3D mockups or App Preview videos, Rotato's desktop app is the strongest pick.
 
-**Does Shotbot output the correct 1290×2796 spec?**
-Yes — Shotbot frames screenshots at the iPhone 5.5" master spec and auto-scales to every iPhone size including 6.9" portrait (1290×2796) for App Store Connect. iPad output is supported; Android is in beta. The output spec is correct; the friction is the native-app-plus-subscription combination.
+**Does Shotbot output App Store screenshot sizes?**
+Shotbot puts screenshots into device frames for iPhone, iPad, Mac and Apple Watch; its App Store listing (as of 2026-11-16) doesn't list App Store export sizes. Before you upload, check each PNG's pixel size against Apple's list, for example with the free size checker at shotstudio.dev/tools/app-store-screenshot-sizes. ShotStudio exports 1290×2796, one of Apple's accepted iPhone sizes.
 
 ### AppLaunchpad (https://shotstudio.dev/alternatives/applaunchpad)
 

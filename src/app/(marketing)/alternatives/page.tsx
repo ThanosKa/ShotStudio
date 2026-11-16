@@ -106,7 +106,7 @@ export default function AlternativesHubPage() {
       <Section
         eyebrow="At a glance"
         title="What each tool costs, and what you still have to do yourself"
-        description="Pricing model is the fault line in this category. Everything here outputs the 1290×2796 App Store spec correctly; the difference is whether you're renting the tool and whether you're doing the layout."
+        description="Pricing model is the fault line in this category: the difference is whether you're renting the tool and whether you're doing the layout."
       >
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-body-lg">

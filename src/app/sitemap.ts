@@ -46,10 +46,12 @@ const REVISED = {
   // 2026-11-09: new /alternatives/appscreens; the alternatives hub lists it.
   // 2026-11-13: hub descriptions name the five indexed competitors (not the
   // pruned Rotato / Screenshots.pro) on the alternatives, category and blog hubs.
+  // 2026-11-16: alternatives hub drops the unsourced "everything outputs 1290×2796"
+  // line; its Shotbot row shows the App Store price.
   home: "2026-11-04",
   pricing: "2026-11-04",
   screenshotsForHub: "2026-11-13",
-  alternativesHub: "2026-11-13",
+  alternativesHub: "2026-11-16",
   blogHub: "2026-11-13",
   privacy: "2026-07-29",
   terms: "2026-07-29",
@@ -89,7 +91,8 @@ const COMPETITOR_REVISED: Record<string, string> = {
   // primaryImageOfPage from the WebPage schema.
   appmockup: "2026-11-09",
   previewed: "2026-11-09",
-  shotbot: "2026-11-09",
+  // 2026-11-16: Shotbot price and size FAQ from its App Store listing.
+  shotbot: "2026-11-16",
   // 2026-11-06: new page (pricing checked on theapplaunchpad.com/pricing that day).
   applaunchpad: "2026-11-09",
   // 2026-11-09: new page (pricing checked on appscreens.com/pricing that day).
