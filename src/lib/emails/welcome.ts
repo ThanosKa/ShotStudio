@@ -1,6 +1,6 @@
-import WelcomeEmail from "../../../emails/welcome";
 import { APP_URL } from "../utils";
 import { sendTransactional } from "./send";
+import { welcomeEmail } from "./templates";
 
 export async function sendWelcomeEmail(params: {
   to: string;
@@ -8,7 +8,7 @@ export async function sendWelcomeEmail(params: {
   firstName?: string | null;
 }) {
   return sendTransactional({
-    element: WelcomeEmail({ firstName: params.firstName, appUrl: APP_URL }),
+    email: welcomeEmail({ firstName: params.firstName, appUrl: APP_URL }),
     to: params.to,
     subject: "Welcome to ShotStudio",
     idempotencyKey: `welcome-email/${params.userId}`,
