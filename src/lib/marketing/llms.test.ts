@@ -137,6 +137,16 @@ describe("llms-full.txt stays in sync with the data modules", () => {
   });
 });
 
+describe("agent-facing fact files match the upload rules", () => {
+  it.each([
+    ["llms.txt", llms],
+    ["llms-full.txt", llmsFull],
+    ["pricing.md", pricingMd],
+  ])("%s never promises a 10 MB upload limit", (_name, text) => {
+    expect(text).not.toMatch(/10\s*mb/i);
+  });
+});
+
 describe("llms.txt stays in sync with the data modules", () => {
   it("links every competitor page", () => {
     for (const { slug } of COMPETITORS) {
