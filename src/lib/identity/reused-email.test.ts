@@ -32,17 +32,21 @@ vi.mock("@/lib/emails/welcome", () => ({ sendWelcomeEmail: vi.fn() }));
 
 const lines = vi.hoisted(() => [] as { level: string; ctx: unknown; msg: unknown }[]);
 vi.mock("@/lib/logger", () => {
-  const record = (level: string) => (ctx: unknown, msg?: unknown) => {
-    lines.push({ level, ctx, msg });
+  // Each line's context carries its child loggers' bindings, as pino's does.
+  const make = (bindings: object): Record<string, unknown> => {
+    const record = (level: string) => (ctx: unknown, msg?: unknown) => {
+      const [own, text] = typeof ctx === "string" ? [{}, ctx] : [ctx, msg];
+      lines.push({ level, ctx: { ...bindings, ...(own as object) }, msg: text });
+    };
+    return {
+      info: record("info"),
+      warn: record("warn"),
+      error: record("error"),
+      debug: record("debug"),
+      child: (more: object) => make({ ...bindings, ...more }),
+    };
   };
-  const fake: Record<string, unknown> = {
-    info: record("info"),
-    warn: record("warn"),
-    error: record("error"),
-    debug: record("debug"),
-  };
-  fake.child = () => fake;
-  return { logger: fake };
+  return { logger: make({}) };
 });
 
 const verify = vi.mocked(verifyWebhook);

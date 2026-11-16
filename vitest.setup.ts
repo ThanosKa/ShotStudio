@@ -8,6 +8,10 @@ process.env.STRIPE_PRICE_STARTER ??= "price_test_starter";
 process.env.STRIPE_PRICE_GROWTH ??= "price_test_growth";
 process.env.STRIPE_PRICE_STUDIO ??= "price_test_studio";
 
+// No test reaches Clerk's Backend API: without a secret key, a Clerk module a
+// test does not mock throws before any request (CI sets a placeholder key).
+delete process.env.CLERK_SECRET_KEY;
+
 // Mutable holder so `beforeEach` can swap in a fresh DB per test without
 // re-mocking. The `get db()` accessor below reads the live value.
 let currentDb: TestDb;
