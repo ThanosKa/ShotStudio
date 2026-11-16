@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
 import { describe, expect, test, vi } from "vitest";
 import { db } from "@/lib/db";
-import { ensureUser } from "@/lib/db/queries";
+import { ensureUser } from "@/lib/identity/user-sync";
 import { transactions, users } from "@/lib/db/schema";
 import { sendCreditsPurchasedEmail } from "@/lib/emails/credits-purchased";
 import { stripe } from "@/lib/stripe";
