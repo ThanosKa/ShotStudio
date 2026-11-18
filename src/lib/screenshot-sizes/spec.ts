@@ -6,14 +6,16 @@
  * numbers below are the verbatim ones. Apple's page re-read verbatim on
  * 2026-11-11 after its October 2026 update: it added the 1512x2316 11" iPad
  * size and a "Required device sizes" section naming the medium Dynamic Island
- * iPhone display, our 6.3" row):
+ * iPhone display, our 6.3" row. Re-read 2026-11-18 to add the iPhone Duo
+ * outer and inner display sizes):
  *  - Apple: https://developer.apple.com/help/app-store-connect/reference/screenshot-specifications
  *  - Google Play: https://support.google.com/googleplay/android-developer/answer/9866151
  *
  * Scope: iPhone and iPad for the App Store; phone and tablet rules for Google
- * Play. Mac, Apple TV, Vision Pro, Apple Watch, iPhone Duo (listed by Apple
- * since October 2026, required from April 2027) and the Wear OS / TV /
- * Automotive / XR Play surfaces are left out of the checker on purpose.
+ * Play. iPhone Duo (listed by Apple since October 2026, required from April
+ * 2027) is in as two iPhone rows, outer and inner display. Mac, Apple TV,
+ * Vision Pro, Apple Watch and the Wear OS / TV / Automotive / XR Play surfaces
+ * are left out of the checker on purpose.
  *
  * When Apple or Google change a page, edit this file and the fetch date above.
  */
@@ -21,7 +23,7 @@
 export type Orientation = "portrait" | "landscape";
 
 export type AppleSize = {
-  /** Display class, e.g. `6.9"`. */
+  /** Display class, e.g. `6.9"` or `Duo (inner display)`. */
   display: string;
   family: "iPhone" | "iPad";
   width: number;
@@ -89,6 +91,16 @@ const APPLE_DISPLAYS: readonly AppleDisplay[] = [
     display: '4.7"',
     family: "iPhone",
     sizes: [{ width: 750, height: 1334 }],
+  },
+  {
+    display: "Duo (outer display)",
+    family: "iPhone",
+    sizes: [{ width: 1398, height: 2034 }],
+  },
+  {
+    display: "Duo (inner display)",
+    family: "iPhone",
+    sizes: [{ width: 2007, height: 2853 }],
   },
   {
     display: '13"',

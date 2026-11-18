@@ -35,6 +35,13 @@ describe("APPLE_SIZES dataset", () => {
     );
   });
 
+  it("contains the iPhone Duo outer and inner display sizes, both orientations", () => {
+    const outer = APPLE_SIZES.filter((s) => s.display === "Duo (outer display)").map(sizeId);
+    const inner = APPLE_SIZES.filter((s) => s.display === "Duo (inner display)").map(sizeId);
+    expect(outer).toEqual(["1398x2034", "2034x1398"]);
+    expect(inner).toEqual(["2007x2853", "2853x2007"]);
+  });
+
   it("keeps the status-bar variants explicit", () => {
     expect(APPLE_SIZES.some((s) => sizeId(s) === "1136x600")).toBe(true);
     expect(APPLE_SIZES.some((s) => sizeId(s) === "2048x1496")).toBe(true);
@@ -51,6 +58,14 @@ describe("checkApple", () => {
   it("reports every display a shared size belongs to", () => {
     const result = checkApple({ width: 2048, height: 2732, ...png });
     expect(result.matches.map((m) => m.display).sort()).toEqual(['12.9"', '13"']);
+  });
+
+  it("accepts the iPhone Duo inner display size", () => {
+    const result = checkApple({ width: 2007, height: 2853, ...png });
+    expect(result.accepted).toBe(true);
+    expect(result.matches.map((m) => `${m.family} ${m.display}`)).toEqual([
+      "iPhone Duo (inner display)",
+    ]);
   });
 
   it("rejects an unlisted size", () => {
