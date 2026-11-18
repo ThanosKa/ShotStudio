@@ -146,6 +146,10 @@ export default function ScreenshotSizesToolPage() {
                   {r.family} {r.display}: {r.text}.
                 </li>
               ))}
+              <li>
+                iPhone Duo: Apple says screenshots will be required from April
+                2027 for any app using the iOS 27.1 SDK or later.
+              </li>
             </ul>
           </div>
           <div className="rounded-xl border p-6">
@@ -184,7 +188,7 @@ export default function ScreenshotSizesToolPage() {
           >
             screenshot specifications
           </a>{" "}
-          and Google&apos;s{" "}
+          (checked 18 November 2026) and Google&apos;s{" "}
           <a
             href="https://support.google.com/googleplay/android-developer/answer/9866151"
             className="underline underline-offset-4"
@@ -192,16 +196,17 @@ export default function ScreenshotSizesToolPage() {
           >
             Play Console screenshot requirements
           </a>
-          , checked 1 October 2026. This tool covers iPhone, iPad, and Google
-          Play phone and tablet screenshots; Mac, TV, Vision Pro and Watch have
-          their own sizes on Apple&apos;s page.
+          {" "}(checked 1 October 2026). This tool covers iPhone (including both
+          iPhone Duo displays), iPad, and Google Play phone and tablet
+          screenshots; Mac, TV, Vision Pro and Watch have their own sizes on
+          Apple&apos;s page.
         </p>
       </Section>
 
       <Section
         eyebrow="Reference"
         title="Every accepted App Store screenshot size"
-        description="iPhone and iPad sizes as Apple lists them. When you skip a display size, Apple scales a larger one down for it."
+        description="iPhone (including iPhone Duo) and iPad sizes as Apple lists them. When you skip a display size, Apple scales a larger one down for it."
       >
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] border-collapse text-left text-sm">

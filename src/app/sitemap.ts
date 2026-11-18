@@ -55,8 +55,8 @@ const REVISED = {
   blogHub: "2026-11-13",
   privacy: "2026-07-29",
   terms: "2026-07-29",
-  /** /tools/app-store-screenshot-sizes, new 2026-10-01; 2026-11-11 Apple's October 2026 spec update. */
-  sizeChecker: "2026-11-11",
+  /** /tools/app-store-screenshot-sizes, new 2026-10-01; 2026-11-11 Apple's October 2026 spec update; 2026-11-18 iPhone Duo sizes. */
+  sizeChecker: "2026-11-18",
   /** Fallback for `/screenshots-for/[category]` — src/data/categories.ts. */
   categories: "2026-07-29",
   /** Fallback for `/alternatives/[competitor]` — src/data/competitors.ts. */
