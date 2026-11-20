@@ -77,11 +77,11 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
   shotbot: {
     anchor: "Shotbot alternatives",
     quickAnswer:
-      "Shotbot is a native iOS, macOS and visionOS app that frames screenshots through the Share Sheet, Shortcuts and iCloud sync, with caption guidance derived from top App Store listings. The free tier caps daily frames and the unlimited tier is an Apple in-app subscription.",
+      "Shotbot is a native iOS, macOS and visionOS app that frames screenshots in iPhone, iPad, Mac and Apple Watch mockups through its share extension, widgets and Shortcuts, and syncs its preferences over iCloud. The free tier caps daily frames and the unlimited tier is an Apple in-app subscription.",
     switchSteps: [
       "No daily frame cap to hit on submission night — one credit is one full set of three shots.",
       "Nothing syncs to iCloud: uploads pass through memory to the model and are never written to disk.",
-      "The headline is written for you from your pitch rather than picked from caption guidance.",
+      "A headline is written for you from your pitch; Shotbot frames the screenshot and leaves the copy to you.",
     ],
     categorySlugs: [
       "habit-tracker-apps",
