@@ -188,13 +188,13 @@ export const COMPETITORS: Competitor[] = [
     primaryWeakness: "Lives inside the Apple ecosystem — beautiful Share Sheet integration, but the free tier hits a daily-frame cap at exactly the moment you're trying to ship, and the paid tier is another subscription.",
     honestStrengths: [
       "Native Share Sheet, Shortcuts, and widget integration on iOS, macOS, and visionOS — friction-free if you live in Apple's stack.",
-      "Caption guidance derived from analysis of top App Store apps — closest thing to copy assistance in the category before AI tools.",
-      "iCloud sync keeps frames and preferences consistent across all your devices.",
+      "Device frames for iPhone, iPad, Mac and Apple Watch, including both iPhone Duo screens, with a combined mode that stitches framed shots side by side.",
+      "iCloud sync keeps preferences consistent across all your devices.",
     ],
     featureGaps: [
       "Free tier caps daily frames — exactly the wrong limit on submission night.",
       "Native app required — no browser fallback when you're on a borrowed machine.",
-      "Frames and captions, not full AI-generated layouts — same template-editor pattern.",
+      "Device frames only: no headlines and no AI-generated layouts.",
       "Subscription on a once-a-year job.",
       "iCloud sync — screenshots leave your machine; ShotStudio's never touch our disk.",
     ],
