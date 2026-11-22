@@ -40,12 +40,12 @@ const generationResponseSchema = z.object({
 
 const CATEGORIES = Object.keys(CATEGORY_DEFAULT_PRESET);
 
+const LAST_STEP = WIZARD_STEPS.length - 1;
+
 const SHOT_LABELS = ["Hero feature", "Differentiator", "Another feature"] as const;
 
-const LAST_STEP: Step = 2;
-
 type Status = "idle" | "submitting" | "done" | "error";
-type Step = 0 | 1 | 2;
+type Step = number;
 
 type ShotState = {
   file: File | null;
@@ -201,18 +201,18 @@ export function Wizard() {
       return;
     }
     setNotice(null);
-    if (step < LAST_STEP) setStep(step === 0 ? 1 : 2);
+    if (step < LAST_STEP) setStep(step + 1);
   }
 
   function prev() {
     setError(null);
     setNotice(null);
-    if (step > 0) setStep(step === 2 ? 1 : 0);
+    if (step > 0) setStep(step - 1);
   }
 
   async function onSubmit() {
     setError(null);
-    for (const s of [0, 1, 2] as const) {
+    for (const s of WIZARD_STEPS.keys()) {
       const v = validateStep(s);
       if (v) {
         setError(v);

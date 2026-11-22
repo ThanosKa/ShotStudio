@@ -117,7 +117,11 @@ export async function runCheckoutFulfillment(
     return { kind: "user_not_ready", userId };
   }
 
-  const { granted, balance: newBalance } = await grant({ userId, n: pack.credits, stripePaymentId: session.id });
+  const { granted, balance: newBalance } = await grant({
+    userId,
+    credits: pack.credits,
+    stripePaymentId: session.id,
+  });
   if (!granted) {
     log.info({ balance: newBalance }, "credits already granted for this session");
     return { kind: "already_granted", userId, balance: newBalance };
@@ -133,7 +137,10 @@ export async function runCheckoutFulfillment(
       packageName: `${pack.name} — ${pack.credits} ${pluralize({ n: pack.credits, singular: "set" })}`,
       creditsAdded: pack.credits,
       newBalance,
-      amountFormatted: formatAmount({ amountCents: session.amount_total ?? pack.priceCents, currency: session.currency ?? "usd" }),
+      amountFormatted: formatAmount({
+        amountCents: session.amount_total ?? pack.priceCents,
+        currency: session.currency ?? "usd",
+      }),
     });
     if (error) {
       log.error({ err: error }, "purchase email failed");

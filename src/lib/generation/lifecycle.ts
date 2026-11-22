@@ -23,7 +23,11 @@ export type GenerationOutcome =
   | { kind: "user_not_ready" }
   | { kind: "failed_and_refunded"; reason: string };
 
-const ALLOWED_SCREENSHOT_MIME: readonly string[] = ["image/jpeg", "image/png"];
+const ALLOWED_SCREENSHOT_MIME = ["image/jpeg", "image/png"] as const;
+
+function isAllowedScreenshotMime(type: string): type is (typeof ALLOWED_SCREENSHOT_MIME)[number] {
+  return ALLOWED_SCREENSHOT_MIME.some((allowed) => allowed === type);
+}
 const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 
 function validateScreenshots(
@@ -31,7 +35,7 @@ function validateScreenshots(
 ): { kind: "invalid_input"; message: string } | null {
   for (let i = 0; i < files.length; i++) {
     const f = files[i];
-    if (!ALLOWED_SCREENSHOT_MIME.includes(f.type)) {
+    if (!isAllowedScreenshotMime(f.type)) {
       return { kind: "invalid_input", message: "Screenshots must be JPEG or PNG." };
     }
     if (f.size > MAX_SCREENSHOT_BYTES) {
@@ -92,7 +96,12 @@ async function failAndRefund({
       .where(and(eq(generations.id, generation.id), eq(generations.status, "pending")))
       .returning({ id: generations.id });
     if (failed.length === 0) return false;
-    await refund({ userId: generation.userId, n: 1, metadata: { reason: refundReason, generationId: generation.id }, within: tx });
+    await refund({
+      userId: generation.userId,
+      credits: 1,
+      metadata: { reason: refundReason, generationId: generation.id },
+      within: tx,
+    });
     return true;
   });
 }

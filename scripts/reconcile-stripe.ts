@@ -182,7 +182,7 @@ async function main() {
     }
     try {
       if (plan.email) await createUserIfAbsent({ userId: plan.userId, email: plan.email });
-      const { balance } = await grant({ userId: plan.userId, n: plan.credits, stripePaymentId: plan.sessionId });
+      const { balance } = await grant({ userId: plan.userId, credits: plan.credits, stripePaymentId: plan.sessionId });
       granted++;
       log(`${label}  → balance ${balance}`);
     } catch (err) {

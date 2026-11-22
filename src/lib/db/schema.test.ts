@@ -159,10 +159,10 @@ describe("credit accounting on a fresh database", () => {
   test("grant → debit → refund leaves a balanced ledger", async () => {
     await ensureUser({ userId: "acct", email: "acct@test" });
 
-    const afterGrant = await grant({ userId: "acct", n: 5, stripePaymentId: "cs_test_reconcile_1" });
+    const afterGrant = await grant({ userId: "acct", credits: 5, stripePaymentId: "cs_test_reconcile_1" });
     expect(afterGrant).toEqual({ granted: true, balance: 5 });
 
-    const afterRefund = await refund({ userId: "acct", n: 1, metadata: { reason: "generation_failed" } });
+    const afterRefund = await refund({ userId: "acct", credits: 1, metadata: { reason: "generation_failed" } });
     expect(afterRefund).toBe(6);
 
     const ledger = await db
@@ -182,9 +182,9 @@ describe("credit accounting on a fresh database", () => {
   test("grant is idempotent per Stripe checkout session id (replay-safe)", async () => {
     await ensureUser({ userId: "acct2", email: "acct2@test" });
 
-    const a = await grant({ userId: "acct2", n: 2, stripePaymentId: "cs_dup" });
-    const b = await grant({ userId: "acct2", n: 2, stripePaymentId: "cs_dup" });
-    const c = await grant({ userId: "acct2", n: 12, stripePaymentId: "cs_other" });
+    const a = await grant({ userId: "acct2", credits: 2, stripePaymentId: "cs_dup" });
+    const b = await grant({ userId: "acct2", credits: 2, stripePaymentId: "cs_dup" });
+    const c = await grant({ userId: "acct2", credits: 12, stripePaymentId: "cs_other" });
 
     expect(a).toEqual({ granted: true, balance: 2 });
     expect(b).toEqual({ granted: false, balance: 2 });
@@ -198,13 +198,13 @@ describe("credit accounting on a fresh database", () => {
   });
 
   test("grant on a missing user row fails without granting credits", async () => {
-    await expect(grant({ userId: "nobody", n: 5, stripePaymentId: "cs_ghost" })).rejects.toThrow();
+    await expect(grant({ userId: "nobody", credits: 5, stripePaymentId: "cs_ghost" })).rejects.toThrow();
 
     const ledger = await db.select().from(transactions);
     expect(ledger).toHaveLength(0);
   });
 
   test("refund on a missing user row throws UserNotFoundError", async () => {
-    await expect(refund({ userId: "nobody", n: 1 })).rejects.toThrow(/User not found/);
+    await expect(refund({ userId: "nobody", credits: 1 })).rejects.toThrow(/User not found/);
   });
 });

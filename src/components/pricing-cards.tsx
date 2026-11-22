@@ -33,10 +33,12 @@ export function PricingCards() {
         !("checkoutUrl" in data) ||
         typeof data.checkoutUrl !== "string"
       ) {
-        setError(parseApiError({
+        setError(
+          parseApiError({
             data,
             fallback: "Couldn't start checkout. Please try again.",
-          }));
+          }),
+        );
         setBusy(null);
         return;
       }

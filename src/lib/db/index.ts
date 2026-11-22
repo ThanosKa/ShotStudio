@@ -181,6 +181,7 @@ function currentDb(): Db {
 
 const dbTarget: Db = Object.create(Object.prototype);
 
+/** Resolves on every access: the request's client on a Worker, a shared one under Node. */
 export const db = new Proxy(dbTarget, {
   get: (_target, property) => Reflect.get(currentDb(), property),
 });

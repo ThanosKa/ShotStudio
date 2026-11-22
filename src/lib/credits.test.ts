@@ -14,8 +14,8 @@ describe("grant", () => {
   test("is idempotent on duplicate stripePaymentId", async () => {
     await ensureUser({ userId: "u1", email: "u1@test" });
 
-    const a = await grant({ userId: "u1", n: 10, stripePaymentId: "evt_X" });
-    const b = await grant({ userId: "u1", n: 10, stripePaymentId: "evt_X" });
+    const a = await grant({ userId: "u1", credits: 10, stripePaymentId: "evt_X" });
+    const b = await grant({ userId: "u1", credits: 10, stripePaymentId: "evt_X" });
 
     expect(a).toEqual({ granted: true, balance: 10 });
     expect(b).toEqual({ granted: false, balance: 10 });
@@ -54,7 +54,7 @@ describe("debit", () => {
 
   test("lowers the balance by 1 and writes one usage -1 Transaction", async () => {
     await ensureUser({ userId: "d1", email: "d1@test" });
-    await grant({ userId: "d1", n: 3, stripePaymentId: "evt_d1" });
+    await grant({ userId: "d1", credits: 3, stripePaymentId: "evt_d1" });
 
     const balance = await db.transaction((tx) =>
       debit({ userId: "d1", metadata: { reason: "generation" }, within: tx }),
@@ -87,7 +87,7 @@ describe("debit", () => {
 
   test("leaves nothing behind if the caller's transaction fails afterwards", async () => {
     await ensureUser({ userId: "d3", email: "d3@test" });
-    await grant({ userId: "d3", n: 1, stripePaymentId: "evt_d3" });
+    await grant({ userId: "d3", credits: 1, stripePaymentId: "evt_d3" });
 
     await expect(
       db.transaction(async (tx) => {

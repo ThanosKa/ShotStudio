@@ -26,6 +26,11 @@ export function pickUserEmail(input: {
   return (primary ?? addresses[0])?.email ?? null;
 }
 
+/**
+ * Just-in-time user sync. Idempotent: safe to call on every authenticated page
+ * load and from server routes before any credit operation, to close the
+ * Clerk-vs-Stripe webhook race.
+ */
 export async function ensureUser({
   userId,
   email,
@@ -33,14 +38,18 @@ export async function ensureUser({
   userId: string;
   email: string;
 }) {
-  await withEmailReleased({ userId, email, write: () =>
-    db
-      .insert(users)
-      .values({ id: userId, email, credits: 0 })
-      .onConflictDoUpdate({
-        target: users.id,
-        set: { email: sql`excluded.email` },
-      }) });
+  await withEmailReleased({
+    userId,
+    email,
+    write: () =>
+      db
+        .insert(users)
+        .values({ id: userId, email, credits: 0 })
+        .onConflictDoUpdate({
+          target: users.id,
+          set: { email: sql`excluded.email` },
+        }),
+  });
 }
 
 async function withEmailReleased<T>({
@@ -143,6 +152,7 @@ export async function createUserIfAbsent({
     .onConflictDoNothing();
 }
 
+/** JIT User Sync for the signed-in user. Call AFTER the rate limit. */
 export async function syncSignedInUser(userId: string): Promise<string | null> {
   const user = await currentUser();
   const email = pickUserEmail({
@@ -167,12 +177,16 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
     });
     if (!email) return { kind: "skipped", reason: "no_email" };
 
-    const inserted = await withEmailReleased({ userId: id, email, write: () =>
-      db
-        .insert(users)
-        .values({ id, email, credits: 0 })
-        .onConflictDoNothing({ target: users.id })
-        .returning({ id: users.id }) });
+    const inserted = await withEmailReleased({
+      userId: id,
+      email,
+      write: () =>
+        db
+          .insert(users)
+          .values({ id, email, credits: 0 })
+          .onConflictDoNothing({ target: users.id })
+          .returning({ id: users.id }),
+    });
     if (inserted.length === 0) return { kind: "already_exists" };
 
     try {

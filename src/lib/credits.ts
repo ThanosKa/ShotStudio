@@ -65,19 +65,19 @@ export async function debit({
  */
 export async function refund({
   userId,
-  n,
+  credits,
   metadata,
   within,
 }: {
   userId: string;
-  n: number;
+  credits: number;
   metadata?: Record<string, unknown>;
   within?: Tx;
 }) {
   return (within ?? db).transaction(async (tx) => {
     const updated = await tx
       .update(users)
-      .set({ credits: sql`${users.credits} + ${n}` })
+      .set({ credits: sql`${users.credits} + ${credits}` })
       .where(eq(users.id, userId))
       .returning({ credits: users.credits });
 
@@ -86,7 +86,7 @@ export async function refund({
     await tx.insert(transactions).values({
       userId,
       type: "refund",
-      amount: n,
+      amount: credits,
       metadata: metadata ?? null,
     });
 
@@ -101,11 +101,11 @@ export async function refund({
  */
 export async function grant({
   userId,
-  n,
+  credits,
   stripePaymentId,
 }: {
   userId: string;
-  n: number;
+  credits: number;
   stripePaymentId: string;
 }): Promise<{ granted: boolean; balance: number }> {
   return db.transaction(async (tx) => {
@@ -114,7 +114,7 @@ export async function grant({
       .values({
         userId,
         type: "purchase",
-        amount: n,
+        amount: credits,
         stripePaymentId,
       })
       .onConflictDoNothing({
@@ -136,7 +136,7 @@ export async function grant({
 
     const updated = await tx
       .update(users)
-      .set({ credits: sql`${users.credits} + ${n}` })
+      .set({ credits: sql`${users.credits} + ${credits}` })
       .where(eq(users.id, userId))
       .returning({ credits: users.credits });
 

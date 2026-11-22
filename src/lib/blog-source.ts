@@ -2,6 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 
+/**
+ * The only blog code that touches the disk. The Worker has no project files, so
+ * `blog-vite-plugin.ts` replaces this module with the posts themselves at build
+ * time. It must keep exporting what that replacement exports.
+ */
 export const BLOG_DIR = path.join(process.cwd(), "src", "content", "blog");
 
 export type PostMeta = {

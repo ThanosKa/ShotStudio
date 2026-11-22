@@ -59,7 +59,7 @@ describe("Credit Ledger", () => {
     const userId = "u_ledger";
     await ensureUser({ userId, email: `${userId}@test` });
 
-    expect(await grant({ userId, n: 5, stripePaymentId: "cs_ledger" })).toEqual({ granted: true, balance: 5 });
+    expect(await grant({ userId, credits: 5, stripePaymentId: "cs_ledger" })).toEqual({ granted: true, balance: 5 });
     expect(await transactionsSum(userId)).toBe(await balanceOf(userId));
 
     vi.mocked(generateImage).mockResolvedValue(ONE_PX_PNG_B64);

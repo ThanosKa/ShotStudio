@@ -39,12 +39,16 @@ export async function withAuthenticatedUser({
   const rl = await rateLimit.limit(userId);
   if (!rl.success) {
     scoped.warn("rate limit hit");
-    return jsonError({ status: 429, error: "Too many requests — please wait a moment.", init: {
-      headers: {
-        ...rateLimitHeaders(rl),
-        "Retry-After": String(Math.max(0, Math.ceil((rl.reset - Date.now()) / 1000))),
+    return jsonError({
+      status: 429,
+      error: "Too many requests — please wait a moment.",
+      init: {
+        headers: {
+          ...rateLimitHeaders(rl),
+          "Retry-After": String(Math.max(0, Math.ceil((rl.reset - Date.now()) / 1000))),
+        },
       },
-    } });
+    });
   }
 
   const email = await syncSignedInUser(userId);
