@@ -23,7 +23,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 ## Before working on
 
 - Any Next.js feature → read the matching guide in `node_modules/next/dist/docs/` first: this version has breaking changes from your training data. Heed deprecation notices.
-- Server code (API routes, `src/lib/`) → read `CODING_STANDARDS.md`
+- Any code (writing, editing or reviewing a diff) → read `CODING_STANDARDS.md`
 - Credit balances, debit, `grant` or `refund` → read `.claude/docs/credits.md`
 - The generation route or `src/lib/generation/` → read `.claude/docs/generation.md`
 - Stripe or Clerk webhooks, or transactional email → read `.claude/docs/webhooks.md`
