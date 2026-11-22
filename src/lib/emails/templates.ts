@@ -53,7 +53,13 @@ function previewHtml(preview: string): string {
   return `<div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">${escapeHtml(text)}${padding}</div>`;
 }
 
-function layoutHtml(preview: string, content: string): string {
+function layoutHtml({
+  preview,
+  content,
+}: {
+  preview: string;
+  content: string;
+}): string {
   return (
     `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">` +
     `<html dir="ltr" lang="en"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/><style></style></head>` +
@@ -69,7 +75,15 @@ function layoutHtml(preview: string, content: string): string {
 }
 
 /** Heading, greeting and first paragraph. */
-function introHtml(heading: string, greeting: string, paragraph: string): string {
+function introHtml({
+  heading,
+  greeting,
+  paragraph,
+}: {
+  heading: string;
+  greeting: string;
+  paragraph: string;
+}): string {
   return (
     `${TABLE} style="margin-top:32px"><tbody><tr><td>` +
     `<h1 style="font-size:24px;line-height:32px;font-weight:600;letter-spacing:-0.025em;margin:0">${heading}</h1>` +
@@ -90,23 +104,35 @@ function buttonHtml(appUrl: string): string {
   );
 }
 
-function linkHtml(href: string, label: string): string {
+function linkHtml({ href, label }: { href: string; label: string }): string {
   return `<a href="${escapeHtml(href)}" ${LINK_STYLE}>${label}</a>`;
 }
 
 /** Footer after the closing rule; `legal` is the first line's content. */
-function footerHtml(appUrl: string, legal: string): string {
+function footerHtml({
+  appUrl,
+  legal,
+}: {
+  appUrl: string;
+  legal: string;
+}): string {
   return (
     `<hr style="${HR_STYLE};margin-bottom:32px;margin-top:32px"/>` +
     `${TABLE}><tbody><tr><td>` +
     `<p style="${SMALL_MUTED};${TEXT_RESET}">${legal}</p>` +
-    `<p style="${SMALL_MUTED};margin-top:12px;margin-bottom:0">${linkHtml(appUrl, "shotstudio.dev")} <!-- -->— App Store screenshots, in a minute.</p>` +
+    `<p style="${SMALL_MUTED};margin-top:12px;margin-bottom:0">${linkHtml({ href: appUrl, label: "shotstudio.dev" })} <!-- -->— App Store screenshots, in a minute.</p>` +
     `<p style="${SMALL_MUTED};margin-top:4px;margin-bottom:0">© 2026 ShotStudio</p>` +
     `</td></tr></tbody></table>`
   );
 }
 
-function footerText(appUrl: string, legal: string): string {
+function footerText({
+  appUrl,
+  legal,
+}: {
+  appUrl: string;
+  legal: string;
+}): string {
   return [
     TEXT_HR,
     legal,
@@ -126,15 +152,20 @@ export function welcomeEmail({
   const paragraph =
     "Upload three mobile screenshots, give us your app name and tagline, and you'll have three polished App Store shots in under a minute. No subscriptions, no design tools.";
 
-  const html = layoutHtml(
-    "Welcome to ShotStudio — App Store screenshots in a minute.",
-    introHtml("Welcome to ShotStudio", greeting, escapeHtml(paragraph)) +
+  const html = layoutHtml({
+    preview: "Welcome to ShotStudio — App Store screenshots in a minute.",
+    content:
+      introHtml({
+        heading: "Welcome to ShotStudio",
+        greeting,
+        paragraph: escapeHtml(paragraph),
+      }) +
       buttonHtml(appUrl) +
-      footerHtml(
+      footerHtml({
         appUrl,
-        `${linkHtml(`${appUrl}/terms`, "Terms")} · ${linkHtml(`${appUrl}/privacy`, "Privacy")}`,
-      ),
-  );
+        legal: `${linkHtml({ href: `${appUrl}/terms`, label: "Terms" })} · ${linkHtml({ href: `${appUrl}/privacy`, label: "Privacy" })}`,
+      }),
+  });
 
   const text = [
     // The logo paragraph and the heading are three lines apart.
@@ -142,7 +173,10 @@ export function welcomeEmail({
     collapseWhitespace(greeting),
     paragraph,
     `Open ShotStudio ${appUrl}/home`,
-    footerText(appUrl, `Terms ${appUrl}/terms · Privacy ${appUrl}/privacy`),
+    footerText({
+      appUrl,
+      legal: `Terms ${appUrl}/terms · Privacy ${appUrl}/privacy`,
+    }),
   ].join("\n\n");
 
   return { html, text };
@@ -171,7 +205,13 @@ export function creditsPurchasedEmail({
     `<p style="font-size:12px;line-height:16px;text-transform:uppercase;letter-spacing:0.025em;color:rgb(90,90,90);${TEXT_RESET}">${value}</p>`;
   const value = (v: string) =>
     `<p style="font-size:14px;line-height:20px;font-weight:500;color:rgb(10,10,10);margin-top:4px;margin-bottom:0">${escapeHtml(v)}</p>`;
-  const row = (left: [string, string], right: [string, string]) =>
+  const row = ({
+    left,
+    right,
+  }: {
+    left: [string, string];
+    right: [string, string];
+  }) =>
     `${TABLE}><tbody style="width:100%"><tr style="width:100%">` +
     `<td data-id="__react-email-column">${label(left[0])}${value(left[1])}</td>` +
     `<td align="right" data-id="__react-email-column">${label(right[0])}${value(right[1])}</td>` +
@@ -179,25 +219,27 @@ export function creditsPurchasedEmail({
 
   const summary =
     `${TABLE} style="margin-top:32px;background-color:rgb(247,247,247);border-radius:0.5rem;padding-right:20px;padding-left:20px;padding-bottom:16px;padding-top:16px;border-style:solid;border-width:1px;border-color:rgb(229,229,229)"><tbody><tr><td>` +
-    row(["Package", packageName], ["Amount", amountFormatted]) +
+    row({ left: ["Package", packageName], right: ["Amount", amountFormatted] }) +
     `<hr style="${HR_STYLE};margin-bottom:16px;margin-top:16px"/>` +
-    row(["Credits added", added], ["New balance", balance]) +
+    row({ left: ["Credits added", added], right: ["New balance", balance] }) +
     `</td></tr></tbody></table>`;
 
-  const html = layoutHtml(
-    `Payment confirmed — ${added} added (balance: ${newBalance}).`,
-    introHtml(
-      "Payment confirmed",
-      greeting,
-      "Thanks for buying credits. Your balance is updated and ready to use.",
-    ) +
+  const html = layoutHtml({
+    preview: `Payment confirmed — ${added} added (balance: ${newBalance}).`,
+    content:
+      introHtml({
+        heading: "Payment confirmed",
+        greeting,
+        paragraph:
+          "Thanks for buying credits. Your balance is updated and ready to use.",
+      }) +
       summary +
       buttonHtml(appUrl) +
-      footerHtml(
+      footerHtml({
         appUrl,
-        `All sales final. See our<!-- --> ${linkHtml(`${appUrl}/terms`, "Terms")} <!-- -->and<!-- --> ${linkHtml(`${appUrl}/privacy`, "Privacy Policy")}.`,
-      ),
-  );
+        legal: `All sales final. See our<!-- --> ${linkHtml({ href: `${appUrl}/terms`, label: "Terms" })} <!-- -->and<!-- --> ${linkHtml({ href: `${appUrl}/privacy`, label: "Privacy Policy" })}.`,
+      }),
+  });
 
   const text = [
     // The logo paragraph and the heading are three lines apart.
@@ -214,10 +256,10 @@ export function creditsPurchasedEmail({
     "New balance",
     balance,
     `Open ShotStudio ${appUrl}/home`,
-    footerText(
+    footerText({
       appUrl,
-      `All sales final. See our Terms ${appUrl}/terms and Privacy Policy ${appUrl}/privacy.`,
-    ),
+      legal: `All sales final. See our Terms ${appUrl}/terms and Privacy Policy ${appUrl}/privacy.`,
+    }),
   ].join("\n\n");
 
   return { html, text };

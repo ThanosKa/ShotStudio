@@ -565,7 +565,13 @@ const MAX_CLUSTER_SIBLINGS = 4;
  *    Walking a window forward through the array guarantees each category is
  *    linked from several others and every block is unique per page.
  */
-export function relatedCategories(slug: string, limit = 6): Category[] {
+export function relatedCategories({
+  slug,
+  limit = 6,
+}: {
+  slug: string;
+  limit?: number;
+}): Category[] {
   const editorial = CATEGORY_EDITORIAL[slug];
   const picked: Category[] = [];
   const push = (c: Category | undefined) => {

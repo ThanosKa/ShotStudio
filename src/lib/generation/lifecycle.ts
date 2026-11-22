@@ -23,7 +23,7 @@ export type GenerationOutcome =
   | { kind: "user_not_ready" }
   | { kind: "failed_and_refunded"; reason: string };
 
-const ALLOWED_SCREENSHOT_MIME = ["image/jpeg", "image/png"] as const;
+const ALLOWED_SCREENSHOT_MIME: readonly string[] = ["image/jpeg", "image/png"];
 const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 
 function validateScreenshots(
@@ -31,7 +31,7 @@ function validateScreenshots(
 ): { kind: "invalid_input"; message: string } | null {
   for (let i = 0; i < files.length; i++) {
     const f = files[i];
-    if (!ALLOWED_SCREENSHOT_MIME.includes(f.type as (typeof ALLOWED_SCREENSHOT_MIME)[number])) {
+    if (!ALLOWED_SCREENSHOT_MIME.includes(f.type)) {
       return { kind: "invalid_input", message: "Screenshots must be JPEG or PNG." };
     }
     if (f.size > MAX_SCREENSHOT_BYTES) {
@@ -53,7 +53,7 @@ async function debitAndStartGeneration(
   input: Omit<RunGenerationInput, "pitch" | "audience" | "screenshots">,
 ): Promise<{ generationId: string }> {
   return db.transaction(async (tx) => {
-    await debit(input.userId, { reason: "generation" }, tx);
+    await debit({ userId: input.userId, metadata: { reason: "generation" }, within: tx });
 
     const [row] = await tx
       .insert(generations)
@@ -83,11 +83,15 @@ async function markGenerationComplete(generationId: string) {
  * Returns false, and changes nothing, when the row is no longer `pending`: the
  * other path (the run itself or the abandoned sweep) already settled it.
  */
-async function failAndRefund(
-  generation: { id: string; userId: string },
-  failureReason: string,
-  refundReason: "generation_failed" | "generation_abandoned",
-): Promise<boolean> {
+async function failAndRefund({
+  generation,
+  failureReason,
+  refundReason,
+}: {
+  generation: { id: string; userId: string };
+  failureReason: string;
+  refundReason: "generation_failed" | "generation_abandoned";
+}): Promise<boolean> {
   return db.transaction(async (tx) => {
     const failed = await tx
       .update(generations)
@@ -99,7 +103,7 @@ async function failAndRefund(
       .where(and(eq(generations.id, generation.id), eq(generations.status, "pending")))
       .returning({ id: generations.id });
     if (failed.length === 0) return false;
-    await refund(generation.userId, 1, { reason: refundReason, generationId: generation.id }, tx);
+    await refund({ userId: generation.userId, n: 1, metadata: { reason: refundReason, generationId: generation.id }, within: tx });
     return true;
   });
 }
@@ -131,11 +135,11 @@ export async function refundAbandonedGenerations(
   let refunded = 0;
   for (const generation of abandoned) {
     try {
-      const done = await failAndRefund(
+      const done = await failAndRefund({
         generation,
-        "Abandoned: no outcome was recorded",
-        "generation_abandoned",
-      );
+        failureReason: "Abandoned: no outcome was recorded",
+        refundReason: "generation_abandoned",
+      });
       if (done) refunded++;
     } catch (err) {
       log.error({ err, generationId: generation.id }, "abandoned generation refund failed");
@@ -185,17 +189,20 @@ async function runGenerationToEnd(
   const shotLog = log.child({ generationId });
   shotLog.info("generation started");
 
-  const screenshotDataUrls = (await Promise.all(
-    input.screenshots.map(async (f) => {
-      const buf = Buffer.from(await f.arrayBuffer());
-      return `data:${f.type};base64,${buf.toString("base64")}`;
-    }),
-  )) as [string, string, string];
+  const toDataUrl = async (f: File) => {
+    const buf = Buffer.from(await f.arrayBuffer());
+    return `data:${f.type};base64,${buf.toString("base64")}`;
+  };
+  const screenshotDataUrls = await Promise.all([
+    toDataUrl(input.screenshots[0]),
+    toDataUrl(input.screenshots[1]),
+    toDataUrl(input.screenshots[2]),
+  ]);
   // Release ~5MB-per-file File handles before the long-running shot calls.
-  (input.screenshots as File[]).length = 0;
+  input.screenshots.splice(0);
 
-  const set = await generateSet(
-    {
+  const set = await generateSet({
+    brief: {
       appName: input.appName,
       pitch: input.pitch,
       audience: input.audience,
@@ -203,13 +210,17 @@ async function runGenerationToEnd(
       stylePreset: input.stylePreset,
       referenceScreenshots: screenshotDataUrls,
     },
-    shotLog,
-  );
+    log: shotLog,
+  });
 
   if (set.kind === "failed") {
     const reason = `Generation failed: ${set.failed}/${set.total} shots failed`;
     try {
-      await failAndRefund({ id: generationId, userId: input.userId }, reason, "generation_failed");
+      await failAndRefund({
+        generation: { id: generationId, userId: input.userId },
+        failureReason: reason,
+        refundReason: "generation_failed",
+      });
     } catch (refundErr) {
       // The row stays `pending`, so the abandoned sweep refunds it later.
       shotLog.error(

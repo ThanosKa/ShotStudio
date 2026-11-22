@@ -18,10 +18,13 @@ export function readPost(slug) { return posts.find((post) => post.slug === slug)
  * Next renders. Its output is a function body, which `MDXRemote` then runs through
  * `new Function`. Workers refuse that, so here it is written into the bundle.
  */
-async function compiledMdxModule(
-  posts: Post[],
-  sourceModule: string,
-): Promise<string> {
+async function compiledMdxModule({
+  posts,
+  sourceModule,
+}: {
+  posts: Post[];
+  sourceModule: string;
+}): Promise<string> {
   const bodies = await Promise.all(
     posts.map(async (post) => {
       const { compiledSource } = await serialize(post.content, {}, true);
@@ -79,7 +82,7 @@ export function blogContent({ dir = BLOG_DIR }: { dir?: string } = {}): Plugin {
     load(id) {
       if (id === sourceFile) return postsModule(readBuiltPosts());
       if (id === COMPILED_MDX_ID) {
-        return compiledMdxModule(readBuiltPosts(), sourceFile);
+        return compiledMdxModule({ posts: readBuiltPosts(), sourceModule: sourceFile });
       }
     },
   };

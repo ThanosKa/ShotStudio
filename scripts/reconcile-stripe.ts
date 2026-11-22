@@ -116,7 +116,7 @@ async function phase1BackfillClerkUsers(): Promise<{
         log(`  skip  ${user.id} — no email address on the Clerk record`);
         continue;
       }
-      if (APPLY) await ensureUser(user.id, email);
+      if (APPLY) await ensureUser({ userId: user.id, email });
       synced++;
       log(`  ${APPLY ? "sync" : "plan"}  ${user.id}  ${email}`);
     }
@@ -221,8 +221,8 @@ async function main() {
       continue;
     }
     try {
-      if (plan.email) await createUserIfAbsent(plan.userId, plan.email);
-      const { balance } = await grant(plan.userId, plan.credits, plan.sessionId);
+      if (plan.email) await createUserIfAbsent({ userId: plan.userId, email: plan.email });
+      const { balance } = await grant({ userId: plan.userId, n: plan.credits, stripePaymentId: plan.sessionId });
       granted++;
       log(`${label}  → balance ${balance}`);
     } catch (err) {

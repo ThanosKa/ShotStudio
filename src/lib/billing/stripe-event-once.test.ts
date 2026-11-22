@@ -25,7 +25,7 @@ describe("runStripeEventOnce", () => {
   it("claims stripe:event:<id> as processing for 120 s, then marks done for 86,400 s", async () => {
     const work = vi.fn().mockResolvedValue({ ok: true });
 
-    const out = await runStripeEventOnce("evt_1", work, log);
+    const out = await runStripeEventOnce({ eventId: "evt_1", work, log });
 
     expect(out).toEqual({ kind: "ran", result: { ok: true } });
     expect(fakeRedis.set).toHaveBeenNthCalledWith(1, KEY, "processing", { nx: true, ex: 120 });
@@ -38,7 +38,7 @@ describe("runStripeEventOnce", () => {
     fakeRedis.set.mockResolvedValue(null);
     for (const stored of ["1", "done"]) {
       fakeRedis.get.mockResolvedValue(stored);
-      expect(await runStripeEventOnce("evt_1", work, log)).toEqual({ kind: "duplicate" });
+      expect(await runStripeEventOnce({ eventId: "evt_1", work, log })).toEqual({ kind: "duplicate" });
     }
     expect(work).not.toHaveBeenCalled();
   });
@@ -48,12 +48,12 @@ describe("runStripeEventOnce", () => {
     fakeRedis.set.mockResolvedValue(null);
     fakeRedis.get.mockResolvedValue("processing");
 
-    expect(await runStripeEventOnce("evt_1", work, log)).toEqual({ kind: "in_progress" });
+    expect(await runStripeEventOnce({ eventId: "evt_1", work, log })).toEqual({ kind: "in_progress" });
     expect(work).not.toHaveBeenCalled();
   });
 
   it("deletes the claim and still answers ran when the result is not ok", async () => {
-    const out = await runStripeEventOnce("evt_1", async () => ({ ok: false }), log);
+    const out = await runStripeEventOnce({ eventId: "evt_1", work: async () => ({ ok: false }), log });
 
     expect(out).toEqual({ kind: "ran", result: { ok: false } });
     expect(fakeRedis.del).toHaveBeenCalledWith(KEY);
@@ -64,7 +64,7 @@ describe("runStripeEventOnce", () => {
     const boom = new Error("boom");
 
     await expect(
-      runStripeEventOnce("evt_1", async () => Promise.reject(boom), log),
+      runStripeEventOnce({ eventId: "evt_1", work: async () => Promise.reject(boom), log }),
     ).rejects.toBe(boom);
     expect(fakeRedis.del).toHaveBeenCalledWith(KEY);
   });
@@ -72,7 +72,7 @@ describe("runStripeEventOnce", () => {
   it("still answers ran when the done write fails after success", async () => {
     fakeRedis.set.mockResolvedValueOnce("OK").mockRejectedValueOnce(new Error("redis down"));
 
-    const out = await runStripeEventOnce("evt_1", async () => ({ ok: true }), log);
+    const out = await runStripeEventOnce({ eventId: "evt_1", work: async () => ({ ok: true }), log });
 
     expect(out).toEqual({ kind: "ran", result: { ok: true } });
     expect(log.warn).toHaveBeenCalled();

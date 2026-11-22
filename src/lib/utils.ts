@@ -5,7 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function pluralize(n: number, singular: string, plural?: string): string {
+export function pluralize({
+  n,
+  singular,
+  plural,
+}: {
+  n: number;
+  singular: string;
+  plural?: string;
+}): string {
   return n === 1 ? singular : plural ?? `${singular}s`;
 }
 

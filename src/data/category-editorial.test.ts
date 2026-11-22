@@ -29,7 +29,7 @@ const LIMIT = 6;
 
 describe("relatedCategories", () => {
   const blocks = new Map(
-    CATEGORIES.map((c) => [c.slug, relatedCategories(c.slug, LIMIT)] as const),
+    CATEGORIES.map((c) => [c.slug, relatedCategories({ slug: c.slug, limit: LIMIT })] as const),
   );
 
   it("always returns the requested number of siblings", () => {

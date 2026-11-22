@@ -50,7 +50,7 @@ function sessionFor(
 
 describe("runCheckoutFulfillment", () => {
   test("ok: grants pack credits, returns new balance, sends receipt email keyed by event id", async () => {
-    await ensureUser("u_buy", "u_buy@test");
+    await ensureUser({ userId: "u_buy", email: "u_buy@test" });
 
     const outcome = await runCheckoutFulfillment({
       session: sessionFor(),
@@ -88,7 +88,7 @@ describe("runCheckoutFulfillment", () => {
   // Stripe retries for up to 3 days and the Redis mark lasts 24 h, so a replay
   // of an already-granted session must not tell the customer "you bought" twice.
   test("already_granted: a replayed session grants nothing and sends no second email", async () => {
-    await ensureUser("u_buy", "u_buy@test");
+    await ensureUser({ userId: "u_buy", email: "u_buy@test" });
     await runCheckoutFulfillment({ session: sessionFor(), eventId: "evt_1" });
     vi.mocked(sendCreditsPurchasedEmail).mockClear();
 
@@ -104,7 +104,7 @@ describe("runCheckoutFulfillment", () => {
   });
 
   test("unknown_pack: no grant, no email", async () => {
-    await ensureUser("u_pkg", "u_pkg@test");
+    await ensureUser({ userId: "u_pkg", email: "u_pkg@test" });
     vi.mocked(sendCreditsPurchasedEmail).mockClear();
 
     const outcome = await runCheckoutFulfillment({
@@ -229,7 +229,7 @@ describe("runCheckoutFulfillment and the User Email", () => {
   }
 
   test("an existing User who pays with another email gets the Credits and keeps their email", async () => {
-    await ensureUser("u_buy", "a@test");
+    await ensureUser({ userId: "u_buy", email: "a@test" });
     vi.mocked(sendCreditsPurchasedEmail).mockClear();
 
     const outcome = await runCheckoutFulfillment({
@@ -247,8 +247,8 @@ describe("runCheckoutFulfillment and the User Email", () => {
   });
 
   test("an existing User who pays with another User's email gets the Credits and neither email changes", async () => {
-    await ensureUser("u_buy", "a@test");
-    await ensureUser("u_other", "b@test");
+    await ensureUser({ userId: "u_buy", email: "a@test" });
+    await ensureUser({ userId: "u_other", email: "b@test" });
 
     const outcome = await runCheckoutFulfillment({
       session: paidWith("b@test"),
@@ -271,7 +271,7 @@ describe("runCheckoutFulfillment and the User Email", () => {
   });
 
   test("with no User row and a Stripe email owned by another User, the outcome is user_not_ready and nothing is written", async () => {
-    await ensureUser("u_other", "b@test");
+    await ensureUser({ userId: "u_other", email: "b@test" });
     vi.mocked(sendCreditsPurchasedEmail).mockClear();
 
     const outcome = await runCheckoutFulfillment({
@@ -287,11 +287,11 @@ describe("runCheckoutFulfillment and the User Email", () => {
   });
 
   test("once User Sync has created the buyer's row, Stripe's retry Grants the Credits", async () => {
-    await ensureUser("u_other", "b@test");
+    await ensureUser({ userId: "u_other", email: "b@test" });
     const session = paidWith("b@test");
     await runCheckoutFulfillment({ session, eventId: "evt_retry" });
 
-    await ensureUser("u_buy", "a@test");
+    await ensureUser({ userId: "u_buy", email: "a@test" });
     const retry = await runCheckoutFulfillment({ session, eventId: "evt_retry" });
 
     expect(retry).toMatchObject({ kind: "ok", creditsGranted: 5, newBalance: 5 });

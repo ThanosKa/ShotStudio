@@ -44,10 +44,13 @@ export const DottedGlowBackground = ({
   const [resolvedColor, setResolvedColor] = useState<string>(color);
   const [resolvedGlowColor, setResolvedGlowColor] = useState<string>(glowColor);
 
-  const resolveCssVariable = (
-    el: Element,
-    variableName?: string,
-  ): string | null => {
+  const resolveCssVariable = ({
+    el,
+    variableName,
+  }: {
+    el: Element;
+    variableName?: string;
+  }): string | null => {
     if (!variableName) return null;
     const normalized = variableName.startsWith("--")
       ? variableName
@@ -81,13 +84,13 @@ export const DottedGlowBackground = ({
       let nextGlow: string = glowColor;
 
       if (isDark) {
-        const varDot = resolveCssVariable(container, colorDarkVar);
-        const varGlow = resolveCssVariable(container, glowColorDarkVar);
+        const varDot = resolveCssVariable({ el: container, variableName: colorDarkVar });
+        const varGlow = resolveCssVariable({ el: container, variableName: glowColorDarkVar });
         nextColor = varDot || darkColor || nextColor;
         nextGlow = varGlow || darkGlowColor || nextGlow;
       } else {
-        const varDot = resolveCssVariable(container, colorLightVar);
-        const varGlow = resolveCssVariable(container, glowColorLightVar);
+        const varDot = resolveCssVariable({ el: container, variableName: colorLightVar });
+        const varGlow = resolveCssVariable({ el: container, variableName: glowColorLightVar });
         nextColor = varDot || nextColor;
         nextGlow = varGlow || nextGlow;
       }

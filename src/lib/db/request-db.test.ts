@@ -46,19 +46,19 @@ describe("runWithRequestDb", () => {
     let release!: () => void;
     const bothInside = new Promise<void>((r) => (release = r));
 
-    const a = runWithRequestDb(LOCAL_A, ctx, async () => {
+    const a = runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       seen.a = db.$client;
       seen.aDatabase = db.$client.options.database;
       await bothInside;
       seen.aAgain = db.$client;
       return new Response("a");
-    });
-    const b = runWithRequestDb(LOCAL_B, ctx, async () => {
+    } });
+    const b = runWithRequestDb({ connectionString: LOCAL_B, ctx, handler: async () => {
       seen.b = db.$client;
       seen.bDatabase = db.$client.options.database;
       release();
       return new Response("b");
-    });
+    } });
     await Promise.all([a, b]);
 
     expect(seen.a).toBe(seen.aAgain);
@@ -70,10 +70,10 @@ describe("runWithRequestDb", () => {
   it("keeps the client open until the response body has been read, then closes it", async () => {
     const { ctx, settled } = fakeCtx();
     let client!: typeof db.$client;
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       client = db.$client;
       return new Response("streamed body", { status: 201, headers: { "x-kept": "yes" } });
-    });
+    } });
 
     expect(response.status).toBe(201);
     expect(response.headers.get("x-kept")).toBe("yes");
@@ -85,7 +85,7 @@ describe("runWithRequestDb", () => {
   it("lets a query that starts after the response is returned use the same client", async () => {
     const { ctx } = fakeCtx();
     const clients: unknown[] = [];
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       clients.push(db.$client);
       const stream = new ReadableStream({
         async pull(controller) {
@@ -96,7 +96,7 @@ describe("runWithRequestDb", () => {
         },
       });
       return new Response(stream);
-    });
+    } });
 
     expect(await response.text()).toBe("late");
     expect(clients[1]).toBe(clients[0]);
@@ -105,10 +105,10 @@ describe("runWithRequestDb", () => {
   it("closes the client when the reader cancels the body", async () => {
     const { ctx, settled } = fakeCtx();
     let client!: typeof db.$client;
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       client = db.$client;
       return new Response(new ReadableStream({ pull: () => new Promise(() => {}) }));
-    });
+    } });
 
     await response.body!.cancel();
     await settled();
@@ -118,10 +118,10 @@ describe("runWithRequestDb", () => {
   it("logs, at debug, a response stream that stopped early instead of hiding it", async () => {
     const { ctx, settled } = fakeCtx();
     const debug = vi.spyOn(logger, "debug");
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       void db.$client;
       return new Response(new ReadableStream({ pull: () => new Promise(() => {}) }));
-    });
+    } });
 
     await response.body!.cancel(new Error("reader gone"));
     await settled();
@@ -133,10 +133,10 @@ describe("runWithRequestDb", () => {
   it("closes the client when the response has no body", async () => {
     const { ctx, settled } = fakeCtx();
     let client!: typeof db.$client;
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       client = db.$client;
       return new Response(null, { status: 304 });
-    });
+    } });
 
     expect(response.status).toBe(304);
     await settled();
@@ -146,14 +146,14 @@ describe("runWithRequestDb", () => {
   it("leaves a response untouched when no client was opened and it is not a page", async () => {
     const { ctx } = fakeCtx();
     const original = new Response("User-agent: *", { headers: { "content-type": "text/plain" } });
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => original);
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => original });
     expect(response).toBe(original);
   });
 
   it("still closes a client that a streamed page opens after it is returned", async () => {
     const { ctx, settled } = fakeCtx();
     let client!: typeof db.$client;
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       const stream = new ReadableStream({
         async pull(controller) {
           await new Promise((r) => setTimeout(r, 5));
@@ -163,7 +163,7 @@ describe("runWithRequestDb", () => {
         },
       });
       return new Response(stream, { headers: { "content-type": "text/html; charset=utf-8" } });
-    });
+    } });
 
     expect(await response.text()).toBe("late");
     await settled();
@@ -173,10 +173,10 @@ describe("runWithRequestDb", () => {
   it("keeps Content-Length on a body of known length, and closes the client", async () => {
     const { ctx, settled } = fakeCtx();
     let client!: typeof db.$client;
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       client = db.$client;
       return new Response("hello", { headers: { "content-length": "5" } });
-    });
+    } });
 
     expect(response.headers.get("content-length")).toBe("5");
     await settled();
@@ -188,10 +188,10 @@ describe("runWithRequestDb", () => {
     const { ctx, settled } = fakeCtx();
     let client!: typeof db.$client;
     await expect(
-      runWithRequestDb(LOCAL_A, ctx, async () => {
+      runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
         client = db.$client;
         throw new Error("boom");
-      }),
+      } }),
     ).rejects.toThrow("boom");
 
     await settled();
@@ -212,7 +212,7 @@ describe("runWithRequestDb", () => {
     let finishWork!: () => void;
     let clientInWork!: typeof db.$client;
     let openDuringWork = false;
-    const response = await runWithRequestDb(LOCAL_A, recordingCtx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx: recordingCtx, handler: async () => {
       const work = (async () => {
         await new Promise<void>((r) => (finishWork = r));
         clientInWork = db.$client;
@@ -222,7 +222,7 @@ describe("runWithRequestDb", () => {
       return new Response(new ReadableStream({ pull: () => new Promise(() => {}) }), {
         headers: { "content-type": "application/json" },
       });
-    });
+    } });
 
     await response.body!.cancel();
     const handedOver = waitedOn.length;
@@ -236,7 +236,7 @@ describe("runWithRequestDb", () => {
 
   it("refuses the database once the request's client has closed, instead of opening one that never closes", async () => {
     const { ctx, settled } = fakeCtx();
-    const response = await runWithRequestDb(LOCAL_A, ctx, async () => {
+    const response = await runWithRequestDb({ connectionString: LOCAL_A, ctx, handler: async () => {
       const stream = new ReadableStream({
         async pull(controller) {
           await new Promise((r) => setTimeout(r, 5));
@@ -251,7 +251,7 @@ describe("runWithRequestDb", () => {
         },
       });
       return new Response(stream, { headers: { "content-type": "application/json" } });
-    });
+    } });
 
     await settled();
     expect(await response.text()).toMatch(/after the request's database client closed/);
@@ -263,14 +263,14 @@ describe("runWithRequestDb", () => {
 
   it("does not need a connection string until the database is used", async () => {
     const { ctx } = fakeCtx();
-    const response = await runWithRequestDb(undefined, ctx, async () => new Response("public"));
+    const response = await runWithRequestDb({ connectionString: undefined, ctx, handler: async () => new Response("public") });
     expect(await response.text()).toBe("public");
 
     await expect(
-      runWithRequestDb(undefined, ctx, async () => {
+      runWithRequestDb({ connectionString: undefined, ctx, handler: async () => {
         void db.$client;
         return new Response("never");
-      }),
+      } }),
     ).rejects.toThrow("No database connection string");
   });
 });
@@ -279,10 +279,10 @@ describe("runWithJobDb", () => {
   it("gives a scheduled job its own client and closes it when the job ends", async () => {
     const { ctx } = fakeCtx();
     let client!: typeof db.$client;
-    const result = await runWithJobDb(LOCAL_B, ctx, async () => {
+    const result = await runWithJobDb({ connectionString: LOCAL_B, ctx, job: async () => {
       client = db.$client;
       return 7;
-    });
+    } });
 
     expect(result).toBe(7);
     expect(client.options.database).toBe("request_b");
@@ -293,10 +293,10 @@ describe("runWithJobDb", () => {
     const { ctx } = fakeCtx();
     let client!: typeof db.$client;
     await expect(
-      runWithJobDb(LOCAL_A, ctx, async () => {
+      runWithJobDb({ connectionString: LOCAL_A, ctx, job: async () => {
         client = db.$client;
         throw new Error("job failed");
-      }),
+      } }),
     ).rejects.toThrow("job failed");
     expect(await isEnded(client)).toBe(true);
   });

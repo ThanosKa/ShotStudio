@@ -41,15 +41,15 @@ export async function POST(req: NextRequest) {
   let handlerFailed = false;
   let delivery: DeliveryResult<Response>;
   try {
-    delivery = await runStripeEventOnce(
-      event.id,
-      () =>
-        handleEvent(event, scoped).catch((err: unknown) => {
+    delivery = await runStripeEventOnce({
+      eventId: event.id,
+      work: () =>
+        handleEvent({ event, scoped }).catch((err: unknown) => {
           handlerFailed = true;
           throw err;
         }),
-      scoped,
-    );
+      log: scoped,
+    });
   } catch (err) {
     if (!handlerFailed) throw err;
     scoped.error({ err }, "stripe webhook handler failed");
@@ -68,9 +68,15 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleEvent(event: Stripe.Event, scoped: Logger): Promise<Response> {
+async function handleEvent({
+  event,
+  scoped,
+}: {
+  event: Stripe.Event;
+  scoped: Logger;
+}): Promise<Response> {
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
+    const session = event.data.object;
     const outcome = await runCheckoutFulfillment({
       session,
       eventId: event.id,

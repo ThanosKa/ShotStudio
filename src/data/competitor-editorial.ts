@@ -140,7 +140,13 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
   },
 };
 
-export function competitorAnchor(slug: string, name: string): string {
+export function competitorAnchor({
+  slug,
+  name,
+}: {
+  slug: string;
+  name: string;
+}): string {
   return COMPETITOR_EDITORIAL[slug]?.anchor ?? `${name} alternatives`;
 }
 

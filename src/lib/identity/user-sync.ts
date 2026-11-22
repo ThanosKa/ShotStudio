@@ -32,16 +32,21 @@ export function pickUserEmail(input: {
  * routes before any credit operation, to close the Clerk-vs-Stripe webhook race.
  * https://clerk.com/blog/just-in-time-api-requests-are-replacing-webhooks
  */
-export async function ensureUser(userId: string, email: string) {
-  await withEmailReleased(userId, email, () =>
+export async function ensureUser({
+  userId,
+  email,
+}: {
+  userId: string;
+  email: string;
+}) {
+  await withEmailReleased({ userId, email, write: () =>
     db
       .insert(users)
       .values({ id: userId, email, credits: 0 })
       .onConflictDoUpdate({
         target: users.id,
         set: { email: sql`excluded.email` },
-      }),
-  );
+      }) });
 }
 
 /**
@@ -50,21 +55,29 @@ export async function ensureUser(userId: string, email: string) {
  * anonymized, and a live one that no longer lists the address gets its current
  * User Email; then the write runs again. Otherwise the write's error stands.
  */
-async function withEmailReleased<T>(userId: string, email: string, write: () => Promise<T>): Promise<T> {
+async function withEmailReleased<T>({
+  userId,
+  email,
+  write,
+}: {
+  userId: string;
+  email: string;
+  write: () => Promise<T>;
+}): Promise<T> {
   try {
     return await write();
   } catch (err) {
-    if (!isUniqueViolation(err) || !(await releaseEmail(userId, email))) throw err;
+    if (!isUniqueViolation(err) || !(await releaseEmail({ userId, email }))) throw err;
     return write();
   }
 }
 
 /** Postgres unique_violation, raised by the driver or wrapped by Drizzle. */
 function isUniqueViolation(err: unknown): boolean {
-  let e = err;
+  let e: unknown = err;
   for (let depth = 0; depth < 5 && typeof e === "object" && e !== null; depth++) {
-    if ((e as { code?: unknown }).code === "23505") return true;
-    e = (e as { cause?: unknown }).cause;
+    if ("code" in e && e.code === "23505") return true;
+    e = "cause" in e ? e.cause : undefined;
   }
   return false;
 }
@@ -73,12 +86,20 @@ function isUniqueViolation(err: unknown): boolean {
 function isClerkNotFound(err: unknown): boolean {
   // The check Clerk's own `isClerkAPIResponseError` makes, without importing
   // `@clerk/nextjs/errors`, which pulls in client hooks.
-  const e = err as { constructor?: { kind?: unknown }; status?: unknown } | null;
-  return e?.constructor?.kind === "ClerkAPIResponseError" && e.status === 404;
+  if (typeof err !== "object" || err === null) return false;
+  const ctor: unknown = err.constructor;
+  const kind = typeof ctor === "function" && "kind" in ctor ? ctor.kind : undefined;
+  return kind === "ClerkAPIResponseError" && "status" in err && err.status === 404;
 }
 
 /** True when another User row held `email` and no longer does. */
-async function releaseEmail(userId: string, email: string): Promise<boolean> {
+async function releaseEmail({
+  userId,
+  email,
+}: {
+  userId: string;
+  email: string;
+}): Promise<boolean> {
   const [holder] = await db
     .select({ id: users.id })
     .from(users)
@@ -133,7 +154,13 @@ async function anonymizeUser(id: string): Promise<boolean> {
  * nothing instead of throwing. For an email that is not the User Email's
  * source (the Stripe payment email); `ensureUser` overwrites the email instead.
  */
-export async function createUserIfAbsent(userId: string, email: string) {
+export async function createUserIfAbsent({
+  userId,
+  email,
+}: {
+  userId: string;
+  email: string;
+}) {
   await db
     .insert(users)
     .values({ id: userId, email, credits: 0 })
@@ -147,7 +174,7 @@ export async function syncSignedInUser(userId: string): Promise<string | null> {
     addresses: user?.emailAddresses.map((a) => ({ id: a.id, email: a.emailAddress })) ?? [],
     primaryId: user?.primaryEmailAddressId,
   });
-  if (email) await ensureUser(userId, email);
+  if (email) await ensureUser({ userId, email });
   return email;
 }
 
@@ -165,13 +192,12 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
     });
     if (!email) return { kind: "skipped", reason: "no_email" };
 
-    const inserted = await withEmailReleased(id, email, () =>
+    const inserted = await withEmailReleased({ userId: id, email, write: () =>
       db
         .insert(users)
         .values({ id, email, credits: 0 })
         .onConflictDoNothing({ target: users.id })
-        .returning({ id: users.id }),
-    );
+        .returning({ id: users.id }) });
     if (inserted.length === 0) return { kind: "already_exists" };
 
     try {
@@ -203,7 +229,7 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
     if (!email) return { kind: "skipped", reason: "no_email" };
     // Upsert: an "updated" event can arrive before "created", and the first
     // signed-in request (JIT User Sync) may not have run yet either.
-    await ensureUser(id, email);
+    await ensureUser({ userId: id, email });
     return { kind: "upserted" };
   }
 

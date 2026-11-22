@@ -35,7 +35,7 @@ describe("withAuthenticatedUser", () => {
     clerk.auth.mockResolvedValue({ userId: null });
     const handler = vi.fn();
 
-    const res = await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed) }, handler);
+    const res = await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed), handler });
 
     expect(res.status).toBe(401);
     expect(handler).not.toHaveBeenCalled();
@@ -46,10 +46,11 @@ describe("withAuthenticatedUser", () => {
     const reset = Date.now() + 30_000;
     const handler = vi.fn();
 
-    const res = await withAuthenticatedUser(
-      { action: "t", rateLimit: limiter({ success: false, limit: 5, remaining: 0, reset }) },
+    const res = await withAuthenticatedUser({
+      action: "t",
+      rateLimit: limiter({ success: false, limit: 5, remaining: 0, reset }),
       handler,
-    );
+    });
 
     expect(res.status).toBe(429);
     expect(res.headers.get("X-RateLimit-Limit")).toBe("5");
@@ -68,7 +69,7 @@ describe("withAuthenticatedUser", () => {
     clerk.currentUser.mockResolvedValue(clerkUser("a@test"));
     const handler = vi.fn(async () => new Response("ok"));
 
-    const res = await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed) }, handler);
+    const res = await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed), handler });
 
     expect(res.status).toBe(200);
     expect(handler).toHaveBeenCalledWith(
@@ -88,7 +89,7 @@ describe("withAuthenticatedUser", () => {
     });
     const handler = vi.fn(async () => new Response("ok"));
 
-    await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed) }, handler);
+    await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed), handler });
 
     expect(handler).toHaveBeenCalledWith(expect.objectContaining({ userId: "u_4", email: "primary@test" }));
     expect(await rowOf("u_4")).toMatchObject({ email: "primary@test" });
@@ -99,7 +100,7 @@ describe("withAuthenticatedUser", () => {
     clerk.currentUser.mockResolvedValue(clerkUser());
     const handler = vi.fn(async () => new Response("ok"));
 
-    await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed) }, handler);
+    await withAuthenticatedUser({ action: "t", rateLimit: limiter(allowed), handler });
 
     expect(handler).toHaveBeenCalledWith(expect.objectContaining({ userId: "u_3", email: null }));
     expect(await rowOf("u_3")).toBeUndefined();

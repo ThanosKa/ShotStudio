@@ -26,7 +26,13 @@ export type Post = PostMeta & {
   content: string;
 };
 
-function readPostFile(dir: string, filename: string): Post {
+function readPostFile({
+  dir,
+  filename,
+}: {
+  dir: string;
+  filename: string;
+}): Post {
   const filePath = path.join(dir, filename);
   const raw = fs.readFileSync(filePath, "utf8");
   const { data, content } = matter(raw);
@@ -53,12 +59,12 @@ export function readPosts(dir: string = BLOG_DIR): Post[] {
   return fs
     .readdirSync(dir)
     .filter((f) => f.endsWith(".mdx"))
-    .map((f) => readPostFile(dir, f))
+    .map((f) => readPostFile({ dir, filename: f }))
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
 }
 
 export function readPost(slug: string): Post | undefined {
   const filename = `${slug}.mdx`;
   if (!fs.existsSync(path.join(BLOG_DIR, filename))) return undefined;
-  return readPostFile(BLOG_DIR, filename);
+  return readPostFile({ dir: BLOG_DIR, filename });
 }

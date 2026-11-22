@@ -14,7 +14,7 @@ export function Navbar({ credits }: { credits: number }) {
         </Link>
         <div className="flex items-center gap-4">
           <span className="rounded-full border px-3 py-1 text-sm">
-            {credits} {pluralize(credits, "credit")}
+            {credits} {pluralize({ n: credits, singular: "credit" })}
           </span>
           {credits > 0 && <BuyCreditsButton />}
           <UserButton appearance={dark} />

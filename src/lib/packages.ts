@@ -48,9 +48,13 @@ export function formatPriceUSD(priceCents: number): string {
   return Number.isInteger(dollars) ? `$${dollars}` : `$${dollars.toFixed(2)}`;
 }
 
+function isCreditPackageId(id: string): id is CreditPackageId {
+  return CREDIT_PACKAGE_IDS.some((packageId) => packageId === id);
+}
+
 export function getCreditPackage(id: string): CreditPackage | null {
-  if ((CREDIT_PACKAGE_IDS as readonly string[]).includes(id)) {
-    return CREDIT_PACKAGES[id as CreditPackageId];
+  if (isCreditPackageId(id)) {
+    return CREDIT_PACKAGES[id];
   }
   return null;
 }

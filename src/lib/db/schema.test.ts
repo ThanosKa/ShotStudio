@@ -103,8 +103,8 @@ describe("fresh-database bootstrap", () => {
   });
 
   test("multiple users may have a null stripe_customer_id", async () => {
-    await ensureUser("p1", "p1@test");
-    await ensureUser("p2", "p2@test");
+    await ensureUser({ userId: "p1", email: "p1@test" });
+    await ensureUser({ userId: "p2", email: "p2@test" });
 
     const result = await db.select().from(users);
     expect(result).toHaveLength(2);
@@ -112,7 +112,7 @@ describe("fresh-database bootstrap", () => {
   });
 
   test("many transactions may have a null stripe_payment_id", async () => {
-    await ensureUser("p3", "p3@test");
+    await ensureUser({ userId: "p3", email: "p3@test" });
     await db.insert(transactions).values([
       { userId: "p3", type: "usage", amount: -1 },
       { userId: "p3", type: "usage", amount: -1 },
@@ -161,7 +161,7 @@ describe("fresh-database bootstrap", () => {
   });
 
   test("gen_random_uuid() default works (uuid PKs generate without pgcrypto setup)", async () => {
-    await ensureUser("p4", "p4@test");
+    await ensureUser({ userId: "p4", email: "p4@test" });
     const [row] = await db
       .insert(transactions)
       .values({ userId: "p4", type: "usage", amount: -1 })
@@ -174,14 +174,14 @@ describe("fresh-database bootstrap", () => {
 
 describe("credit accounting on a fresh database", () => {
   test("grant → debit → refund leaves a balanced ledger", async () => {
-    await ensureUser("acct", "acct@test");
+    await ensureUser({ userId: "acct", email: "acct@test" });
 
     // Purchase (Growth pack = 5).
-    const afterGrant = await grant("acct", 5, "cs_test_reconcile_1");
+    const afterGrant = await grant({ userId: "acct", n: 5, stripePaymentId: "cs_test_reconcile_1" });
     expect(afterGrant).toEqual({ granted: true, balance: 5 });
 
     // Failure refund.
-    const afterRefund = await refund("acct", 1, { reason: "generation_failed" });
+    const afterRefund = await refund({ userId: "acct", n: 1, metadata: { reason: "generation_failed" } });
     expect(afterRefund).toBe(6);
 
     const ledger = await db
@@ -200,11 +200,11 @@ describe("credit accounting on a fresh database", () => {
   });
 
   test("grant is idempotent per Stripe checkout session id (replay-safe)", async () => {
-    await ensureUser("acct2", "acct2@test");
+    await ensureUser({ userId: "acct2", email: "acct2@test" });
 
-    const a = await grant("acct2", 2, "cs_dup");
-    const b = await grant("acct2", 2, "cs_dup");
-    const c = await grant("acct2", 12, "cs_other");
+    const a = await grant({ userId: "acct2", n: 2, stripePaymentId: "cs_dup" });
+    const b = await grant({ userId: "acct2", n: 2, stripePaymentId: "cs_dup" });
+    const c = await grant({ userId: "acct2", n: 12, stripePaymentId: "cs_other" });
 
     expect(a).toEqual({ granted: true, balance: 2 });
     expect(b).toEqual({ granted: false, balance: 2 });
@@ -218,13 +218,13 @@ describe("credit accounting on a fresh database", () => {
   });
 
   test("grant on a missing user row fails without granting credits", async () => {
-    await expect(grant("nobody", 5, "cs_ghost")).rejects.toThrow();
+    await expect(grant({ userId: "nobody", n: 5, stripePaymentId: "cs_ghost" })).rejects.toThrow();
 
     const ledger = await db.select().from(transactions);
     expect(ledger).toHaveLength(0);
   });
 
   test("refund on a missing user row throws UserNotFoundError", async () => {
-    await expect(refund("nobody", 1)).rejects.toThrow(/User not found/);
+    await expect(refund({ userId: "nobody", n: 1 })).rejects.toThrow(/User not found/);
   });
 });

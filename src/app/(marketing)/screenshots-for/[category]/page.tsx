@@ -78,7 +78,7 @@ export default async function CategoryPage({
   // `relatedCategories` fixes both: cluster siblings first (relevant), then a
   // rotating ring window so every category is linked from several others and
   // every block is unique per page.
-  const related = relatedCategories(data.slug, 6);
+  const related = relatedCategories({ slug: data.slug, limit: 6 });
   const cluster = clusterOf(data.slug);
   const editorial = getCategoryEditorial(data.slug);
   const comparedTools = competitorSlugsForCategory(data.slug)
@@ -288,7 +288,7 @@ export default async function CategoryPage({
           items={[
             ...comparedTools.map((c) => ({
               href: `/alternatives/${c.slug}`,
-              label: competitorAnchor(c.slug, c.name),
+              label: competitorAnchor({ slug: c.slug, name: c.name }),
               eyebrow: c.pricingModel,
               description: c.primaryWeakness,
             })),

@@ -126,7 +126,7 @@ async function signedInRequest() {
   clerk.auth.mockResolvedValue({ userId: "u_new" });
   clerk.currentUser.mockResolvedValue(clerkAccount("u_new", REUSED));
   try {
-    return await withAuthenticatedUser({ action: "t", rateLimit: allowed }, async () => new Response("ok"));
+    return await withAuthenticatedUser({ action: "t", rateLimit: allowed, handler: async () => new Response("ok") });
   } catch {
     return new Response("Internal Server Error", { status: 500 });
   }

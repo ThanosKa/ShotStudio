@@ -24,11 +24,15 @@ export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
  * together with the Generation it pays for. Throws InsufficientCreditsError or
  * UserNotFoundError. Returns the new balance.
  */
-export async function debit(
-  userId: string,
-  metadata: Record<string, unknown>,
-  within: Tx,
-): Promise<number> {
+export async function debit({
+  userId,
+  metadata,
+  within,
+}: {
+  userId: string;
+  metadata: Record<string, unknown>;
+  within: Tx;
+}): Promise<number> {
   const updated = await within
     .update(users)
     .set({ credits: sql`${users.credits} - 1` })
@@ -59,12 +63,17 @@ export async function debit(
  * Pass `within` to make the Refund part of a caller's transaction (it runs as a
  * savepoint), so it commits or rolls back together with the caller's own writes.
  */
-export async function refund(
-  userId: string,
-  n: number,
-  metadata?: Record<string, unknown>,
-  within?: Tx,
-) {
+export async function refund({
+  userId,
+  n,
+  metadata,
+  within,
+}: {
+  userId: string;
+  n: number;
+  metadata?: Record<string, unknown>;
+  within?: Tx;
+}) {
   return (within ?? db).transaction(async (tx) => {
     const updated = await tx
       .update(users)
@@ -90,11 +99,15 @@ export async function refund(
  * is granted twice, the second call changes nothing and returns
  * `granted: false` with the current balance.
  */
-export async function grant(
-  userId: string,
-  n: number,
-  stripePaymentId: string,
-): Promise<{ granted: boolean; balance: number }> {
+export async function grant({
+  userId,
+  n,
+  stripePaymentId,
+}: {
+  userId: string;
+  n: number;
+  stripePaymentId: string;
+}): Promise<{ granted: boolean; balance: number }> {
   return db.transaction(async (tx) => {
     const inserted = await tx
       .insert(transactions)

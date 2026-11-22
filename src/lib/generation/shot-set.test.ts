@@ -41,7 +41,7 @@ async function solidPng(background = "white"): Promise<string> {
 }
 
 async function run(): Promise<ReturnType<typeof generateSet>> {
-  const pending = generateSet(brief, log);
+  const pending = generateSet({ brief, log });
   await vi.runAllTimersAsync();
   return pending;
 }
@@ -152,7 +152,7 @@ describe("generateSet", () => {
       return solidPng();
     });
     let settled: Awaited<ReturnType<typeof generateSet>> | undefined;
-    void generateSet(brief, log).then((o) => {
+    void generateSet({ brief, log }).then((o) => {
       settled = o;
     });
 
@@ -175,7 +175,7 @@ describe("generateSet", () => {
         if (referenceImages![0] === "data:ref-1") throw new Error("down");
         return solidPng();
       });
-      void generateSet(brief, log);
+      void generateSet({ brief, log });
 
       await vi.advanceTimersByTimeAsync(Math.floor(waitMs) - 1);
       expect(callsFor("data:ref-1")).toHaveLength(1);

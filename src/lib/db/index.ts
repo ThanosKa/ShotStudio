@@ -46,7 +46,13 @@ export function resolveConnectionString(env: {
   return env.HYPERDRIVE?.connectionString;
 }
 
-function openScope(connectionString: string | undefined, ctx: WaitUntil) {
+function openScope({
+  connectionString,
+  ctx,
+}: {
+  connectionString: string | undefined;
+  ctx: WaitUntil;
+}) {
   const scope: RequestScope = { connectionString, ctx, pending: [], closed: false };
   const close = async () => {
     // Work can hand over more work while it runs, so wait until none is added.
@@ -64,12 +70,16 @@ function openScope(connectionString: string | undefined, ctx: WaitUntil) {
  * Runs a Worker job that has no Response, such as a Cron Trigger, with its own
  * database client, closed once the job and its kept-alive work have finished.
  */
-export function runWithJobDb<T>(
-  connectionString: string | undefined,
-  ctx: WaitUntil,
-  job: () => Promise<T>,
-): Promise<T> {
-  const { scope, close } = openScope(connectionString, ctx);
+export function runWithJobDb<T>({
+  connectionString,
+  ctx,
+  job,
+}: {
+  connectionString: string | undefined;
+  ctx: WaitUntil;
+  job: () => Promise<T>;
+}): Promise<T> {
+  const { scope, close } = openScope({ connectionString, ctx });
   return requestScope.run(scope, async () => {
     try {
       return await job();
@@ -87,12 +97,16 @@ export function runWithJobDb<T>(
  * not before every promise handed to `keepRequestAliveUntil` has settled.
  * After that, using `db` in this request throws.
  */
-export function runWithRequestDb(
-  connectionString: string | undefined,
-  ctx: WaitUntil,
-  handler: () => Promise<Response>,
-): Promise<Response> {
-  const { scope, close } = openScope(connectionString, ctx);
+export function runWithRequestDb({
+  connectionString,
+  ctx,
+  handler,
+}: {
+  connectionString: string | undefined;
+  ctx: WaitUntil;
+  handler: () => Promise<Response>;
+}): Promise<Response> {
+  const { scope, close } = openScope({ connectionString, ctx });
 
   return requestScope.run(scope, async () => {
     let response: Response;
@@ -172,7 +186,9 @@ function currentDb(): Db {
 }
 
 /** Resolves on every access: the request's client on a Worker, a shared one under Node. */
-export const db = new Proxy({} as Db, {
+const dbTarget: Db = Object.create(Object.prototype);
+
+export const db = new Proxy(dbTarget, {
   get: (_target, property) => Reflect.get(currentDb(), property),
 });
 export { schema };

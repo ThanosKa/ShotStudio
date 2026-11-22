@@ -11,8 +11,8 @@ describe("runStripeEventOnce without Redis", () => {
   it("runs the work for both of two deliveries of the same event", async () => {
     const work = vi.fn().mockResolvedValue({ ok: true });
 
-    const first = await runStripeEventOnce("evt_1", work, log);
-    const second = await runStripeEventOnce("evt_1", work, log);
+    const first = await runStripeEventOnce({ eventId: "evt_1", work, log });
+    const second = await runStripeEventOnce({ eventId: "evt_1", work, log });
 
     expect(first).toEqual({ kind: "ran", result: { ok: true } });
     expect(second).toEqual({ kind: "ran", result: { ok: true } });

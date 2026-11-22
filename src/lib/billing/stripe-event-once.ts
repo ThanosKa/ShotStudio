@@ -15,11 +15,15 @@ export type DeliveryResult<T> =
 
 /** Key `stripe:event:<id>`. `processing` 120 s; `done` 24 h only if result.ok.
  *  If work throws: delete the claim and rethrow. Without Redis: just run the work. */
-export async function runStripeEventOnce<T extends { ok: boolean }>(
-  eventId: string,
-  work: () => Promise<T>,
-  log: Logger,
-): Promise<DeliveryResult<T>> {
+export async function runStripeEventOnce<T extends { ok: boolean }>({
+  eventId,
+  work,
+  log,
+}: {
+  eventId: string;
+  work: () => Promise<T>;
+  log: Logger;
+}): Promise<DeliveryResult<T>> {
   const idemKey = `stripe:event:${eventId}`;
   if (redis) {
     const claimed = await redis.set(idemKey, "processing", {

@@ -29,7 +29,7 @@ function solidPng(rgb: [number, number, number]): Promise<Buffer> {
 
 describe("runGeneration reference screenshots", () => {
   test("each Shot Role sends only its own Reference Screenshot, and the Set is in role order", async () => {
-    await ensureUser("u_refs", "u_refs@test");
+    await ensureUser({ userId: "u_refs", email: "u_refs@test" });
     await db.update(users).set({ credits: 3 }).where(eq(users.id, "u_refs"));
 
     const screenshots: [File, File, File] = [
