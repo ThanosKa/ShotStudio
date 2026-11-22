@@ -15,6 +15,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 - Package manager: **pnpm**. Never run `npm` or `yarn`.
 - Before declaring done, run `pnpm lint`, `pnpm exec tsc --noEmit` and `pnpm test`. CI runs lint, type-check, tests, the Next build, the Worker build (`pnpm build:vinext`) and `pnpm check:worker-bundle` on PRs into `main`, but check locally first.
 - Production is the Cloudflare Worker `shot-studio`. Merging to `main` updates it: `.github/workflows/deploy.yml` deploys once CI passes, and stops if `drizzle/` changed, so apply the migration first and then press Run workflow. Deploy by hand only with the developer's yes (README, "Deploy on Cloudflare Workers", Node 24.22 or newer).
+- Logs: `npx wrangler tail shot-studio --format pretty` streams live requests through the owner's `wrangler login`, so start it before the request you want to see.
 - `pnpm test` runs once; `pnpm test:watch` watches. Tests use in-memory PGlite, no real database.
 - The developer runs dev servers: ask them to start or restart `pnpm dev`, and never run it yourself.
 - Ask before any script that acts on whatever `.env.local` points at: `db:migrate`, `db:push`, `db:reset` (drops every table), `db:reconcile`, `test:user`.
@@ -44,3 +45,17 @@ Out of scope for v1, so push back on requests that drift here: subscriptions, re
 - Land on `main` through a PR opened with `gh pr create`; PRs are squash-merged.
 - Ask before every push and merge. Never push directly to `main`, use `--force` or skip pre-commit hooks.
 - If your change makes a line in these docs false, fix that line in the same PR.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs are local markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default labels, recorded as a `Status:` line in each issue. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context. See `docs/agents/domain.md`.
