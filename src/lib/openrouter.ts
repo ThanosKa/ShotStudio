@@ -8,14 +8,9 @@ const MODEL = "openai/gpt-image-2.5-sunburst";
 
 export type ImageGenerationInput = {
   prompt: string;
-  /**
-   * Optional reference images as data URLs (e.g. `data:image/jpeg;base64,...`).
-   * Sent as `input_references` for image-to-image generation (the model accepts up to 16).
-   */
   referenceImages?: string[];
   aspectRatio?: string;
   imageSize?: "0.5K" | "1K" | "2K" | "4K";
-  /** Per-call timeout in ms. Defaults to 120s so a single slow shot can't starve the route. */
   timeoutMs?: number;
 };
 
@@ -23,7 +18,6 @@ type ImagesResponse = {
   data?: Array<{ b64_json?: string; media_type?: string }>;
 };
 
-/** Long edge in px per size tier. Concrete dimensions are derived from the aspect ratio. */
 const LONG_EDGE_PX: Record<NonNullable<ImageGenerationInput["imageSize"]>, number> = {
   "0.5K": 1024,
   "1K": 1536,
@@ -31,10 +25,6 @@ const LONG_EDGE_PX: Record<NonNullable<ImageGenerationInput["imageSize"]>, numbe
   "4K": 3840,
 };
 
-/**
- * The images endpoint for gpt-image models wants explicit `WIDTHxHEIGHT` (a tier like
- * "1K" is rejected with 400). Dimensions are rounded to multiples of 16.
- */
 function toPixelSize({
   aspectRatio,
   imageSize,

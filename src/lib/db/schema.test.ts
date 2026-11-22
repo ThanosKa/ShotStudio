@@ -7,17 +7,6 @@ import { ensureUser } from "@/lib/identity/user-sync";
 import { transactions, users } from "@/lib/db/schema";
 import { STYLE_PRESET_IDS } from "@/lib/generation/presets";
 
-/**
- * Fresh-database bootstrap contract.
- *
- * Every test in this file runs against a brand-new PGlite instance with the
- * `drizzle/*.sql` chain applied from empty — i.e. exactly what a brand-new
- * Supabase project looks like after `pnpm db:migrate`. These assertions are
- * the checklist to run against a rebuilt database: if they hold here and the
- * same catalog queries return the same shape in Supabase, the rebuild is
- * faithful.
- */
-
 async function rows<T = Record<string, unknown>>(
   query: ReturnType<typeof sql>,
 ): Promise<T[]> {
@@ -73,7 +62,6 @@ describe("fresh-database bootstrap", () => {
       "complete",
       "failed",
     ]);
-    // 0004 renamed these; the old soft_bright/dark_premium/... set must be gone.
     expect(byType.get("style_preset")).toEqual([...STYLE_PRESET_IDS]);
   });
 
@@ -85,9 +73,6 @@ describe("fresh-database bootstrap", () => {
     `);
     expect(idx).toBeDefined();
     expect(idx.indexdef).toMatch(/CREATE UNIQUE INDEX/i);
-    // The WHERE clause is the whole point: without it, grant()'s
-    // onConflictDoNothing({ where: ... }) cannot infer this arbiter and every
-    // Stripe webhook fails.
     expect(idx.indexdef).toMatch(/WHERE .*stripe_payment_id IS NOT NULL/i);
   });
 
@@ -103,8 +88,8 @@ describe("fresh-database bootstrap", () => {
   });
 
   test("multiple users may have a null stripe_customer_id", async () => {
-    await ensureUser("p1", "p1@test");
-    await ensureUser("p2", "p2@test");
+    await ensureUser({ userId: "p1", email: "p1@test" });
+    await ensureUser({ userId: "p2", email: "p2@test" });
 
     const result = await db.select().from(users);
     expect(result).toHaveLength(2);
@@ -112,7 +97,7 @@ describe("fresh-database bootstrap", () => {
   });
 
   test("many transactions may have a null stripe_payment_id", async () => {
-    await ensureUser("p3", "p3@test");
+    await ensureUser({ userId: "p3", email: "p3@test" });
     await db.insert(transactions).values([
       { userId: "p3", type: "usage", amount: -1 },
       { userId: "p3", type: "usage", amount: -1 },
@@ -154,14 +139,12 @@ describe("fresh-database bootstrap", () => {
       order by conname
     `);
     const byName = new Map(result.map((r) => [r.conname, r.confdeltype]));
-    // 'r' = RESTRICT — preserves the financial audit trail on user deletion.
     expect(byName.get("transactions_user_id_users_id_fk")).toBe("r");
-    // 'c' = CASCADE.
     expect(byName.get("generations_user_id_users_id_fk")).toBe("c");
   });
 
   test("gen_random_uuid() default works (uuid PKs generate without pgcrypto setup)", async () => {
-    await ensureUser("p4", "p4@test");
+    await ensureUser({ userId: "p4", email: "p4@test" });
     const [row] = await db
       .insert(transactions)
       .values({ userId: "p4", type: "usage", amount: -1 })
@@ -174,14 +157,12 @@ describe("fresh-database bootstrap", () => {
 
 describe("credit accounting on a fresh database", () => {
   test("grant → debit → refund leaves a balanced ledger", async () => {
-    await ensureUser("acct", "acct@test");
+    await ensureUser({ userId: "acct", email: "acct@test" });
 
-    // Purchase (Growth pack = 5).
-    const afterGrant = await grant("acct", 5, "cs_test_reconcile_1");
+    const afterGrant = await grant({ userId: "acct", credits: 5, stripePaymentId: "cs_test_reconcile_1" });
     expect(afterGrant).toEqual({ granted: true, balance: 5 });
 
-    // Failure refund.
-    const afterRefund = await refund("acct", 1, { reason: "generation_failed" });
+    const afterRefund = await refund({ userId: "acct", credits: 1, metadata: { reason: "generation_failed" } });
     expect(afterRefund).toBe(6);
 
     const ledger = await db
@@ -195,16 +176,15 @@ describe("credit accounting on a fresh database", () => {
       .from(users)
       .where(eq(users.id, "acct"));
 
-    // Ledger sum must always equal the cached balance on users.credits.
     expect(sum).toBe(u.credits);
   });
 
   test("grant is idempotent per Stripe checkout session id (replay-safe)", async () => {
-    await ensureUser("acct2", "acct2@test");
+    await ensureUser({ userId: "acct2", email: "acct2@test" });
 
-    const a = await grant("acct2", 2, "cs_dup");
-    const b = await grant("acct2", 2, "cs_dup");
-    const c = await grant("acct2", 12, "cs_other");
+    const a = await grant({ userId: "acct2", credits: 2, stripePaymentId: "cs_dup" });
+    const b = await grant({ userId: "acct2", credits: 2, stripePaymentId: "cs_dup" });
+    const c = await grant({ userId: "acct2", credits: 12, stripePaymentId: "cs_other" });
 
     expect(a).toEqual({ granted: true, balance: 2 });
     expect(b).toEqual({ granted: false, balance: 2 });
@@ -218,13 +198,13 @@ describe("credit accounting on a fresh database", () => {
   });
 
   test("grant on a missing user row fails without granting credits", async () => {
-    await expect(grant("nobody", 5, "cs_ghost")).rejects.toThrow();
+    await expect(grant({ userId: "nobody", credits: 5, stripePaymentId: "cs_ghost" })).rejects.toThrow();
 
     const ledger = await db.select().from(transactions);
     expect(ledger).toHaveLength(0);
   });
 
   test("refund on a missing user row throws UserNotFoundError", async () => {
-    await expect(refund("nobody", 1)).rejects.toThrow(/User not found/);
+    await expect(refund({ userId: "nobody", credits: 1 })).rejects.toThrow(/User not found/);
   });
 });

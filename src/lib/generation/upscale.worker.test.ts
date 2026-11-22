@@ -2,9 +2,6 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { logger } from "@/lib/logger";
 import { upscaleToAppStore } from "./upscale.worker";
 
-// The real binding only exists on Cloudflare, so this fakes that one boundary
-// and checks the request against Cloudflare's documented options. The result
-// itself can only be proven on the deployed Worker.
 const calls = vi.hoisted(() => ({
   input: [] as Uint8Array[],
   transform: [] as unknown[],
@@ -42,8 +39,6 @@ describe("upscaleToAppStore (Worker runtime)", () => {
     calls.failWith = null;
   });
 
-  // Past the monthly allowance every Generation fails and is refunded, so the
-  // product is shut without anyone noticing unless this is logged as such.
   test("logs an error naming the monthly Images limit when the binding answers 9422", async () => {
     const error = vi.spyOn(logger, "error").mockImplementation(() => undefined as never);
     calls.failWith = new Error("IMAGES_TRANSFORM_ERROR 9422: Exceeded monthly transformations");
@@ -61,8 +56,6 @@ describe("upscaleToAppStore (Worker runtime)", () => {
     const png = await upscaleToAppStore(Buffer.from([9, 8, 7]).toString("base64"));
 
     expect(calls.input).toEqual([new Uint8Array([9, 8, 7])]);
-    // `cover` enlarges small images; `crop` would not. No `gravity`: Cloudflare
-    // documents the centre as the default.
     expect(calls.transform).toEqual([{ width: 1290, height: 2796, fit: "cover" }]);
     expect(calls.output).toEqual([{ format: "image/png" }]);
     expect([...png]).toEqual([1, 2, 3]);

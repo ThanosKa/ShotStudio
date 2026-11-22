@@ -24,11 +24,15 @@ export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
  * together with the Generation it pays for. Throws InsufficientCreditsError or
  * UserNotFoundError. Returns the new balance.
  */
-export async function debit(
-  userId: string,
-  metadata: Record<string, unknown>,
-  within: Tx,
-): Promise<number> {
+export async function debit({
+  userId,
+  metadata,
+  within,
+}: {
+  userId: string;
+  metadata: Record<string, unknown>;
+  within: Tx;
+}): Promise<number> {
   const updated = await within
     .update(users)
     .set({ credits: sql`${users.credits} - 1` })
@@ -59,16 +63,21 @@ export async function debit(
  * Pass `within` to make the Refund part of a caller's transaction (it runs as a
  * savepoint), so it commits or rolls back together with the caller's own writes.
  */
-export async function refund(
-  userId: string,
-  n: number,
-  metadata?: Record<string, unknown>,
-  within?: Tx,
-) {
+export async function refund({
+  userId,
+  credits,
+  metadata,
+  within,
+}: {
+  userId: string;
+  credits: number;
+  metadata?: Record<string, unknown>;
+  within?: Tx;
+}) {
   return (within ?? db).transaction(async (tx) => {
     const updated = await tx
       .update(users)
-      .set({ credits: sql`${users.credits} + ${n}` })
+      .set({ credits: sql`${users.credits} + ${credits}` })
       .where(eq(users.id, userId))
       .returning({ credits: users.credits });
 
@@ -77,7 +86,7 @@ export async function refund(
     await tx.insert(transactions).values({
       userId,
       type: "refund",
-      amount: n,
+      amount: credits,
       metadata: metadata ?? null,
     });
 
@@ -90,24 +99,27 @@ export async function refund(
  * is granted twice, the second call changes nothing and returns
  * `granted: false` with the current balance.
  */
-export async function grant(
-  userId: string,
-  n: number,
-  stripePaymentId: string,
-): Promise<{ granted: boolean; balance: number }> {
+export async function grant({
+  userId,
+  credits,
+  stripePaymentId,
+}: {
+  userId: string;
+  credits: number;
+  stripePaymentId: string;
+}): Promise<{ granted: boolean; balance: number }> {
   return db.transaction(async (tx) => {
     const inserted = await tx
       .insert(transactions)
       .values({
         userId,
         type: "purchase",
-        amount: n,
+        amount: credits,
         stripePaymentId,
       })
       .onConflictDoNothing({
         target: transactions.stripePaymentId,
-        // Required: matches the partial unique index's WHERE clause so
-        // Postgres' arbiter inference can find it.
+        // Required so Postgres can infer the partial unique index as the arbiter: https://www.postgresql.org/docs/current/sql-insert.html
         where: sql`${transactions.stripePaymentId} is not null`,
       })
       .returning({ id: transactions.id });
@@ -124,7 +136,7 @@ export async function grant(
 
     const updated = await tx
       .update(users)
-      .set({ credits: sql`${users.credits} + ${n}` })
+      .set({ credits: sql`${users.credits} + ${credits}` })
       .where(eq(users.id, userId))
       .returning({ credits: users.credits });
 

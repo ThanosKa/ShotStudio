@@ -1,37 +1,3 @@
-/**
- * Disaster-recovery reconciliation: rebuild `users` and `transactions` in a
- * fresh database from the two systems that still hold authoritative records.
- *
- *   Phase 1 — Clerk  → `users` rows (id + email), credits start at 0.
- *   Phase 2 — Stripe → `transactions` rows of type `purchase`, and the matching
- *                      credit grant, replayed through the SAME `grant()` used
- *                      by the webhook, keyed on the Checkout Session id. The
- *                      Stripe email only creates a User row that is missing;
- *                      it never changes an existing User's email.
- *
- * Why `grant()` and not raw inserts: `grant()` is idempotent on
- * `transactions.stripe_payment_id` via the PARTIAL unique index, so this script
- * is safe to run repeatedly, and a later duplicate Stripe webhook for the same
- * session is also a no-op. It does NOT send email — customers are not re-mailed
- * about purchases they made months ago.
- *
- * IMPORTANT — this restores PURCHASED credits, not REMAINING credits. Credits
- * that users had already consumed lived only in the lost database. Running this
- * with no adjustment gives every customer back their full lifetime purchase.
- * That is deliberate: over-crediting a handful of paying customers is cheaper
- * than under-crediting them. Use `--since` if you want to limit the window.
- *
- * Usage (requires .env.local with the NEW DATABASE_URL + existing Stripe/Clerk keys):
- *
- *   # 1. Dry run — prints exactly what it would do, writes nothing.
- *   pnpm db:reconcile
- *
- *   # 2. Same, limited to purchases since a date.
- *   pnpm db:reconcile -- --since=2026-01-01
- *
- *   # 3. Apply.
- *   pnpm db:reconcile -- --apply
- */
 import { createClerkClient } from "@clerk/nextjs/server";
 import type Stripe from "stripe";
 import { grant } from "@/lib/credits";
@@ -67,16 +33,12 @@ type SkippedSession = {
   reason: string;
 };
 
-/** Resolve the package from session metadata, falling back to the line-item price id. */
 async function resolvePackageId(
   session: Stripe.Checkout.Session,
 ): Promise<string | null> {
   const fromMetadata = session.metadata?.packageId ?? null;
   if (fromMetadata && getCreditPackage(fromMetadata)) return fromMetadata;
 
-  // Fallback: the Stripe Price ids are unchanged by the database loss, so a
-  // line-item lookup still identifies the pack for sessions written before
-  // metadata existed (or where metadata was dropped).
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
     limit: 10,
   });
@@ -116,7 +78,7 @@ async function phase1BackfillClerkUsers(): Promise<{
         log(`  skip  ${user.id} — no email address on the Clerk record`);
         continue;
       }
-      if (APPLY) await ensureUser(user.id, email);
+      if (APPLY) await ensureUser({ userId: user.id, email });
       synced++;
       log(`  ${APPLY ? "sync" : "plan"}  ${user.id}  ${email}`);
     }
@@ -142,7 +104,6 @@ async function phase2ReplayStripePurchases(): Promise<{
     const createdIso = new Date(session.created * 1000).toISOString();
 
     if (session.payment_status !== "paid") {
-      // Unpaid / expired sessions never granted credits — nothing to restore.
       continue;
     }
 
@@ -188,7 +149,6 @@ async function phase2ReplayStripePurchases(): Promise<{
     });
   }
 
-  // Oldest first, so the ledger reads chronologically.
   plans.sort((a, b) => a.createdIso.localeCompare(b.createdIso));
 
   return { plans, skipped };
@@ -221,8 +181,8 @@ async function main() {
       continue;
     }
     try {
-      if (plan.email) await createUserIfAbsent(plan.userId, plan.email);
-      const { balance } = await grant(plan.userId, plan.credits, plan.sessionId);
+      if (plan.email) await createUserIfAbsent({ userId: plan.userId, email: plan.email });
+      const { balance } = await grant({ userId: plan.userId, credits: plan.credits, stripePaymentId: plan.sessionId });
       granted++;
       log(`${label}  → balance ${balance}`);
     } catch (err) {

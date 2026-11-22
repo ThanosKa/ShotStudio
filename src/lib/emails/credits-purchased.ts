@@ -21,7 +21,7 @@ export async function sendCreditsPurchasedEmail(params: {
       appUrl: APP_URL,
     }),
     to: params.to,
-    subject: `Payment confirmed — ${params.creditsAdded} ${pluralize(params.creditsAdded, "set")} added`,
+    subject: `Payment confirmed — ${params.creditsAdded} ${pluralize({ n: params.creditsAdded, singular: "set" })} added`,
     idempotencyKey: `credits-purchased/${params.stripeEventId}`,
   });
 }

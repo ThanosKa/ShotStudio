@@ -56,13 +56,16 @@ export function LandingPricing() {
         !data ||
         typeof data !== "object" ||
         !("checkoutUrl" in data) ||
-        typeof (data as { checkoutUrl: unknown }).checkoutUrl !== "string"
+        typeof data.checkoutUrl !== "string"
       ) {
-        setError(parseApiError(res.status, data, "Couldn't start checkout. Please try again."));
+        setError(parseApiError({
+            data,
+            fallback: "Couldn't start checkout. Please try again.",
+          }));
         setBusy(null);
         return;
       }
-      window.location.assign((data as { checkoutUrl: string }).checkoutUrl);
+      window.location.assign(data.checkoutUrl);
     } catch {
       setError("Couldn't start checkout. Please try again.");
       setBusy(null);
@@ -91,7 +94,7 @@ export function LandingPricing() {
               <div className="flex items-baseline justify-between">
                 <h3 className="text-heading-sm font-semibold">{pack.name}</h3>
                 <span className="font-mono text-caption uppercase tracking-wider text-muted-foreground">
-                  {pack.credits} {pluralize(pack.credits, "set")}
+                  {pack.credits} {pluralize({ n: pack.credits, singular: "set" })}
                 </span>
               </div>
               <div className="mt-4 flex items-baseline gap-1.5">

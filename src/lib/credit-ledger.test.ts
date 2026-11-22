@@ -38,7 +38,6 @@ async function transactionsSum(userId: string) {
   return row.total;
 }
 
-/** An Abandoned Generation: its Debit committed, then the Worker stopped before any outcome. */
 async function leaveAbandonedGeneration(userId: string) {
   await db.insert(generations).values({
     userId,
@@ -58,9 +57,9 @@ async function leaveAbandonedGeneration(userId: string) {
 describe("Credit Ledger", () => {
   test("Transactions sum equals the balance after a Grant, a Debit, a failed Generation's Refund and a swept Abandoned Generation", async () => {
     const userId = "u_ledger";
-    await ensureUser(userId, `${userId}@test`);
+    await ensureUser({ userId, email: `${userId}@test` });
 
-    expect(await grant(userId, 5, "cs_ledger")).toEqual({ granted: true, balance: 5 });
+    expect(await grant({ userId, credits: 5, stripePaymentId: "cs_ledger" })).toEqual({ granted: true, balance: 5 });
     expect(await transactionsSum(userId)).toBe(await balanceOf(userId));
 
     vi.mocked(generateImage).mockResolvedValue(ONE_PX_PNG_B64);

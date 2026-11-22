@@ -3,9 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { runCheckoutFulfillment } from "@/lib/billing/checkout";
 
-// Characterization of the Delivery Claim's edge cases that route.test.ts does
-// not cover: the stored values, key and expiry times, and the retry paths.
-
 const SECRET = "whsec_test_secret";
 const real = new Stripe("sk_test_unused");
 
@@ -18,7 +15,6 @@ vi.mock("@/lib/stripe", () => ({
   },
 }));
 
-// A fake that also records every write, so the key, value and expiry can be read.
 const fakeRedis = vi.hoisted(() => {
   const store = new Map<string, { value: unknown; ex: number }>();
   const sets: { key: string; value: unknown; opts: { nx?: boolean; ex: number } }[] = [];

@@ -8,7 +8,6 @@ export type CreditPackage = {
   priceCents: number;
   stripePriceId: string | undefined;
   featured?: boolean;
-  /** Short phrase shown after the Set count on the pricing card. */
   purpose?: string;
 };
 
@@ -48,14 +47,17 @@ export function formatPriceUSD(priceCents: number): string {
   return Number.isInteger(dollars) ? `$${dollars}` : `$${dollars.toFixed(2)}`;
 }
 
+function isCreditPackageId(id: string): id is CreditPackageId {
+  return CREDIT_PACKAGE_IDS.some((packageId) => packageId === id);
+}
+
 export function getCreditPackage(id: string): CreditPackage | null {
-  if ((CREDIT_PACKAGE_IDS as readonly string[]).includes(id)) {
-    return CREDIT_PACKAGES[id as CreditPackageId];
+  if (isCreditPackageId(id)) {
+    return CREDIT_PACKAGES[id];
   }
   return null;
 }
 
-/** One Credit is one Set, so the count comes from the pack's own Credits. */
 export function packBlurb(pack: Pick<CreditPackage, "credits" | "purpose">): string {
   const sets = `${pack.credits} ${pack.credits === 1 ? "set" : "sets"}`;
   return pack.purpose ? `${sets} — ${pack.purpose}` : sets;

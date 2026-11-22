@@ -93,7 +93,7 @@ export default function AlternativesHubPage() {
                 <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
               </div>
               <h3 className="text-heading-sm font-semibold">
-                {competitorAnchor(c.slug, c.name)}
+                {competitorAnchor({ slug: c.slug, name: c.name })}
               </h3>
               <p className="text-body-lg text-muted-foreground line-clamp-2">
                 {c.primaryWeakness}
@@ -140,7 +140,7 @@ export default function AlternativesHubPage() {
                       href={`/alternatives/${c.slug}`}
                       className="underline decoration-foreground/30 underline-offset-4 transition-colors hover:decoration-foreground"
                     >
-                      {competitorAnchor(c.slug, c.name)}
+                      {competitorAnchor({ slug: c.slug, name: c.name })}
                     </Link>
                   </td>
                   <td className="py-4 pr-6 text-muted-foreground">

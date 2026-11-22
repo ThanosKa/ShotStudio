@@ -12,17 +12,6 @@ import {
   socialMetadata,
 } from "@/lib/marketing/meta";
 
-/**
- * `meta.ts` documents a length budget — titles under 60 chars *including* the
- * " — ShotStudio" suffix the root layout appends, descriptions under 155 — so
- * the brand survives SERP truncation. Nothing enforced it, which meant the
- * budget silently applied only to the snippets someone remembered to count.
- *
- * These assertions make adding a 41st category fail here rather than in a
- * truncated Google snippet. Failures report the offending string and its
- * length, so the fix is obvious.
- */
-
 function tooLong(
   values: { title: string; description: string }[],
   pick: (v: { title: string; description: string }) => string,
@@ -56,11 +45,6 @@ describe("categorySnippet", () => {
 });
 
 describe("hubMetadata", () => {
-  /**
-   * This pins the exact object the five hub pages used to declare inline. It is
-   * the proof that folding them into one helper changed no emitted tag: if this
-   * shape drifts, the canonical, the OG url or the brand suffix has moved.
-   */
   it("emits exactly the metadata the hub pages declared by hand", () => {
     expect(
       hubMetadata({
@@ -118,8 +102,6 @@ describe("socialMetadata", () => {
 describe("competitorSnippet", () => {
   const snippets = COMPETITORS.map(competitorSnippet);
 
-  // Competitor titles are absolute — they fold the brand in themselves rather
-  // than taking the layout's suffix — so they get the full budget.
   it("keeps every title inside the budget", () => {
     expect(tooLong(snippets, (s) => s.title, MAX_TITLE_LENGTH)).toEqual([]);
   });

@@ -1,18 +1,5 @@
-/**
- * Project-local OpenRouter image generation. Calls /v1/images (text-to-image)
- * and saves the returned PNG.
- *
- * Usage:
- *   pnpm tsx scripts/generate-shot.ts \
- *     --prompt "..." \
- *     --output public/showcase/lumen/1.png \
- *     [--model openai/gpt-image-2.5-sunburst] \
- *     [--aspect-ratio 9:16]
- */
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-
-// tsx auto-loads .env.local via its built-in dotenv support — no import needed.
 
 const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey) {

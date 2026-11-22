@@ -13,22 +13,19 @@ export function readPost(slug) { return posts.find((post) => post.slug === slug)
 `;
 }
 
-/**
- * `serialize` is the compile step inside `MDXRemote`, so the Worker renders what
- * Next renders. Its output is a function body, which `MDXRemote` then runs through
- * `new Function`. Workers refuse that, so here it is written into the bundle.
- */
-async function compiledMdxModule(
-  posts: Post[],
-  sourceModule: string,
-): Promise<string> {
+async function compiledMdxModule({
+  posts,
+  sourceModule,
+}: {
+  posts: Post[];
+  sourceModule: string;
+}): Promise<string> {
   const bodies = await Promise.all(
     posts.map(async (post) => {
       const { compiledSource } = await serialize(post.content, {}, true);
       return `${JSON.stringify(post.slug)}: function () {\n${compiledSource}\n}`;
     }),
   );
-  // `serialize` picks the JSX flavour from NODE_ENV, as this does.
   const runtime =
     process.env.NODE_ENV === "production"
       ? "react/jsx-runtime"
@@ -53,19 +50,11 @@ export function MDXRemote({ source, components }) {
 `;
 }
 
-/**
- * Builds the blog into the Worker, which has no project files and cannot run
- * `new Function`. Any `.mdx` in the folder is picked up by the next build.
- *
- * Only the Worker build uses this. `next build`, `next dev` and Vitest keep
- * reading the folder through `blog-source.ts` and rendering with `MDXRemote`.
- */
 export function blogContent({ dir = BLOG_DIR }: { dir?: string } = {}): Plugin {
   const sourceFile = path.join(process.cwd(), "src", "lib", "blog-source.ts");
 
   function readBuiltPosts(): Post[] {
     const posts = readPosts(dir);
-    // On the Worker an empty blog would still answer 200, so stop the build.
     if (posts.length === 0) throw new Error(`No blog posts found in ${dir}`);
     return posts;
   }
@@ -79,7 +68,7 @@ export function blogContent({ dir = BLOG_DIR }: { dir?: string } = {}): Plugin {
     load(id) {
       if (id === sourceFile) return postsModule(readBuiltPosts());
       if (id === COMPILED_MDX_ID) {
-        return compiledMdxModule(readBuiltPosts(), sourceFile);
+        return compiledMdxModule({ posts: readBuiltPosts(), sourceModule: sourceFile });
       }
     },
   };

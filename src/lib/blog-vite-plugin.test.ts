@@ -22,7 +22,6 @@ publishedAt: "2026-12-01"
 Hello **world**.
 `;
 
-// Proves the MDX components still apply, the way mdx-content.tsx uses them.
 const components = {
   strong: (props: ComponentProps<"strong">) =>
     createElement("strong", { ...props, className: "custom" }),
@@ -61,9 +60,7 @@ describe("blog content built into the Worker", () => {
   }
 
   beforeAll(async () => {
-    // The Worker runs the production build of everything.
     vi.stubEnv("NODE_ENV", "production");
-    // Inside the project, so the entry below can resolve packages.
     const cacheDir = path.join(process.cwd(), "node_modules", ".cache");
     fs.mkdirSync(cacheDir, { recursive: true });
     tempDir = fs.mkdtempSync(path.join(cacheDir, "blog-worker-"));
@@ -78,7 +75,6 @@ describe("blog content built into the Worker", () => {
     );
     await buildWorkerBlog(contentDir, path.join(tempDir, "out"));
 
-    // Workers have no project files: nothing may need the folder after the build.
     fs.rmSync(contentDir, { recursive: true });
 
     const bundle = path.join(tempDir, "out", "worker-blog.mjs");
@@ -127,7 +123,6 @@ describe("blog content built into the Worker", () => {
       const next = await compileMDX({ source, components });
       const expected = renderToStaticMarkup(next.content);
 
-      // workerd refuses `new Function`, which is how MDXRemote normally runs.
       vi.stubGlobal("Function", function blocked() {
         throw new EvalError("Code generation from strings disallowed");
       });

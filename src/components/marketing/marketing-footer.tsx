@@ -36,7 +36,7 @@ export function MarketingFooter() {
     0,
     FOOTER_COMPETITOR_COUNT,
   ).map((c) => ({
-    label: competitorAnchor(c.slug, c.name),
+    label: competitorAnchor({ slug: c.slug, name: c.name }),
     href: `/alternatives/${c.slug}`,
   }));
   competitorLinks.push({

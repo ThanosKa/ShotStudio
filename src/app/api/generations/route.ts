@@ -20,14 +20,15 @@ const Body = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  return withAuthenticatedUser(
-    { action: "generations.create", rateLimit: generationRateLimit },
-    async ({ userId, log }) => {
+  return withAuthenticatedUser({
+    action: "generations.create",
+    rateLimit: generationRateLimit,
+    handler: async ({ userId, log }) => {
       let formData: FormData;
       try {
         formData = await req.formData();
       } catch {
-        return jsonError(400, "Expected multipart/form-data");
+        return jsonError({ status: 400, error: "Expected multipart/form-data" });
       }
 
       const audienceRaw = formData.get("audience");
@@ -39,7 +40,10 @@ export async function POST(req: NextRequest) {
         stylePreset: formData.get("stylePreset"),
       });
       if (!parsed.success) {
-        return jsonError(400, parsed.error.issues[0]?.message ?? "Invalid request body");
+        return jsonError({
+          status: 400,
+          error: parsed.error.issues[0]?.message ?? "Invalid request body",
+        });
       }
       const input = parsed.data;
 
@@ -47,7 +51,7 @@ export async function POST(req: NextRequest) {
       for (let i = 0; i < 3; i++) {
         const f = formData.get(`screenshot_${i}`);
         if (!(f instanceof File)) {
-          return jsonError(400, `Missing screenshot_${i}`);
+          return jsonError({ status: 400, error: `Missing screenshot_${i}` });
         }
         screenshotFiles.push(f);
       }
@@ -75,19 +79,25 @@ export async function POST(req: NextRequest) {
             imageUrls: outcome.imageUrls,
           });
         case "invalid_input":
-          return jsonError(400, outcome.message);
+          return jsonError({ status: 400, error: outcome.message });
         case "insufficient_credits":
-          return jsonError(402, "You don't have enough credits. Please buy a pack to continue.");
+          return jsonError({
+            status: 402,
+            error: "You don't have enough credits. Please buy a pack to continue.",
+          });
         case "user_not_ready":
           log.warn("user not ready at debit");
-          return jsonError(409, "We're setting up your account. Please try again in a few seconds.");
+          return jsonError({
+            status: 409,
+            error: "We're setting up your account. Please try again in a few seconds.",
+          });
         case "failed_and_refunded":
           log.error({ reason: outcome.reason, durationMs }, "generation failed");
-          return jsonError(
-            502,
-            "Couldn't generate your screenshots. Your credit was refunded — please try again.",
-          );
+          return jsonError({
+            status: 502,
+            error: "Couldn't generate your screenshots. Your credit was refunded — please try again.",
+          });
       }
     },
-  );
+  });
 }

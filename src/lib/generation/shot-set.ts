@@ -4,21 +4,17 @@ import { STYLE_PRESETS, type StylePresetId } from "./presets";
 import { buildPrompt, type ShotRole } from "./prompts";
 import { upscaleToAppStore } from "@/lib/generation/upscale";
 
-// Server only: it imports the OpenRouter adapter, which throws at import
-// without its key. Never import it from client code. No database here.
-
 export type Brief = {
   appName: string;
   pitch: string;
   audience?: string;
   category: string;
   stylePreset: StylePresetId;
-  /** Data URLs, in Shot Role order. */
   referenceScreenshots: readonly [string, string, string];
 };
 
 export type SetOutcome =
-  | { kind: "ok"; shots: string[] } // 1290x2796 PNG data URLs, in ACTIVE_ROLES order
+  | { kind: "ok"; shots: string[] }
   | { kind: "failed"; failed: number; total: number };
 
 const ROLES: ShotRole[] = [
@@ -27,7 +23,6 @@ const ROLES: ShotRole[] = [
   "another_feature",
 ];
 
-// In dev, run just one shot (hero_feature) to save time and cost while iterating.
 const ACTIVE_ROLES: ShotRole[] =
   process.env.NODE_ENV === "development" ? ["hero_feature"] : ROLES;
 
@@ -37,8 +32,12 @@ const REF_INDEX: Record<ShotRole, number> = {
   another_feature: 2,
 };
 
-async function runShot(
-  role: ShotRole,
+async function runShot({
+  role,
+  ctx,
+  log,
+}: {
+  role: ShotRole;
   ctx: {
     appName: string;
     pitch: string;
@@ -46,9 +45,9 @@ async function runShot(
     category: string;
     stylePreset: StylePresetId;
     screenshotDataUrls: readonly [string, string, string];
-  },
-  log: Logger,
-): Promise<string> {
+  };
+  log: Logger;
+}): Promise<string> {
   const preset = STYLE_PRESETS[ctx.stylePreset];
   const prompt = buildPrompt({
     appName: ctx.appName,
@@ -80,12 +79,18 @@ async function runShot(
 }
 
 /** No database, never throws. Up to 2 attempts per Shot. One failed Shot fails the Set. */
-export async function generateSet(brief: Brief, log: Logger): Promise<SetOutcome> {
+export async function generateSet({
+  brief,
+  log,
+}: {
+  brief: Brief;
+  log: Logger;
+}): Promise<SetOutcome> {
   const results = await Promise.allSettled(
     ACTIVE_ROLES.map((role) =>
-      runShot(
+      runShot({
         role,
-        {
+        ctx: {
           appName: brief.appName,
           pitch: brief.pitch,
           audience: brief.audience,
@@ -94,7 +99,7 @@ export async function generateSet(brief: Brief, log: Logger): Promise<SetOutcome
           screenshotDataUrls: brief.referenceScreenshots,
         },
         log,
-      ),
+      }),
     ),
   );
 
@@ -104,6 +109,6 @@ export async function generateSet(brief: Brief, log: Logger): Promise<SetOutcome
   }
   return {
     kind: "ok",
-    shots: results.map((r) => (r as PromiseFulfilledResult<string>).value),
+    shots: results.flatMap((r) => (r.status === "fulfilled" ? [r.value] : [])),
   };
 }

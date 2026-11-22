@@ -6,9 +6,6 @@ import { db } from "@/lib/db";
 import { transactions, users } from "@/lib/db/schema";
 import { sendWelcomeEmail } from "@/lib/emails/welcome";
 
-// Verification and the welcome email are mocked at their modules; the database
-// is the per-test PGlite from vitest.setup.ts. These tests record today's
-// behaviour, so every event carries one address (or its primary one first).
 vi.mock("@clerk/nextjs/webhooks", () => ({ verifyWebhook: vi.fn() }));
 vi.mock("@/lib/emails/welcome", () => ({ sendWelcomeEmail: vi.fn() }));
 
@@ -211,7 +208,6 @@ describe("POST /api/webhooks/clerk", () => {
 
   describe("a database error answers 500, so Clerk retries", () => {
     beforeEach(async () => {
-      // The email column is unique, so a second User with the same address fails.
       await db.insert(users).values({ id: "u_first", email: "taken@example.com", credits: 0 });
     });
 

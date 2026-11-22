@@ -5,22 +5,17 @@ import {
   type Orientation,
 } from "@/lib/screenshot-sizes/spec";
 
-/** What the browser can tell us about one uploaded image. */
 export type ImageFacts = {
   width: number;
   height: number;
-  /** MIME type, e.g. "image/png". */
   mimeType: string;
-  /** True when at least one pixel is not fully opaque. Unknown formats pass false. */
   hasAlpha: boolean;
 };
 
 export type Issue = { code: string; message: string };
 
 export type AppleResult = {
-  /** Every Apple size the image already matches exactly. */
   matches: AppleSize[];
-  /** True when there is at least one exact match and no blocking issue. */
   accepted: boolean;
   issues: Issue[];
 };
@@ -28,7 +23,6 @@ export type AppleResult = {
 export type GooglePlayResult = {
   accepted: boolean;
   issues: Issue[];
-  /** 9:16 portrait at least 1080x1920, or 16:9 landscape at least 1920x1080. */
   promoEligible: boolean;
 };
 
@@ -132,7 +126,6 @@ export function checkGooglePlay(image: ImageFacts): GooglePlayResult {
 
 function isPromoEligible({ width, height }: { width: number; height: number }): boolean {
   const { portrait, landscape } = GOOGLE_PLAY_RULES.promo;
-  // Exact ratio on integers: 9:16 is width*16 === height*9.
   if (height > width) {
     return width * 16 === height * 9 && width >= portrait.width && height >= portrait.height;
   }
@@ -148,16 +141,12 @@ export type FitMode = "contain" | "cover";
 export type ResizePlan = {
   canvasWidth: number;
   canvasHeight: number;
-  /** Where and how large the source is drawn on the canvas. */
   drawX: number;
   drawY: number;
   drawWidth: number;
   drawHeight: number;
-  /** "contain" pads with a background colour; "cover" crops the overflow. */
   mode: FitMode;
-  /** True when source and target aspect ratios differ by more than 1%. */
   aspectMismatch: boolean;
-  /** True when the source is drawn larger than its native size. */
   upscaled: boolean;
 };
 
@@ -204,7 +193,6 @@ export function planResize({
   };
 }
 
-/** Apple sizes ordered by how close their aspect ratio is to the image's, nearest first. */
 export function nearestAppleSizes({
   image,
   limit,
@@ -221,7 +209,6 @@ export function nearestAppleSizes({
     .map((x) => x.s);
 }
 
-/** Stable id for a size, used as a form value and in zip file names. */
 export function sizeId({ width, height }: { width: number; height: number }): string {
   return `${width}x${height}`;
 }
@@ -234,10 +221,6 @@ export type ResizeTarget = {
   store: "app-store" | "google-play";
 };
 
-/**
- * Every size the tool can resize to: each distinct App Store size (labelled
- * with all the displays that accept it) plus the two Google Play promo sizes.
- */
 export function resizeTargets(): ResizeTarget[] {
   const byId = new Map<string, { size: AppleSize; labels: string[] }>();
   for (const size of APPLE_SIZES) {

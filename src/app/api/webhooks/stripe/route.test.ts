@@ -6,8 +6,6 @@ import { runCheckoutFulfillment } from "@/lib/billing/checkout";
 const SECRET = "whsec_test_secret";
 const real = new Stripe("sk_test_unused");
 
-// A Worker's crypto is async only, so the sync call throws there. Node's would
-// pass, which is how this route's bug stayed hidden until real events arrived.
 vi.mock("@/lib/stripe", () => ({
   stripe: {
     webhooks: {
@@ -20,8 +18,6 @@ vi.mock("@/lib/stripe", () => ({
   },
 }));
 
-// Just enough of Upstash's `set`/`get`/`del` to keep keys with a TTL against a
-// clock the tests move by hand.
 const fakeRedis = vi.hoisted(() => {
   const store = new Map<string, { value: unknown; expiresAt: number }>();
   let now = 0;
@@ -107,13 +103,10 @@ describe("POST /api/webhooks/stripe", () => {
 
   it("fulfils a retry of a delivery that was cut off mid-way", async () => {
     const { POST } = await import("./route");
-    // The first delivery never finishes: the Worker is stopped inside fulfilment,
-    // so neither its success path nor its catch block runs.
     fulfil.mockReturnValueOnce(new Promise(() => {}));
     void POST(checkoutCompleted());
     await vi.waitFor(() => expect(fulfil).toHaveBeenCalledTimes(1));
 
-    // Stripe's first retry comes minutes later at the earliest.
     fakeRedis.advanceSeconds(5 * 60);
     fulfil.mockResolvedValueOnce(OK_OUTCOME);
     const retry = await POST(checkoutCompleted());

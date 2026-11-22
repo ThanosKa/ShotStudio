@@ -31,13 +31,18 @@ export function PricingCards() {
         !data ||
         typeof data !== "object" ||
         !("checkoutUrl" in data) ||
-        typeof (data as { checkoutUrl: unknown }).checkoutUrl !== "string"
+        typeof data.checkoutUrl !== "string"
       ) {
-        setError(parseApiError(res.status, data, "Couldn't start checkout. Please try again."));
+        setError(
+          parseApiError({
+            data,
+            fallback: "Couldn't start checkout. Please try again.",
+          }),
+        );
         setBusy(null);
         return;
       }
-      window.location.assign((data as { checkoutUrl: string }).checkoutUrl);
+      window.location.assign(data.checkoutUrl);
     } catch {
       setError("Couldn't start checkout. Please try again.");
       setBusy(null);
@@ -59,7 +64,7 @@ export function PricingCards() {
                   {formatPriceUSD(p.priceCents)}
                 </div>
                 <div className="mt-1 text-body-lg text-muted-foreground">
-                  {p.credits} {pluralize(p.credits, "credit")}
+                  {p.credits} {pluralize({ n: p.credits, singular: "credit" })}
                 </div>
               </div>
               <Button

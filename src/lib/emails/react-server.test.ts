@@ -6,10 +6,6 @@ import { describe, expect, it } from "vitest";
 const run = promisify(execFile);
 const here = import.meta.dirname;
 
-// On the Worker, route handlers run under the `react-server` condition, where
-// `react-dom/server` is a stub that throws. Node resolves with the same
-// condition here, so this runs the real send path as the Worker does. Resend's
-// HTTP call is replaced: nothing leaves the machine.
 const script = `
 const sent = [];
 globalThis.fetch = async (url, init) => {
@@ -54,8 +50,6 @@ async function sendUnderReactServer() {
   ).then(
     (r) => r.stdout,
     (err: { stderr?: string }) => {
-      // Rethrow only the child's error line: its raw stack carries inline
-      // source maps that Vitest cannot parse.
       const line = err.stderr?.split("\n").find((l) => /^\w*Error\b/.test(l));
       throw new Error(line ?? "the send script failed");
     },

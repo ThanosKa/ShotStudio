@@ -3,15 +3,9 @@ import { ChevronRight } from "lucide-react";
 
 export type Crumb = {
   label: string;
-  /** Omit on the current page. */
   href?: string;
 };
 
-/**
- * Visible breadcrumb trail. Every deep page gets free, descriptive internal
- * links back to its hub and the homepage — the cheapest fix for a site where
- * category and comparison pages sit on a single inbound link.
- */
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
     <nav

@@ -3,8 +3,6 @@ import { isWorkersRuntime } from "@/lib/runtime";
 import { writeLineToConsole } from "./console-line";
 
 const isDevelopment = process.env.NODE_ENV === "development";
-// Workers have no worker threads for transports, and pino's default destination
-// writes to fd 1 through the fs shim. Workers Logs captures console output.
 const isWorkers = isWorkersRuntime();
 
 export function getLoggerConfig() {

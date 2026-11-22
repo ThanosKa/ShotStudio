@@ -5,49 +5,7 @@ import { COMPETITORS } from "@/data/competitors";
 import { getAllPostMetas } from "@/lib/blog";
 import { isCategoryPruned, isCompetitorPruned } from "@/lib/marketing/pruned";
 
-/**
- * Content revision dates — the last time the content behind each surface
- * actually changed. Plain ISO dates, hand-maintained.
- *
- * NEVER put `new Date()` in this file. `sitemap.ts` is a Route Handler that
- * Next caches at build time (see next/docs .../metadata/sitemap.md), so
- * `new Date()` freezes to the build timestamp and stamps every URL with the
- * same instant. That broke crawling twice over:
- *
- *  1. Between deploys the value never moves. The 2026-06-13 build stamped all
- *     52 non-blog URLs `2026-06-13T20:40:15.675Z`; Google read the sitemap on
- *     2026-06-14 and did not come back for 45 days, because nothing in it ever
- *     claimed to have changed.
- *  2. When it does move, all 54 URLs move together. Google discards `<lastmod>`
- *     it cannot verify, and "every URL changed at the same millisecond on every
- *     deploy" is the textbook unreliable signal.
- *
- * When you change the content behind a surface, bump only its entry here.
- * Per-slug overrides go in CATEGORY_REVISED / COMPETITOR_REVISED so a single
- * rewritten page does not have to re-date its 39 siblings.
- */
 const REVISED = {
-  // 2026-07-29: the SEO recovery sprint rewrote metadata, schema, body copy and
-  // internal links across every marketing surface, so today is the honest
-  // revision date for all of them. Previous genuine dates, for reference:
-  // home 2026-05-11, pricing/hubs 2026-05-19, privacy/terms 2026-05-12,
-  // categories 2026-06-13, competitors 2026-05-19.
-  // 2026-10-01: pruning sprint (see PRUNED.md). Home, pricing and the two hubs
-  // changed their links/counts/social metadata; kept category and competitor
-  // pages changed their sibling blocks (overrides below). Everything else is
-  // untouched and keeps its date.
-  // 2026-10-31: fact fix (no click-to-edit, no free per-shot regenerate) on
-  // home + pricing, plus every kept category and competitor page (overrides).
-  // 2026-11-02: 1290×2796 relabelled as a 6.9" size (was the "6.7-inch spec") on home FAQ,
-  // alternatives hub and the kept competitor pages (overrides).
-  // 2026-11-04: /screenshots-for/indie-games un-pruned (1 click while noindexed);
-  // home, pricing and the category hub now link it (hub count 9 -> 10).
-  // 2026-11-06: new /alternatives/applaunchpad; the alternatives hub lists it.
-  // 2026-11-09: new /alternatives/appscreens; the alternatives hub lists it.
-  // 2026-11-13: hub descriptions name the five indexed competitors (not the
-  // pruned Rotato / Screenshots.pro) on the alternatives, category and blog hubs.
-  // 2026-11-16: alternatives hub drops the unsourced "everything outputs 1290×2796"
-  // line; its Shotbot row shows the App Store price.
   home: "2026-11-04",
   pricing: "2026-11-04",
   screenshotsForHub: "2026-11-13",
@@ -55,18 +13,12 @@ const REVISED = {
   blogHub: "2026-11-13",
   privacy: "2026-07-29",
   terms: "2026-07-29",
-  /** /tools/app-store-screenshot-sizes, new 2026-10-01; 2026-11-11 Apple's October 2026 spec update; 2026-11-18 iPhone Duo sizes. */
   sizeChecker: "2026-11-18",
-  /** Fallback for `/screenshots-for/[category]` — src/data/categories.ts. */
   categories: "2026-07-29",
-  /** Fallback for `/alternatives/[competitor]` — src/data/competitors.ts. */
   competitors: "2026-07-29",
 } as const;
 
-/** Per-slug overrides. Add an entry when you rewrite one category page. */
 const CATEGORY_REVISED: Record<string, string> = {
-  // 2026-10-01: sibling blocks and compared-tool lists no longer link pruned pages.
-  // 2026-10-31: H1 casing + removed false click-to-edit claim.
   "fitness-apps": "2026-11-09",
   "finance-apps": "2026-11-09",
   "education-apps": "2026-11-09",
@@ -76,46 +28,23 @@ const CATEGORY_REVISED: Record<string, string> = {
   "pet-care-apps": "2026-11-09",
   "running-apps": "2026-11-09",
   "ai-chatbot-apps": "2026-11-09",
-  // 2026-11-04: indie-games un-pruned (noindex removed, back in the sitemap and hubs).
-  // 2026-11-09: dropped the 404ing primaryImageOfPage from the WebPage schema.
   "indie-games": "2026-11-09",
 };
 
-/** Per-slug overrides. Add an entry when you rewrite one competitor page. */
 const COMPETITOR_REVISED: Record<string, string> = {
-  // 2026-10-01: "other alternatives" and related-category blocks dropped pruned pages.
-  // 2026-10-31: removed false click-to-edit / unlimited-regenerate claims.
-  // 2026-11-02: FAQ relabels 1290×2796 as a 6.9" size.
-  // 2026-11-06: "other alternatives" block lists AppLaunchpad; preset copy fixed (lookup, not AI).
-  // 2026-11-09: "other alternatives" block lists AppScreens; dropped the 404ing
-  // primaryImageOfPage from the WebPage schema.
   appmockup: "2026-11-09",
   previewed: "2026-11-09",
-  // 2026-11-16: Shotbot price and size FAQ from its App Store listing.
   shotbot: "2026-11-16",
-  // 2026-11-06: new page (pricing checked on theapplaunchpad.com/pricing that day).
   applaunchpad: "2026-11-09",
-  // 2026-11-09: new page (pricing checked on appscreens.com/pricing that day).
   appscreens: "2026-11-09",
 };
 
-/**
- * Parse a revision string into a Date. `YYYY-MM-DD` is normalised to UTC
- * midnight so the emitted `<lastmod>` is stable regardless of build machine
- * timezone; a full ISO timestamp is passed through.
- */
 function revisedAt(iso: string | undefined): Date {
-  // Guard: a blog post missing both `updatedAt` and `publishedAt` frontmatter
-  // must not emit an Invalid Date into <lastmod>.
   const raw = iso && /^\d{4}-\d{2}-\d{2}/.test(iso) ? iso : REVISED.blogHub;
   return new Date(raw.includes("T") ? raw : `${raw}T00:00:00.000Z`);
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // Every entry below must be an absolute https://shotstudio.dev URL, must be
-  // indexable, and must match that page's self-referencing canonical exactly.
-  // Deliberately excluded: /home, /sign-in, /sign-up (noindex app + auth
-  // routes) and /api/* (non-HTML, disallowed in robots.ts).
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: APP_URL,
@@ -153,10 +82,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
-    // Kept in the sitemap on purpose: /privacy and /terms are trust signals and
-    // are linked from Stripe checkout and Clerk sign-up. They are NOT
-    // noindexed. Their low priority reflects that they should never outrank
-    // /pricing — see reports/01-indexing.md for the internal-linking handoff.
     {
       url: `${APP_URL}/privacy`,
       lastModified: revisedAt(REVISED.privacy),
@@ -171,8 +96,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Pruned (noindex) pages are listed in src/lib/marketing/pruned.ts and must
-  // not appear here: a sitemap URL has to be one we want indexed.
   const categoryPages: MetadataRoute.Sitemap = CATEGORIES.filter(
     (c) => !isCategoryPruned(c.slug),
   ).map((c) => ({
@@ -191,8 +114,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // `updatedAt` falls back to `publishedAt` in src/lib/blog.ts, so a post that
-  // is edited moves its own lastmod without touching any other URL.
   const blogPages: MetadataRoute.Sitemap = getAllPostMetas().map((p) => ({
     url: `${APP_URL}/blog/${p.slug}`,
     lastModified: revisedAt(p.updatedAt),

@@ -5,9 +5,6 @@ import CreditsPurchasedEmail from "../../../emails/credits-purchased";
 import WelcomeEmail from "../../../emails/welcome";
 import { creditsPurchasedEmail, welcomeEmail } from "./templates";
 
-// The string templates must send exactly what react-email rendered from
-// `emails/*.tsx` before the Worker move. Node can still run react-email, so
-// render the originals here and compare.
 async function rendered(element: ReactElement) {
   const [html, text] = await Promise.all([
     render(element),

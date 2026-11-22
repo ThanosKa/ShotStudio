@@ -38,7 +38,6 @@ type DisplayGroup = {
   sizes: AppleSize[];
 };
 
-/** Group the dataset by family and display for the reference table. */
 function groupByDisplay(): DisplayGroup[] {
   const groups = new Map<string, DisplayGroup>();
   for (const size of APPLE_SIZES) {

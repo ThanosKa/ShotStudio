@@ -4,17 +4,11 @@ import { cn } from "@/lib/utils";
 
 export type LinkCard = {
   href: string;
-  /** Anchor text. Must be the phrase people actually search for. */
   label: string;
   eyebrow?: string;
   description?: string;
 };
 
-/**
- * Contextual link grid used for related categories, competitor cross-links and
- * blog cross-links. The card title IS the anchor text, so every internal link
- * on the site carries the target's real query phrase.
- */
 export function LinkCards({
   items,
   columns = 3,

@@ -24,7 +24,7 @@ function inputFor(userId: string) {
 
 describe("runGeneration", () => {
   test("returns insufficient_credits when balance is 0; no rows written", async () => {
-    await ensureUser("u_zero", "u_zero@test");
+    await ensureUser({ userId: "u_zero", email: "u_zero@test" });
 
     const outcome = await runGeneration(inputFor("u_zero"));
 
@@ -44,7 +44,7 @@ describe("runGeneration", () => {
   });
 
   test("happy path: balance −1, one usage row, generation complete, three image URLs", async () => {
-    await ensureUser("u_ok", "u_ok@test");
+    await ensureUser({ userId: "u_ok", email: "u_ok@test" });
     await db
       .update(users)
       .set({ credits: 3 })
@@ -82,7 +82,7 @@ describe("runGeneration", () => {
   });
 
   test("when shots fail: balance restored, matched usage+refund pair, generation failed", async () => {
-    await ensureUser("u_fail", "u_fail@test");
+    await ensureUser({ userId: "u_fail", email: "u_fail@test" });
     await db
       .update(users)
       .set({ credits: 5 })
@@ -139,7 +139,7 @@ describe("runGeneration", () => {
   });
 
   test("rejects oversized screenshot before any debit", async () => {
-    await ensureUser("u_big", "u_big@test");
+    await ensureUser({ userId: "u_big", email: "u_big@test" });
     await db
       .update(users)
       .set({ credits: 5 })
@@ -167,7 +167,7 @@ describe("runGeneration", () => {
   });
 
   test("rejects screenshot with disallowed MIME before any debit", async () => {
-    await ensureUser("u_mime", "u_mime@test");
+    await ensureUser({ userId: "u_mime", email: "u_mime@test" });
     await db
       .update(users)
       .set({ credits: 5 })
@@ -193,7 +193,7 @@ describe("runGeneration", () => {
 });
 
 async function userWithCredits(userId: string, credits: number) {
-  await ensureUser(userId, `${userId}@test`);
+  await ensureUser({ userId, email: `${userId}@test` });
   await db.update(users).set({ credits }).where(eq(users.id, userId));
 }
 
@@ -213,7 +213,6 @@ async function refundsOf(userId: string) {
   return txs.filter((t) => t.type === "refund");
 }
 
-/** A Generation whose Debit committed, then the Worker stopped before any outcome. */
 async function abandonedGeneration(userId: string, minutesAgo: number) {
   const [row] = await db
     .insert(generations)
@@ -287,7 +286,6 @@ describe("refundAbandonedGenerations", () => {
 
     const run = runGeneration(inputFor("u_race"));
     await vi.waitFor(async () => expect(await creditsOf("u_race")).toBe(0));
-    // The sweep treats every pending row as abandoned with a cutoff in the future.
     expect(await refundAbandonedGenerations(new Date(Date.now() + 60_000))).toBe(1);
     failShots();
     await run;

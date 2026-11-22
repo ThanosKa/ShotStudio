@@ -24,6 +24,10 @@ export type GenerationOutcome =
   | { kind: "failed_and_refunded"; reason: string };
 
 const ALLOWED_SCREENSHOT_MIME = ["image/jpeg", "image/png"] as const;
+
+function isAllowedScreenshotMime(type: string): type is (typeof ALLOWED_SCREENSHOT_MIME)[number] {
+  return ALLOWED_SCREENSHOT_MIME.some((allowed) => allowed === type);
+}
 const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 
 function validateScreenshots(
@@ -31,7 +35,7 @@ function validateScreenshots(
 ): { kind: "invalid_input"; message: string } | null {
   for (let i = 0; i < files.length; i++) {
     const f = files[i];
-    if (!ALLOWED_SCREENSHOT_MIME.includes(f.type as (typeof ALLOWED_SCREENSHOT_MIME)[number])) {
+    if (!isAllowedScreenshotMime(f.type)) {
       return { kind: "invalid_input", message: "Screenshots must be JPEG or PNG." };
     }
     if (f.size > MAX_SCREENSHOT_BYTES) {
@@ -44,16 +48,11 @@ function validateScreenshots(
   return null;
 }
 
-/**
- * Atomic: the Credit Ledger's Debit (one Credit and its `usage` Transaction)
- * and the Pending Generation row, in one DB transaction. Throws
- * InsufficientCreditsError or UserNotFoundError; never partially applied.
- */
 async function debitAndStartGeneration(
   input: Omit<RunGenerationInput, "pitch" | "audience" | "screenshots">,
 ): Promise<{ generationId: string }> {
   return db.transaction(async (tx) => {
-    await debit(input.userId, { reason: "generation" }, tx);
+    await debit({ userId: input.userId, metadata: { reason: "generation" }, within: tx });
 
     const [row] = await tx
       .insert(generations)
@@ -70,7 +69,6 @@ async function debitAndStartGeneration(
   });
 }
 
-/** Only a `pending` row completes: one already failed and refunded stays so. */
 async function markGenerationComplete(generationId: string) {
   await db
     .update(generations)
@@ -78,16 +76,15 @@ async function markGenerationComplete(generationId: string) {
     .where(and(eq(generations.id, generationId), eq(generations.status, "pending")));
 }
 
-/**
- * Fails a `pending` Generation and refunds its Credit in one transaction.
- * Returns false, and changes nothing, when the row is no longer `pending`: the
- * other path (the run itself or the abandoned sweep) already settled it.
- */
-async function failAndRefund(
-  generation: { id: string; userId: string },
-  failureReason: string,
-  refundReason: "generation_failed" | "generation_abandoned",
-): Promise<boolean> {
+async function failAndRefund({
+  generation,
+  failureReason,
+  refundReason,
+}: {
+  generation: { id: string; userId: string };
+  failureReason: string;
+  refundReason: "generation_failed" | "generation_abandoned";
+}): Promise<boolean> {
   return db.transaction(async (tx) => {
     const failed = await tx
       .update(generations)
@@ -99,16 +96,16 @@ async function failAndRefund(
       .where(and(eq(generations.id, generation.id), eq(generations.status, "pending")))
       .returning({ id: generations.id });
     if (failed.length === 0) return false;
-    await refund(generation.userId, 1, { reason: refundReason, generationId: generation.id }, tx);
+    await refund({
+      userId: generation.userId,
+      credits: 1,
+      metadata: { reason: refundReason, generationId: generation.id },
+      within: tx,
+    });
     return true;
   });
 }
 
-/**
- * A run lasts at most about 4 minutes (two 120 s attempts per shot, in
- * parallel), and a Worker keeps it at most ~30 s after a disconnect. A row
- * still `pending` after this long has no run left to settle it.
- */
 const ABANDONED_AFTER_MS = 10 * 60 * 1000;
 const SWEEP_BATCH = 100;
 
@@ -131,11 +128,11 @@ export async function refundAbandonedGenerations(
   let refunded = 0;
   for (const generation of abandoned) {
     try {
-      const done = await failAndRefund(
+      const done = await failAndRefund({
         generation,
-        "Abandoned: no outcome was recorded",
-        "generation_abandoned",
-      );
+        failureReason: "Abandoned: no outcome was recorded",
+        refundReason: "generation_abandoned",
+      });
       if (done) refunded++;
     } catch (err) {
       log.error({ err, generationId: generation.id }, "abandoned generation refund failed");
@@ -185,17 +182,19 @@ async function runGenerationToEnd(
   const shotLog = log.child({ generationId });
   shotLog.info("generation started");
 
-  const screenshotDataUrls = (await Promise.all(
-    input.screenshots.map(async (f) => {
-      const buf = Buffer.from(await f.arrayBuffer());
-      return `data:${f.type};base64,${buf.toString("base64")}`;
-    }),
-  )) as [string, string, string];
-  // Release ~5MB-per-file File handles before the long-running shot calls.
-  (input.screenshots as File[]).length = 0;
+  const toDataUrl = async (f: File) => {
+    const buf = Buffer.from(await f.arrayBuffer());
+    return `data:${f.type};base64,${buf.toString("base64")}`;
+  };
+  const screenshotDataUrls = await Promise.all([
+    toDataUrl(input.screenshots[0]),
+    toDataUrl(input.screenshots[1]),
+    toDataUrl(input.screenshots[2]),
+  ]);
+  input.screenshots.splice(0);
 
-  const set = await generateSet(
-    {
+  const set = await generateSet({
+    brief: {
       appName: input.appName,
       pitch: input.pitch,
       audience: input.audience,
@@ -203,15 +202,18 @@ async function runGenerationToEnd(
       stylePreset: input.stylePreset,
       referenceScreenshots: screenshotDataUrls,
     },
-    shotLog,
-  );
+    log: shotLog,
+  });
 
   if (set.kind === "failed") {
     const reason = `Generation failed: ${set.failed}/${set.total} shots failed`;
     try {
-      await failAndRefund({ id: generationId, userId: input.userId }, reason, "generation_failed");
+      await failAndRefund({
+        generation: { id: generationId, userId: input.userId },
+        failureReason: reason,
+        refundReason: "generation_failed",
+      });
     } catch (refundErr) {
-      // The row stays `pending`, so the abandoned sweep refunds it later.
       shotLog.error(
         { err: refundErr },
         "inline refund failed; the abandoned-generation sweep will retry it",

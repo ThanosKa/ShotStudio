@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,14 +34,18 @@ import {
   PITCH_MIN_CHARS,
 } from "@/lib/validation/pitch";
 
+const generationResponseSchema = z.object({
+  imageUrls: z.array(z.string()).optional(),
+});
+
 const CATEGORIES = Object.keys(CATEGORY_DEFAULT_PRESET);
+
+const LAST_STEP = WIZARD_STEPS.length - 1;
 
 const SHOT_LABELS = ["Hero feature", "Differentiator", "Another feature"] as const;
 
-const LAST_STEP = (WIZARD_STEPS.length - 1) as Step;
-
 type Status = "idle" | "submitting" | "done" | "error";
-type Step = 0 | 1 | 2;
+type Step = number;
 
 type ShotState = {
   file: File | null;
@@ -91,38 +96,53 @@ export function Wizard() {
     };
   }, []);
 
-  function updateShot(idx: number, updater: (s: ShotState) => ShotState) {
+  function updateShot({
+    idx,
+    updater,
+  }: {
+    idx: number;
+    updater: (s: ShotState) => ShotState;
+  }) {
     setShots((prev) => prev.map((s, i) => (i === idx ? updater(s) : s)));
   }
 
-  async function compressIntoSlot(idx: number, raw: File) {
-    updateShot(idx, (s) => {
-      if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
-      return { file: null, previewUrl: null, compressing: true };
+  async function compressIntoSlot({ idx, raw }: { idx: number; raw: File }) {
+    updateShot({
+      idx,
+      updater: (s) => {
+        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+        return { file: null, previewUrl: null, compressing: true };
+      },
     });
     try {
       const compressed = await compressImage(raw);
       const url = URL.createObjectURL(compressed);
-      updateShot(idx, () => ({
-        file: compressed,
-        previewUrl: url,
-        compressing: false,
-      }));
+      updateShot({
+        idx,
+        updater: () => ({
+          file: compressed,
+          previewUrl: url,
+          compressing: false,
+        }),
+      });
     } catch {
-      updateShot(idx, () => EMPTY_SHOT);
+      updateShot({ idx, updater: () => EMPTY_SHOT });
       setError("Couldn't process that image. Please try a PNG or JPEG file.");
     }
   }
 
-  function setShotFile(idx: number, file: File | null) {
+  function setShotFile({ idx, file }: { idx: number; file: File | null }) {
     if (!file) {
-      updateShot(idx, (s) => {
-        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
-        return EMPTY_SHOT;
+      updateShot({
+        idx,
+        updater: (s) => {
+          if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+          return EMPTY_SHOT;
+        },
       });
       return;
     }
-    void compressIntoSlot(idx, file);
+    void compressIntoSlot({ idx, raw: file });
   }
 
   function fillEmptySlots(files: File[]) {
@@ -132,7 +152,7 @@ export function Wizard() {
     });
     const used = files.slice(0, emptyIndices.length);
     used.forEach((f, j) => {
-      void compressIntoSlot(emptyIndices[j], f);
+      void compressIntoSlot({ idx: emptyIndices[j], raw: f });
     });
     if (used.length === 0) {
       setNotice(
@@ -181,18 +201,18 @@ export function Wizard() {
       return;
     }
     setNotice(null);
-    if (step < LAST_STEP) setStep((step + 1) as Step);
+    if (step < LAST_STEP) setStep(step + 1);
   }
 
   function prev() {
     setError(null);
     setNotice(null);
-    if (step > 0) setStep((step - 1) as Step);
+    if (step > 0) setStep(step - 1);
   }
 
   async function onSubmit() {
     setError(null);
-    for (const s of [0, 1, 2] as const) {
+    for (const s of WIZARD_STEPS.keys()) {
       const v = validateStep(s);
       if (v) {
         setError(v);
@@ -218,18 +238,17 @@ export function Wizard() {
       const data: unknown = await res.json().catch(() => null);
       if (!res.ok || !data || typeof data !== "object") {
         throw new Error(
-          parseApiError(
-            res.status,
+          parseApiError({
             data,
-            "Couldn't generate your screenshots. Please try again.",
-          ),
+            fallback: "Couldn't generate your screenshots. Please try again.",
+          }),
         );
       }
-      const ok = data as { imageUrls?: string[] };
-      if (!ok.imageUrls?.length) {
+      const ok = generationResponseSchema.safeParse(data);
+      if (!ok.success || !ok.data.imageUrls?.length) {
         throw new Error("Couldn't generate your screenshots. Please try again.");
       }
-      setImages(ok.imageUrls);
+      setImages(ok.data.imageUrls);
       setStatus("done");
       router.refresh();
     } catch (err) {
@@ -464,7 +483,7 @@ function StepScreenshots({
   fillEmptySlots,
 }: {
   shots: ShotState[];
-  setShotFile: (idx: number, file: File | null) => void;
+  setShotFile: (args: { idx: number; file: File | null }) => void;
   fillEmptySlots: (files: File[]) => void;
 }) {
   const filled = shots.filter((s) => s.file).length;
@@ -506,7 +525,7 @@ function StepScreenshots({
             idx={idx}
             label={label}
             shot={shots[idx]}
-            onFile={(f) => setShotFile(idx, f)}
+            onFile={(f) => setShotFile({ idx, file: f })}
           />
         ))}
       </div>

@@ -69,16 +69,7 @@ export default async function CategoryPage({
 
   const preset = STYLE_PRESETS[data.presetId];
   const example = SHOWCASE_SETS.find((s) => s.preset === data.presetId);
-  // Sibling links used to be `CATEGORIES.filter(not-self).slice(0, 6)`, which
-  // handed every one of the 40 category pages the *same* first six siblings.
-  // Two indexing consequences: 34 of 40 category URLs received zero inbound
-  // sibling links (the hub was their only internal link), and the "Related"
-  // block was byte-identical across all 40 pages, adding to the duplicate mass
-  // that put these URLs in GSC's "Crawled - currently not indexed" bucket.
-  // `relatedCategories` fixes both: cluster siblings first (relevant), then a
-  // rotating ring window so every category is linked from several others and
-  // every block is unique per page.
-  const related = relatedCategories(data.slug, 6);
+  const related = relatedCategories({ slug: data.slug, limit: 6 });
   const cluster = clusterOf(data.slug);
   const editorial = getCategoryEditorial(data.slug);
   const comparedTools = competitorSlugsForCategory(data.slug)
@@ -288,7 +279,7 @@ export default async function CategoryPage({
           items={[
             ...comparedTools.map((c) => ({
               href: `/alternatives/${c.slug}`,
-              label: competitorAnchor(c.slug, c.name),
+              label: competitorAnchor({ slug: c.slug, name: c.name }),
               eyebrow: c.pricingModel,
               description: c.primaryWeakness,
             })),

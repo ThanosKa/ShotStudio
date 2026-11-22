@@ -22,7 +22,6 @@ type Status = { kind: "idle" } | { kind: "busy"; message: string } | { kind: "er
 
 const ALPHA_SCAN_TYPES = ["image/png", "image/webp"];
 
-/** Reads size and transparency in the browser. The file never leaves the device. */
 async function readFacts(file: File): Promise<ImageFacts> {
   const bitmap = await createImageBitmap(file);
   try {
@@ -139,7 +138,6 @@ export function ScreenshotSizeChecker() {
           canvas.height = plan.canvasHeight;
           const ctx = canvas.getContext("2d");
           if (!ctx) throw new Error("Canvas is not available in this browser.");
-          // Opaque background first: the output must not contain transparency.
           ctx.fillStyle = background;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.imageSmoothingQuality = "high";

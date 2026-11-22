@@ -361,7 +361,7 @@ export default async function CompetitorAlternativesPage({
               </div>
               <div className="mt-3 flex items-start justify-between gap-3">
                 <span className="text-heading-sm font-semibold">
-                  {competitorAnchor(c.slug, c.name)}
+                  {competitorAnchor({ slug: c.slug, name: c.name })}
                 </span>
                 <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
               </div>

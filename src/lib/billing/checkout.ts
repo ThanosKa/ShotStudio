@@ -68,7 +68,13 @@ export type CheckoutFulfillmentOutcome =
   | { kind: "unknown_pack"; packageId: string }
   | { kind: "user_not_ready"; userId: string };
 
-function formatAmount(amountCents: number, currency: string): string {
+function formatAmount({
+  amountCents,
+  currency,
+}: {
+  amountCents: number;
+  currency: string;
+}): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency.toUpperCase(),
@@ -95,10 +101,8 @@ export async function runCheckoutFulfillment(
   const pack = getCreditPackage(packageId);
   if (!pack) return { kind: "unknown_pack", packageId };
 
-  // The Stripe email never changes an existing User's email: it only creates
-  // the row when the Clerk webhook and JIT User Sync have not run yet.
   const checkoutEmail = session.customer_details?.email ?? null;
-  if (checkoutEmail) await createUserIfAbsent(userId, checkoutEmail);
+  if (checkoutEmail) await createUserIfAbsent({ userId, email: checkoutEmail });
   const [existing] = await db
     .select({ id: users.id })
     .from(users)
@@ -113,9 +117,12 @@ export async function runCheckoutFulfillment(
     return { kind: "user_not_ready", userId };
   }
 
-  const { granted, balance: newBalance } = await grant(userId, pack.credits, session.id);
+  const { granted, balance: newBalance } = await grant({
+    userId,
+    credits: pack.credits,
+    stripePaymentId: session.id,
+  });
   if (!granted) {
-    // A replay of a session that already got its credits: no second email.
     log.info({ balance: newBalance }, "credits already granted for this session");
     return { kind: "already_granted", userId, balance: newBalance };
   }
@@ -127,13 +134,13 @@ export async function runCheckoutFulfillment(
       to: checkoutEmail,
       stripeEventId: eventId,
       firstName: session.customer_details?.name?.split(" ")[0] ?? null,
-      packageName: `${pack.name} — ${pack.credits} ${pluralize(pack.credits, "set")}`,
+      packageName: `${pack.name} — ${pack.credits} ${pluralize({ n: pack.credits, singular: "set" })}`,
       creditsAdded: pack.credits,
       newBalance,
-      amountFormatted: formatAmount(
-        session.amount_total ?? pack.priceCents,
-        session.currency ?? "usd",
-      ),
+      amountFormatted: formatAmount({
+        amountCents: session.amount_total ?? pack.priceCents,
+        currency: session.currency ?? "usd",
+      }),
     });
     if (error) {
       log.error({ err: error }, "purchase email failed");

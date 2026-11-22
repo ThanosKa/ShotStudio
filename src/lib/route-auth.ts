@@ -19,25 +19,34 @@ export type AuthenticatedContext = {
  * (when an email is available), so downstream credit operations can't race
  * against a missing `users` row.
  */
-export async function withAuthenticatedUser(
-  opts: { action: string; rateLimit: Limiter },
-  handler: (ctx: AuthenticatedContext) => Promise<Response>,
-): Promise<Response> {
+export async function withAuthenticatedUser({
+  action,
+  rateLimit,
+  handler,
+}: {
+  action: string;
+  rateLimit: Limiter;
+  handler: (ctx: AuthenticatedContext) => Promise<Response>;
+}): Promise<Response> {
   const requestId = crypto.randomUUID();
-  const log = logger.child({ action: opts.action, requestId });
+  const log = logger.child({ action, requestId });
 
   const { userId } = await auth();
-  if (!userId) return jsonError(401, "Unauthorized");
+  if (!userId) return jsonError({ status: 401, error: "Unauthorized" });
 
   const scoped = log.child({ userId });
 
-  const rl = await opts.rateLimit.limit(userId);
+  const rl = await rateLimit.limit(userId);
   if (!rl.success) {
     scoped.warn("rate limit hit");
-    return jsonError(429, "Too many requests — please wait a moment.", {
-      headers: {
-        ...rateLimitHeaders(rl),
-        "Retry-After": String(Math.max(0, Math.ceil((rl.reset - Date.now()) / 1000))),
+    return jsonError({
+      status: 429,
+      error: "Too many requests — please wait a moment.",
+      init: {
+        headers: {
+          ...rateLimitHeaders(rl),
+          "Retry-After": String(Math.max(0, Math.ceil((rl.reset - Date.now()) / 1000))),
+        },
       },
     });
   }

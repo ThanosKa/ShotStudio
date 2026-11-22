@@ -132,7 +132,7 @@ export default function LandingPage() {
           <LinkCards
             items={indexableCompetitors().map((c) => ({
               href: `/alternatives/${c.slug}`,
-              label: competitorAnchor(c.slug, c.name),
+              label: competitorAnchor({ slug: c.slug, name: c.name }),
               eyebrow: c.pricingModel,
               description: c.primaryWeakness,
             }))}

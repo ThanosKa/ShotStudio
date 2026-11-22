@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { writeLineToConsole } from "./console-line";
 
-// Workers Logs files each console line under the method that wrote it, so an
-// error written with console.log never shows up under a `level = error` filter.
 describe("writeLineToConsole", () => {
   afterEach(() => {
     vi.restoreAllMocks();

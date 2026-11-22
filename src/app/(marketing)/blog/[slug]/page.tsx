@@ -74,8 +74,6 @@ export default async function BlogPostPage({
 
   const isHowToCandidate = post.slug === "app-store-screenshot-sizes-2026";
 
-  // Highest-demand category pages, rotated per post so the two posts don't
-  // hand identical link blocks to the same three URLs.
   const offset = post.slug.length % 3;
   const relatedCategoryLinks = categoriesByDemand(9).filter(
     (_, i) => i % 3 === offset,
@@ -102,8 +100,6 @@ export default async function BlogPostPage({
               datePublished: post.publishedAt,
               dateModified: post.updatedAt,
               inLanguage: "en-US",
-              // Article rich results need a >=1200px-wide image; the icon is
-              // 512px square and does not qualify.
               image: [
                 post.heroImage
                   ? `${APP_URL}${post.heroImage}`
