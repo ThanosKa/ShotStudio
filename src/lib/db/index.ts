@@ -28,7 +28,6 @@ type RequestScope = {
   connectionString: string | undefined;
   ctx: WaitUntil;
   db?: Db;
-  /** Work that must finish before the client closes (see keepRequestAliveUntil). */
   pending: Promise<void>[];
   closed: boolean;
 };
@@ -55,7 +54,6 @@ function openScope({
 }) {
   const scope: RequestScope = { connectionString, ctx, pending: [], closed: false };
   const close = async () => {
-    // Work can hand over more work while it runs, so wait until none is added.
     for (let seen = -1; seen !== scope.pending.length; ) {
       seen = scope.pending.length;
       await Promise.all(scope.pending);
@@ -116,8 +114,6 @@ export function runWithRequestDb({
       ctx.waitUntil(close());
       throw err;
     }
-    // Only an open client or a page still rendering can need the wrap below,
-    // which costs CPU and loses the Content-Length of a fixed-size body.
     const contentType = response.headers.get("content-type") ?? "";
     const mayStillQuery =
       scope.db !== undefined || /^text\/(html|x-component)/.test(contentType);
@@ -129,8 +125,6 @@ export function runWithRequestDb({
     ctx.waitUntil(
       response.body
         .pipeTo(writable)
-        // Usually a reader that hung up, which is not an error here; at debug
-        // level so a stream that really fails can still be found.
         .catch((err: unknown) => logger.debug({ err }, "response stream stopped early"))
         .then(close),
     );
@@ -185,7 +179,6 @@ function currentDb(): Db {
   return scope.db;
 }
 
-/** Resolves on every access: the request's client on a Worker, a shared one under Node. */
 const dbTarget: Db = Object.create(Object.prototype);
 
 export const db = new Proxy(dbTarget, {

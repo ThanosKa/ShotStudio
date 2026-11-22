@@ -26,12 +26,6 @@ export function pickUserEmail(input: {
   return (primary ?? addresses[0])?.email ?? null;
 }
 
-/**
- * Just-in-time user sync — Clerk's recommended pattern over webhooks.
- * Idempotent: safe to call on every authenticated page load and from server
- * routes before any credit operation, to close the Clerk-vs-Stripe webhook race.
- * https://clerk.com/blog/just-in-time-api-requests-are-replacing-webhooks
- */
 export async function ensureUser({
   userId,
   email,
@@ -49,12 +43,6 @@ export async function ensureUser({
       }) });
 }
 
-/**
- * Runs a write of `email` onto `userId`'s row. If another User row holds that
- * email, asks Clerk about that row's account: a deleted (not found) account is
- * anonymized, and a live one that no longer lists the address gets its current
- * User Email; then the write runs again. Otherwise the write's error stands.
- */
 async function withEmailReleased<T>({
   userId,
   email,
@@ -72,7 +60,6 @@ async function withEmailReleased<T>({
   }
 }
 
-/** Postgres unique_violation, raised by the driver or wrapped by Drizzle. */
 function isUniqueViolation(err: unknown): boolean {
   let e: unknown = err;
   for (let depth = 0; depth < 5 && typeof e === "object" && e !== null; depth++) {
@@ -82,17 +69,13 @@ function isUniqueViolation(err: unknown): boolean {
   return false;
 }
 
-/** Clerk's 404, which is how its Backend API answers for a deleted user. */
 function isClerkNotFound(err: unknown): boolean {
-  // The check Clerk's own `isClerkAPIResponseError` makes, without importing
-  // `@clerk/nextjs/errors`, which pulls in client hooks.
   if (typeof err !== "object" || err === null) return false;
   const ctor: unknown = err.constructor;
   const kind = typeof ctor === "function" && "kind" in ctor ? ctor.kind : undefined;
   return kind === "ClerkAPIResponseError" && "status" in err && err.status === 404;
 }
 
-/** True when another User row held `email` and no longer does. */
 async function releaseEmail({
   userId,
   email,
@@ -112,7 +95,6 @@ async function releaseEmail({
     account = await (await clerkClient()).users.getUser(holder.id);
   } catch (err) {
     if (!isClerkNotFound(err)) {
-      // Nothing is released on a failed lookup; the caller fails and retries.
       log.warn({ err }, "email holder lookup failed");
       return false;
     }
@@ -124,18 +106,12 @@ async function releaseEmail({
   const addresses = account.emailAddresses.map((a) => ({ id: a.id, email: a.emailAddress }));
   if (addresses.some((a) => a.email.toLowerCase() === email.toLowerCase())) return false;
   const current = pickUserEmail({ addresses, primaryId: account.primaryEmailAddressId });
-  // A live account with no email at all keeps the row: there is nothing to refresh it to.
   if (!current) return false;
   await db.update(users).set({ email: current }).where(eq(users.id, holder.id));
   log.info({ reason: "email_no_longer_on_clerk_user" }, "email released from another user");
   return true;
 }
 
-/**
- * User Anonymization: the row stays, because `transactions.user_id` is
- * ON DELETE RESTRICT; its email becomes a placeholder and its Stripe customer
- * id is cleared. Returns whether a row matched.
- */
 async function anonymizeUser(id: string): Promise<boolean> {
   const result = await db
     .update(users)
@@ -167,7 +143,6 @@ export async function createUserIfAbsent({
     .onConflictDoNothing();
 }
 
-/** JIT User Sync for the signed-in user. Call AFTER the rate limit. */
 export async function syncSignedInUser(userId: string): Promise<string | null> {
   const user = await currentUser();
   const email = pickUserEmail({
@@ -201,8 +176,6 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
     if (inserted.length === 0) return { kind: "already_exists" };
 
     try {
-      // Loaded here, not at the top: the Resend client throws at import without
-      // its API key, and every signed-in route imports this module.
       const { sendWelcomeEmail } = await import("@/lib/emails/welcome");
       const { data, error } = await sendWelcomeEmail({
         to: email,
@@ -214,8 +187,6 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
         welcome: error ? { sent: false, err: error } : { sent: true, emailId: data?.id },
       };
     } catch (err) {
-      // The row is already inserted; report the rejection so the route can log
-      // the insert first and then answer 500, as it always has.
       return { kind: "created", welcome: { sent: false, err, thrown: true } };
     }
   }
@@ -227,17 +198,11 @@ export async function applyClerkEvent(evt: WebhookEvent): Promise<ClerkEventOutc
       primaryId: primary_email_address_id,
     });
     if (!email) return { kind: "skipped", reason: "no_email" };
-    // Upsert: an "updated" event can arrive before "created", and the first
-    // signed-in request (JIT User Sync) may not have run yet either.
     await ensureUser({ userId: id, email });
     return { kind: "upserted" };
   }
 
   if (evt.type === "user.deleted") {
-    // Anonymize rather than DELETE: transactions.user_id has ON DELETE
-    // RESTRICT to preserve financial records. Cascading generations are
-    // removed automatically by the FK on generations.user_id. This pattern
-    // is GDPR-compliant — PII is removed but the audit trail survives.
     const { id, deleted } = evt.data;
     if (!id) return { kind: "skipped", reason: "no_id" };
     if (deleted === false) return { kind: "skipped", reason: "not_deleted" };

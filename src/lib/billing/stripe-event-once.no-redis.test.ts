@@ -2,7 +2,6 @@ import type { Logger } from "pino";
 import { describe, expect, it, vi } from "vitest";
 import { runStripeEventOnce } from "@/lib/billing/stripe-event-once";
 
-// Without Redis (local dev) nothing guards a repeated delivery: every one runs.
 vi.mock("@/lib/redis", () => ({ redis: null }));
 
 const log = { warn: vi.fn() } as unknown as Logger;

@@ -44,11 +44,6 @@ function validateScreenshots(
   return null;
 }
 
-/**
- * Atomic: the Credit Ledger's Debit (one Credit and its `usage` Transaction)
- * and the Pending Generation row, in one DB transaction. Throws
- * InsufficientCreditsError or UserNotFoundError; never partially applied.
- */
 async function debitAndStartGeneration(
   input: Omit<RunGenerationInput, "pitch" | "audience" | "screenshots">,
 ): Promise<{ generationId: string }> {
@@ -70,7 +65,6 @@ async function debitAndStartGeneration(
   });
 }
 
-/** Only a `pending` row completes: one already failed and refunded stays so. */
 async function markGenerationComplete(generationId: string) {
   await db
     .update(generations)
@@ -78,11 +72,6 @@ async function markGenerationComplete(generationId: string) {
     .where(and(eq(generations.id, generationId), eq(generations.status, "pending")));
 }
 
-/**
- * Fails a `pending` Generation and refunds its Credit in one transaction.
- * Returns false, and changes nothing, when the row is no longer `pending`: the
- * other path (the run itself or the abandoned sweep) already settled it.
- */
 async function failAndRefund({
   generation,
   failureReason,
@@ -108,11 +97,6 @@ async function failAndRefund({
   });
 }
 
-/**
- * A run lasts at most about 4 minutes (two 120 s attempts per shot, in
- * parallel), and a Worker keeps it at most ~30 s after a disconnect. A row
- * still `pending` after this long has no run left to settle it.
- */
 const ABANDONED_AFTER_MS = 10 * 60 * 1000;
 const SWEEP_BATCH = 100;
 
@@ -198,7 +182,6 @@ async function runGenerationToEnd(
     toDataUrl(input.screenshots[1]),
     toDataUrl(input.screenshots[2]),
   ]);
-  // Release ~5MB-per-file File handles before the long-running shot calls.
   input.screenshots.splice(0);
 
   const set = await generateSet({
@@ -222,7 +205,6 @@ async function runGenerationToEnd(
         refundReason: "generation_failed",
       });
     } catch (refundErr) {
-      // The row stays `pending`, so the abandoned sweep refunds it later.
       shotLog.error(
         { err: refundErr },
         "inline refund failed; the abandoned-generation sweep will retry it",

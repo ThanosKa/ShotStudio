@@ -1,7 +1,3 @@
-// Fails a Worker build that would break in production while building cleanly:
-// - sharp in the bundle (Workers cannot load it; only Generation would fail),
-// - no Clerk publishable key baked in (NEXT_PUBLIC_* come from the build's env).
-// Run after `pnpm build:vinext`, with the same env. Prints no values.
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 

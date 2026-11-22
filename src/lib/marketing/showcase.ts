@@ -5,18 +5,11 @@ export type ShowcaseSet = {
   app: string;
   category: string;
   preset: StylePresetId;
-  /** Tagline used as the headline on Shot 1 */
   tagline: string;
-  /** Short headlines for shots 2/3/4 */
   shots: [string, string, string];
-  /** Composite marketing image — landscape PNG showing 1 hero card + 3 feature phones. */
   image: string;
 };
 
-/**
- * Marquee + persona-page showcase sets. Each entry has a real composite image
- * generated via openai/gpt-5.4-image-2 sitting in `public/showcase/[id].png`.
- */
 export const SHOWCASE_SETS: ShowcaseSet[] = [
   {
     id: "lumen",

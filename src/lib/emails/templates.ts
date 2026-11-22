@@ -1,13 +1,5 @@
-// The welcome and purchase emails as plain strings. On the Worker, route
-// handlers run under the `react-server` condition, where `react-dom/server`
-// (which react-email's `render` needs) is a stub that throws, so production
-// cannot render `emails/*.tsx`. These functions return the HTML and text that
-// react-email rendered from those templates, character for character;
-// `templates.test.ts` renders both and compares, so change the two together.
-
 export type RenderedEmail = { html: string; text: string };
 
-/** React's text and attribute escaping, so interpolated values match its output. */
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -17,7 +9,6 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#x27;");
 }
 
-/** The plain-text converter collapses whitespace runs inside a block to one space. */
 function collapseWhitespace(value: string): string {
   return value.replace(/[ \t\r\n\f​]+/g, " ");
 }
@@ -39,8 +30,6 @@ const HR_STYLE =
   "width:100%;border:none;border-top:1px solid #eaeaea;border-color:rgb(229,229,229);border-style:solid";
 const TEXT_HR = "-".repeat(40);
 
-// react-email's <Preview>: the text cut to 150 characters, padded with
-// invisible characters so inbox previews do not run into the body.
 const PREVIEW_MAX_LENGTH = 150;
 const PREVIEW_PADDING = " ‌​‍‎‏﻿";
 
@@ -74,7 +63,6 @@ function layoutHtml({
   );
 }
 
-/** Heading, greeting and first paragraph. */
 function introHtml({
   heading,
   greeting,
@@ -108,7 +96,6 @@ function linkHtml({ href, label }: { href: string; label: string }): string {
   return `<a href="${escapeHtml(href)}" ${LINK_STYLE}>${label}</a>`;
 }
 
-/** Footer after the closing rule; `legal` is the first line's content. */
 function footerHtml({
   appUrl,
   legal,
@@ -168,7 +155,6 @@ export function welcomeEmail({
   });
 
   const text = [
-    // The logo paragraph and the heading are three lines apart.
     "ShotStudio\n\n\nWELCOME TO SHOTSTUDIO",
     collapseWhitespace(greeting),
     paragraph,
@@ -242,7 +228,6 @@ export function creditsPurchasedEmail({
   });
 
   const text = [
-    // The logo paragraph and the heading are three lines apart.
     "ShotStudio\n\n\nPAYMENT CONFIRMED",
     collapseWhitespace(greeting),
     "Thanks for buying credits. Your balance is updated and ready to use.",

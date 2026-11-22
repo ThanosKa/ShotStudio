@@ -36,8 +36,6 @@ export async function POST(req: NextRequest) {
 
   const scoped = log.child({ eventId: event.id, eventType: event.type });
 
-  // Only an error from the handler (or from deleting its claim) is logged here;
-  // a Redis error while claiming leaves the route unlogged, as it always has.
   let handlerFailed = false;
   let delivery: DeliveryResult<Response>;
   try {

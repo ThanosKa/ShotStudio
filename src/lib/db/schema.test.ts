@@ -7,17 +7,6 @@ import { ensureUser } from "@/lib/identity/user-sync";
 import { transactions, users } from "@/lib/db/schema";
 import { STYLE_PRESET_IDS } from "@/lib/generation/presets";
 
-/**
- * Fresh-database bootstrap contract.
- *
- * Every test in this file runs against a brand-new PGlite instance with the
- * `drizzle/*.sql` chain applied from empty — i.e. exactly what a brand-new
- * Supabase project looks like after `pnpm db:migrate`. These assertions are
- * the checklist to run against a rebuilt database: if they hold here and the
- * same catalog queries return the same shape in Supabase, the rebuild is
- * faithful.
- */
-
 async function rows<T = Record<string, unknown>>(
   query: ReturnType<typeof sql>,
 ): Promise<T[]> {
@@ -73,7 +62,6 @@ describe("fresh-database bootstrap", () => {
       "complete",
       "failed",
     ]);
-    // 0004 renamed these; the old soft_bright/dark_premium/... set must be gone.
     expect(byType.get("style_preset")).toEqual([...STYLE_PRESET_IDS]);
   });
 
@@ -85,9 +73,6 @@ describe("fresh-database bootstrap", () => {
     `);
     expect(idx).toBeDefined();
     expect(idx.indexdef).toMatch(/CREATE UNIQUE INDEX/i);
-    // The WHERE clause is the whole point: without it, grant()'s
-    // onConflictDoNothing({ where: ... }) cannot infer this arbiter and every
-    // Stripe webhook fails.
     expect(idx.indexdef).toMatch(/WHERE .*stripe_payment_id IS NOT NULL/i);
   });
 
@@ -154,9 +139,7 @@ describe("fresh-database bootstrap", () => {
       order by conname
     `);
     const byName = new Map(result.map((r) => [r.conname, r.confdeltype]));
-    // 'r' = RESTRICT — preserves the financial audit trail on user deletion.
     expect(byName.get("transactions_user_id_users_id_fk")).toBe("r");
-    // 'c' = CASCADE.
     expect(byName.get("generations_user_id_users_id_fk")).toBe("c");
   });
 
@@ -176,11 +159,9 @@ describe("credit accounting on a fresh database", () => {
   test("grant → debit → refund leaves a balanced ledger", async () => {
     await ensureUser({ userId: "acct", email: "acct@test" });
 
-    // Purchase (Growth pack = 5).
     const afterGrant = await grant({ userId: "acct", n: 5, stripePaymentId: "cs_test_reconcile_1" });
     expect(afterGrant).toEqual({ granted: true, balance: 5 });
 
-    // Failure refund.
     const afterRefund = await refund({ userId: "acct", n: 1, metadata: { reason: "generation_failed" } });
     expect(afterRefund).toBe(6);
 
@@ -195,7 +176,6 @@ describe("credit accounting on a fresh database", () => {
       .from(users)
       .where(eq(users.id, "acct"));
 
-    // Ledger sum must always equal the cached balance on users.credits.
     expect(sum).toBe(u.credits);
   });
 

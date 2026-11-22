@@ -8,9 +8,6 @@ import {
 } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
-// `vitest.setup.ts` replaces `@/lib/db` with PGlite. These tests need the real
-// module. Clients are never asked to query, so postgres.js opens no socket, and
-// the address below refuses connections anyway.
 vi.unmock("@/lib/db");
 
 const LOCAL_A = "postgres://nobody@127.0.0.1:1/request_a";
@@ -24,8 +21,6 @@ function fakeCtx() {
   };
 }
 
-// postgres.js rejects with CONNECTION_ENDED, without touching the network,
-// once its client has been ended. That is how these tests observe a close.
 async function isEnded(client: { unsafe(query: string): PromiseLike<unknown> }) {
   const outcome = await Promise.race([
     Promise.resolve(client.unsafe("select 1")).catch((err: { code?: string }) => err.code),
@@ -198,8 +193,6 @@ describe("runWithRequestDb", () => {
     expect(await isEnded(client)).toBe(true);
   });
 
-  // A Worker cancels a request's unfinished work when the visitor hangs up, unless
-  // it was handed to waitUntil. A Generation's Refund must survive that.
   it("keeps work handed to keepRequestAliveUntil running, with an open client, after the reader hangs up", async () => {
     const { ctx, settled } = fakeCtx();
     const waitedOn: Promise<unknown>[] = [];
@@ -307,8 +300,6 @@ describe("resolveConnectionString", () => {
     expect(resolveConnectionString({ HYPERDRIVE: { connectionString: LOCAL_B } })).toBe(LOCAL_B);
   });
 
-  // Postgres.js sends no TLS request for these URLs, so falling back to one
-  // would quietly send queries and results across the internet in the clear.
   it("never falls back to a plain DATABASE_URL", () => {
     expect(
       resolveConnectionString({ DATABASE_URL: LOCAL_A } as Parameters<

@@ -1,11 +1,6 @@
 import Image from "next/image";
 import type { ShowcaseSet } from "@/lib/marketing/showcase";
 
-/**
- * One showcase set rendered as a single composite marketing image.
- * The image already contains the hero card + 3 feature phones + headlines —
- * we just frame it in a card and let it speak for itself.
- */
 export function ShowcaseCard({ set }: { set: ShowcaseSet }) {
   return (
     <figure

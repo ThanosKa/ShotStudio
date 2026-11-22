@@ -119,8 +119,7 @@ export async function grant({
       })
       .onConflictDoNothing({
         target: transactions.stripePaymentId,
-        // Required: matches the partial unique index's WHERE clause so
-        // Postgres' arbiter inference can find it.
+        // Required so Postgres can infer the partial unique index as the arbiter: https://www.postgresql.org/docs/current/sql-insert.html
         where: sql`${transactions.stripePaymentId} is not null`,
       })
       .returning({ id: transactions.id });

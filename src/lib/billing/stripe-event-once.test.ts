@@ -2,9 +2,6 @@ import type { Logger } from "pino";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { runStripeEventOnce } from "@/lib/billing/stripe-event-once";
 
-// The Delivery Claim rules, tested through runStripeEventOnce with Redis mocked
-// at its module. The route tests stay as the end-to-end check.
-
 const fakeRedis = vi.hoisted(() => ({
   set: vi.fn(),
   get: vi.fn(),

@@ -8,7 +8,6 @@ import { upscaleToAppStore } from "@/lib/generation/upscale";
 import { eq } from "drizzle-orm";
 import { runGeneration } from "./lifecycle";
 
-// Characterization: which Reference Screenshot reaches which Shot Role.
 const ROLES = ["hero_feature", "differentiator", "another_feature"] as const;
 
 function upload(fill: number, name: string): File {
@@ -39,7 +38,6 @@ describe("runGeneration reference screenshots", () => {
     ];
     const sent = [dataUrlOf(screenshots[0], 1), dataUrlOf(screenshots[1], 2), dataUrlOf(screenshots[2], 3)];
 
-    // A distinct picture per role, so the returned order can be checked too.
     const generated = await Promise.all([
       solidPng([255, 0, 0]),
       solidPng([0, 255, 0]),

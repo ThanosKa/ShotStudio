@@ -21,16 +21,6 @@ function stripTrailingPunctuation(s: string): string {
   return s.replace(/[.!?]+$/u, "").trimEnd();
 }
 
-/**
- * Theme + palette come from the attached reference screenshot, not the preset.
- * The reference is sent alongside the text prompt to OpenRouter (see
- * `lifecycle.ts` `referenceImages`), so the model can see the user's actual
- * app pixels and matches their light/dark theme + dominant accent colors directly.
- *
- * The preset only contributes typography + headline voice. The image model
- * writes and renders the marketing tagline itself based on the pitch, role,
- * and voice — no separate text pre-pass.
- */
 export function buildPrompt(input: ShotInput): string {
   const pitch = stripTrailingPunctuation(input.pitch);
   const audience = input.audience ? stripTrailingPunctuation(input.audience) : undefined;

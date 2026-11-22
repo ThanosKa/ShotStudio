@@ -92,7 +92,6 @@ describe("checkGooglePlay", () => {
 
   it("flags 1290x2796 as breaking the 2x rule", () => {
     const result = checkGooglePlay({ width: 1290, height: 2796, ...png });
-    // 2796 / 1290 = 2.167 > 2, so this common iPhone size fails the 2x rule.
     expect(result.accepted).toBe(false);
     expect(result.issues.map((i) => i.code)).toEqual(["aspect"]);
     expect(result.promoEligible).toBe(false);

@@ -6,12 +6,6 @@ const ORGANIZATION_ID = `${APP_URL}/#organization`;
 const WEBSITE_ID = `${APP_URL}/#website`;
 const SOFTWARE_APP_ID = `${APP_URL}/#software`;
 
-/**
- * Brand disambiguation. GSC shows singular-brand queries ("shot studio",
- * "shotstudio") converting and plural queries ("shots studio(s)") sitting at
- * position 45-81 — those belong to Shots Studios, an unrelated media company.
- * We claim only the singular spellings; we never claim theirs.
- */
 const BRAND_ALTERNATE_NAMES = ["Shot Studio", "ShotStudio.dev"];
 const SAME_AS = ["https://x.com/KazakisThanos"];
 
@@ -49,7 +43,6 @@ function formatUsd(priceCents: number): string {
   return (priceCents / 100).toFixed(2);
 }
 
-/** One Offer per credit pack — real, published, one-time prices. */
 function creditPackOffers() {
   return CREDIT_PACKAGE_LIST.map((pack) => ({
     "@type": "Offer",
@@ -80,11 +73,6 @@ function creditPackOffers() {
   }));
 }
 
-/**
- * AggregateOffer spanning the three packs — $7 floor, $37 ceiling.
- * Used as the `offers` value of the SoftwareApplication entity so price and
- * availability are machine-readable without claiming a Product review.
- */
 function creditPackAggregateOffer() {
   const cents = CREDIT_PACKAGE_LIST.map((pack) => pack.priceCents);
   return {
@@ -100,15 +88,6 @@ function creditPackAggregateOffer() {
   };
 }
 
-/**
- * The single canonical entity for the product.
- *
- * Deliberately NOT `Product`. ShotStudio has zero published customer reviews,
- * so a Product node can never satisfy Google's `review` / `aggregateRating`
- * recommendations without fabricating them — which is a structured-data policy
- * violation. `SoftwareApplication` + `AggregateOffer` describes a web app sold
- * in one-time credit packs accurately and has no rating requirement.
- */
 export function softwareApplicationSchema() {
   return {
     "@type": "SoftwareApplication",

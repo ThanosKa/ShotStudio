@@ -1,6 +1,6 @@
 # Coding Standards
 
-Rules for all code that lint does not enforce. Lint enforces `any`, type assertions (`as const` aside), non-null `!`, `console`, exhaustive `switch` and positional parameters: resolve each lint error in the code itself. Writing code: every rule touching the files you change holds before you finish. Reviewing: check the diff against each rule in turn.
+Rules for all code that lint does not enforce. Lint enforces `any`, type assertions (`as const` aside), non-null `!`, `console`, exhaustive `switch`, positional parameters and comments: resolve each lint error in the code itself. Writing code: every rule touching the files you change holds before you finish. Reviewing: check the diff against each rule in turn.
 
 ## Logging
 

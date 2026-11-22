@@ -38,7 +38,6 @@ async function transactionsSum(userId: string) {
   return row.total;
 }
 
-/** An Abandoned Generation: its Debit committed, then the Worker stopped before any outcome. */
 async function leaveAbandonedGeneration(userId: string) {
   await db.insert(generations).values({
     userId,

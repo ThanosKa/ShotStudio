@@ -213,7 +213,6 @@ async function refundsOf(userId: string) {
   return txs.filter((t) => t.type === "refund");
 }
 
-/** A Generation whose Debit committed, then the Worker stopped before any outcome. */
 async function abandonedGeneration(userId: string, minutesAgo: number) {
   const [row] = await db
     .insert(generations)
@@ -287,7 +286,6 @@ describe("refundAbandonedGenerations", () => {
 
     const run = runGeneration(inputFor("u_race"));
     await vi.waitFor(async () => expect(await creditsOf("u_race")).toBe(0));
-    // The sweep treats every pending row as abandoned with a cutoff in the future.
     expect(await refundAbandonedGenerations(new Date(Date.now() + 60_000))).toBe(1);
     failShots();
     await run;

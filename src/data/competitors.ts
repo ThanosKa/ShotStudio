@@ -3,19 +3,13 @@ export type CompetitorFaq = { q: string; a: string };
 export type Competitor = {
   slug: string;
   name: string;
-  /** What category they sit in (matches how customers describe them). Phrased to read naturally after "[Name] is ". */
   positioning: string;
   pricingModel: string;
   pricingNote: string;
-  /** One-sentence honest weakness — the reason indies look for alternatives. */
   primaryWeakness: string;
-  /** 2-3 honest strengths — credibility builder. Don't lie. */
   honestStrengths: string[];
-  /** 3-5 specific gaps vs ShotStudio's positioning. */
   featureGaps: string[];
-  /** Who actually still picks them today (the anti-anti-persona). */
   whenTheyAreRight: string;
-  /** 4 FAQs per competitor — fuel for FAQPage schema + body FAQ section. */
   faq: [CompetitorFaq, CompetitorFaq, CompetitorFaq, CompetitorFaq];
 };
 

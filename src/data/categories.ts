@@ -5,16 +5,11 @@ export type CategoryFaq = { q: string; a: string };
 export type Category = {
   slug: string;
   name: string;
-  /** Plural noun used inline, e.g. "fitness apps" */
   noun: string;
   presetId: StylePresetId;
-  /** ~100-150 words — why screenshots matter for THIS category specifically. Hand-written, not templated. */
   lead: string;
-  /** 3 dos, each one sentence. Render as a list. */
   whatConverts: string[];
-  /** 3 donts, each one sentence. */
   whatHurts: string[];
-  /** Example one-line pitch a user in this category might enter into the wizard. */
   pitchExample: string;
   faq: [CategoryFaq, CategoryFaq, CategoryFaq];
 };

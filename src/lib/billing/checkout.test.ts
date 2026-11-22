@@ -85,8 +85,6 @@ describe("runCheckoutFulfillment", () => {
     expect(arg.newBalance).toBe(5);
   });
 
-  // Stripe retries for up to 3 days and the Redis mark lasts 24 h, so a replay
-  // of an already-granted session must not tell the customer "you bought" twice.
   test("already_granted: a replayed session grants nothing and sends no second email", async () => {
     await ensureUser({ userId: "u_buy", email: "u_buy@test" });
     await runCheckoutFulfillment({ session: sessionFor(), eventId: "evt_1" });
@@ -211,8 +209,6 @@ describe("createCheckoutSession", () => {
   });
 });
 
-// The Stripe payment email is not an identity source: a purchase never changes
-// the User Email, and it only seeds a new row when no User row exists yet.
 describe("runCheckoutFulfillment and the User Email", () => {
   function paidWith(email: string) {
     return sessionFor({

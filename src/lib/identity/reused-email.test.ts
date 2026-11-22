@@ -8,11 +8,6 @@ import { generations, transactions, users } from "@/lib/db/schema";
 import { sendWelcomeEmail } from "@/lib/emails/welcome";
 import { withAuthenticatedUser } from "@/lib/route-auth";
 
-// A new Clerk account signs up with an email an older User row still holds:
-// User Sync asks Clerk about that older row's account before giving up.
-// Clerk, webhook verification, the welcome email and the logger are mocked at
-// their modules; the database is the per-test PGlite from vitest.setup.ts.
-
 const clerk = vi.hoisted(() => {
   const getUser = vi.fn();
   return {
@@ -32,7 +27,6 @@ vi.mock("@/lib/emails/welcome", () => ({ sendWelcomeEmail: vi.fn() }));
 
 const lines = vi.hoisted(() => [] as { level: string; ctx: unknown; msg: unknown }[]);
 vi.mock("@/lib/logger", () => {
-  // Each line's context carries its child loggers' bindings, as pino's does.
   const make = (bindings: object): Record<string, unknown> => {
     const record = (level: string) => (ctx: unknown, msg?: unknown) => {
       const [own, text] = typeof ctx === "string" ? [{}, ctx] : [ctx, msg];
@@ -69,7 +63,6 @@ function clerkAccount(id: string, ...emails: string[]) {
   };
 }
 
-/** The older User: 5 Credits bought, 1 spent on a Generation, a Stripe customer. */
 async function seedOldUser() {
   await db.insert(users).values({ id: "u_old", email: REUSED, credits: 4, stripeCustomerId: "cus_old" });
   await db.insert(transactions).values([
@@ -121,7 +114,6 @@ async function expectNewUserFresh() {
 
 const releaseLines = () => lines.filter((l) => l.msg === "email released from another user");
 
-/** A signed-in request from the new Clerk account; a throw is Next's 500. */
 async function signedInRequest() {
   clerk.auth.mockResolvedValue({ userId: "u_new" });
   clerk.currentUser.mockResolvedValue(clerkAccount("u_new", REUSED));

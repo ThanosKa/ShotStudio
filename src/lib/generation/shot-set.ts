@@ -4,21 +4,17 @@ import { STYLE_PRESETS, type StylePresetId } from "./presets";
 import { buildPrompt, type ShotRole } from "./prompts";
 import { upscaleToAppStore } from "@/lib/generation/upscale";
 
-// Server only: it imports the OpenRouter adapter, which throws at import
-// without its key. Never import it from client code. No database here.
-
 export type Brief = {
   appName: string;
   pitch: string;
   audience?: string;
   category: string;
   stylePreset: StylePresetId;
-  /** Data URLs, in Shot Role order. */
   referenceScreenshots: readonly [string, string, string];
 };
 
 export type SetOutcome =
-  | { kind: "ok"; shots: string[] } // 1290x2796 PNG data URLs, in ACTIVE_ROLES order
+  | { kind: "ok"; shots: string[] }
   | { kind: "failed"; failed: number; total: number };
 
 const ROLES: ShotRole[] = [
@@ -27,7 +23,6 @@ const ROLES: ShotRole[] = [
   "another_feature",
 ];
 
-// In dev, run just one shot (hero_feature) to save time and cost while iterating.
 const ACTIVE_ROLES: ShotRole[] =
   process.env.NODE_ENV === "development" ? ["hero_feature"] : ROLES;
 

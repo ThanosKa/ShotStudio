@@ -18,12 +18,10 @@ export function isCompetitorPruned(slug: string): boolean {
   return isPrunedPath(`/alternatives/${slug}`);
 }
 
-/** Categories we still index and link to. */
 export function indexableCategories(): Category[] {
   return CATEGORIES.filter((c) => !isCategoryPruned(c.slug));
 }
 
-/** Competitors we still index and link to. */
 export function indexableCompetitors(): Competitor[] {
   return COMPETITORS.filter((c) => !isCompetitorPruned(c.slug));
 }

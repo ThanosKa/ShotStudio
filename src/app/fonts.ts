@@ -13,7 +13,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-/** The `<html>` classes of every full document: the root layout and the global 404. */
 export const htmlClassName = cn(
   "h-full",
   "antialiased",

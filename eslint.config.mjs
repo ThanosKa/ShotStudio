@@ -4,7 +4,6 @@ import nextTs from "eslint-config-next/typescript";
 
 const tsFiles = ["**/*.ts", "**/*.tsx"];
 
-// Vitest's own globs, plus the helpers only tests import.
 const testFiles = [
   "**/*.test.ts",
   "**/*.test.tsx",
@@ -16,7 +15,6 @@ const testFiles = [
   "src/lib/db/test-db.ts",
 ];
 
-// The mechanical half of CODING_STANDARDS.md.
 const objectArgumentRule = [
   "error",
   {
@@ -28,6 +26,46 @@ const objectArgumentRule = [
     message: "Take one object argument instead of positional params.",
   },
 ];
+
+const ALLOWED_COMMENTS = [
+  /^\s*prettier-ignore\s*$/,
+  /^\s*eslint-(disable|enable)/,
+  /^\s*@(vitest|jest)-environment\s/,
+  /^\s*(@vite-ignore|webpackIgnore:)/,
+  /^\/\s*<reference\s/,
+  /https?:\/\/\S+/,
+  /\b(copyright|license|SPDX-License-Identifier)\b/i,
+];
+
+function isDocOnExport({ comment, source }) {
+  if (comment.type !== "Block" || !comment.value.startsWith("*")) return false;
+  return source.getTokenAfter(comment, { includeComments: false })?.value === "export";
+}
+
+const noCommentsRule = {
+  meta: {
+    type: "suggestion",
+    messages: {
+      banned:
+        "Delete this comment and let the code say it. Allowed: a license header, prettier-ignore, /** */ on an export, or a link to the issue, RFC or vendor doc that forces the behaviour.",
+    },
+  },
+  create(context) {
+    const source = context.sourceCode;
+    return {
+      Program() {
+        for (const comment of source.getAllComments()) {
+          if (comment.type === "Shebang") continue;
+          if (isDocOnExport({ comment, source })) continue;
+          if (ALLOWED_COMMENTS.some((pattern) => pattern.test(comment.value))) continue;
+          context.report({ loc: comment.loc, messageId: "banned" });
+        }
+      },
+    };
+  },
+};
+
+const localPlugin = { rules: { "no-comments": noCommentsRule } };
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -51,8 +89,6 @@ const eslintConfig = defineConfig([
       "no-restricted-syntax": objectArgumentRule,
     },
   },
-  // Server code logs through `@/lib/logger`. Client error boundaries can't
-  // import pino, and `scripts/` sits outside `src`, so both keep `console`.
   {
     files: ["src/**", ...tsFiles],
     ignores: [
@@ -65,6 +101,11 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: ["**/*.{js,mjs,cjs,ts,tsx,mts,cts}"],
+    plugins: { local: localPlugin },
+    rules: { "local/no-comments": "error" },
+  },
+  {
     files: testFiles,
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
@@ -73,18 +114,14 @@ const eslintConfig = defineConfig([
       "no-restricted-syntax": "off",
     },
   },
-  // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // vinext build output.
     ".cloudflare/**",
     ".vinext/**",
     "dist/**",
-    // Skill / agent script directories — own toolchains, not app code.
     ".agents/**",
     ".claude/**",
   ]),

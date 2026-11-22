@@ -6,9 +6,6 @@ const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 const RED = { r: 255, g: 0, b: 0 };
 const GREEN = { r: 0, g: 255, b: 0 };
 
-// A 1024x1536 image cover-fitted to 1290x2796 keeps the centre 709px of width,
-// so a centre crop drops about 157px from each side. Red side bands of 150px
-// are therefore all cut, and any off-centre crop would leave red at an edge.
 async function sideBandedImageB64(): Promise<string> {
   const png = await sharp({
     create: { width: 1024, height: 1536, channels: 3, background: GREEN },

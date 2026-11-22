@@ -35,7 +35,6 @@ function buildLimiter(opts: {
   prefix: string;
 }): Limiter {
   if (!redis) {
-    // dev / no-Upstash fallback — redis.ts already throws in production
     return {
       async limit() {
         return {
@@ -52,21 +51,16 @@ function buildLimiter(opts: {
     limiter: Ratelimit.slidingWindow(opts.perWindow, opts.window),
     analytics: true,
     prefix: opts.prefix,
-    // Cache hot denials in-process so a hammering client doesn't hit Redis.
     ephemeralCache: new Map(),
-    // If Redis is slow, fail-open after 1s so users don't see 500s.
     timeout: 1000,
   });
   return {
     async limit(key) {
       try {
         const { pending, ...result } = await limiter.limit(key);
-        // Upstash's analytics write; a Worker would drop it at the response's end.
         keepRequestAliveUntil(pending);
         return result;
       } catch (err) {
-        // `timeout` only covers slow Redis, not thrown errors (quota exceeded,
-        // bad token, REST proxy errors). Fail open so Redis can't take down routes.
         logger.error({ err, prefix: opts.prefix }, "rate limiter failed; failing open");
         return { success: true, limit: opts.perWindow, remaining: opts.perWindow, reset: 0 };
       }

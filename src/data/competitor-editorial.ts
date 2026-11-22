@@ -1,27 +1,10 @@
 import { CATEGORIES, type Category } from "@/data/categories";
 import { isCategoryPruned } from "@/lib/marketing/pruned";
 
-/**
- * Editorial + internal-linking layer over `competitors.ts`.
- *
- * `competitors.ts` holds the comparison data (pricing, gaps, strengths, FAQ).
- * This file adds what the linking layer and the "I'm switching tonight"
- * reader need: the anchor phrase people actually search, a short factual
- * answer for the brand query itself, the concrete switch path, and which
- * category pages this competitor's audience should land on next.
- */
-
 export type CompetitorEditorial = {
-  /** Real query phrase. Used verbatim as internal-link anchor text. */
   anchor: string;
-  /**
-   * Two-sentence factual answer to the bare brand query ("appmockup"), placed
-   * above the fold so the page earns the click instead of ranking silently.
-   */
   quickAnswer: string;
-  /** The concrete move from this tool to ShotStudio, three steps. */
   switchSteps: [string, string, string];
-  /** Category pages this tool's audience most often needs next. */
   categorySlugs: string[];
 };
 

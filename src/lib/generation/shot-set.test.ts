@@ -78,7 +78,6 @@ describe("generateSet", () => {
     const images = await Promise.all(colours.map((c) => solidPng(c)));
     vi.mocked(generateImage).mockImplementation(async ({ referenceImages }) => {
       const idx = Number(referenceImages![0].slice(-1));
-      // The first Shot Role answers last.
       await new Promise((r) => setTimeout(r, (3 - idx) * 100));
       return images[idx];
     });
@@ -96,9 +95,9 @@ describe("generateSet", () => {
         return [...data];
       }),
     );
-    expect(centres[0][0]).toBeGreaterThan(200); // red
-    expect(centres[1][1]).toBeGreaterThan(100); // green
-    expect(centres[2][2]).toBeGreaterThan(200); // blue
+    expect(centres[0][0]).toBeGreaterThan(200);
+    expect(centres[1][1]).toBeGreaterThan(100);
+    expect(centres[2][2]).toBeGreaterThan(200);
   });
 
   test("sends each Shot Role its own Reference Screenshot", async () => {
@@ -157,7 +156,6 @@ describe("generateSet", () => {
     });
 
     await vi.advanceTimersByTimeAsync(1000);
-    // The other two Shots upscale with real sharp work; wait for it in real time.
     for (let i = 0; i < 100 && !settled; i++) await realSleep(50);
 
     expect(settled).toEqual({ kind: "failed", failed: 1, total: 3 });

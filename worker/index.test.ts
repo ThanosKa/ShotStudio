@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 import { refundAbandonedGenerations } from "@/lib/generation";
 import { logger } from "@/lib/logger";
 
-// `vitest.setup.ts` replaces `@/lib/db` with PGlite. The entry needs the real one.
 vi.unmock("@/lib/db");
 
 const vinextFetch = vi.hoisted(() => vi.fn());
@@ -33,7 +32,6 @@ describe("Worker entry", () => {
       throw new Error("auth() was called without middleware");
     });
 
-    // The last ones are real scanner URLs that returned 500 on the deployed Worker.
     for (const path of [
       "/favicon.ico",
       "/missing.png",

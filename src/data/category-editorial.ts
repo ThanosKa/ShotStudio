@@ -1,23 +1,6 @@
 import { CATEGORIES, type Category } from "@/data/categories";
 import { isCategoryPruned } from "@/lib/marketing/pruned";
 
-/**
- * Editorial + internal-linking layer over `categories.ts`.
- *
- * `categories.ts` holds the page body data (lead, dos/donts, FAQ). This file
- * holds the things the *linking* layer needs:
- *
- * - `cluster`   — which sibling group a category belongs to, so related-links
- *                 blocks point at genuinely adjacent verticals instead of
- *                 whatever happens to sit first in the array.
- * - `anchor`    — the real search phrase people type ("fitness app
- *                 screenshots"). Every internal link to a category page uses
- *                 this as anchor text. Never "learn more".
- * - `headlineExamples` — three App Store headline patterns that work in this
- *                 vertical. Rendered on the category page as unique on-page
- *                 substance, not metadata.
- */
-
 export const CATEGORY_CLUSTER_IDS = [
   "health",
   "money",
@@ -34,7 +17,6 @@ export type CategoryClusterId = (typeof CATEGORY_CLUSTER_IDS)[number];
 export type CategoryCluster = {
   id: CategoryClusterId;
   label: string;
-  /** One line describing what the whole cluster has to solve in the carousel. */
   blurb: string;
 };
 
@@ -91,9 +73,7 @@ export const CATEGORY_CLUSTERS: CategoryCluster[] = [
 
 export type CategoryEditorial = {
   cluster: CategoryClusterId;
-  /** Real query phrase. Used verbatim as internal-link anchor text. */
   anchor: string;
-  /** Three example App Store headlines that work in this vertical. */
   headlineExamples: [string, string, string];
 };
 
@@ -467,11 +447,6 @@ export const CATEGORY_EDITORIAL: Record<string, CategoryEditorial> = {
   },
 };
 
-/**
- * Demand order taken from Search Console impressions (2026-07 export). Drives
- * which categories get surfaced on the homepage, in the footer, and as filler
- * in related blocks — link weight follows real demand, not array order.
- */
 export const PRIORITY_CATEGORY_SLUGS: string[] = [
   "fitness-apps",
   "indie-games",
@@ -491,7 +466,6 @@ export const PRIORITY_CATEGORY_SLUGS: string[] = [
   "social-apps",
 ];
 
-/** Which competitor comparison pages are most relevant per cluster. */
 const CLUSTER_COMPETITORS: Record<CategoryClusterId, string[]> = {
   health: ["appmockup", "previewed"],
   money: ["screenshots-pro", "previewed"],
@@ -507,33 +481,22 @@ export function getCategoryEditorial(slug: string): CategoryEditorial | undefine
   return CATEGORY_EDITORIAL[slug];
 }
 
-/**
- * Anchor text for any internal link pointing at a category page. Falls back to
- * a constructed phrase so a newly added category is never linked as "here".
- */
 export function categoryAnchor(category: Pick<Category, "slug" | "noun">): string {
   return CATEGORY_EDITORIAL[category.slug]?.anchor ?? `${category.noun} screenshots`;
 }
 
-/** Every category in a cluster, pruned or not. Internal: keeps ring math stable. */
 function allCategoriesInCluster(cluster: CategoryClusterId): Category[] {
   return CATEGORIES.filter(
     (c) => CATEGORY_EDITORIAL[c.slug]?.cluster === cluster,
   );
 }
 
-/** Indexable categories in a cluster. Pruned pages are not listed in hubs. */
 export function categoriesInCluster(cluster: CategoryClusterId): Category[] {
   return allCategoriesInCluster(cluster).filter(
     (c) => !isCategoryPruned(c.slug),
   );
 }
 
-/**
- * Categories ordered by real search demand, highest first. Computed once at
- * module load: it is a pure function of two module constants, and the footer
- * alone would otherwise rebuild it on every one of the ~55 prerendered pages.
- */
 const CATEGORIES_BY_DEMAND: readonly Category[] = (() => {
   const ranked = PRIORITY_CATEGORY_SLUGS.map((slug) =>
     CATEGORIES.find((c) => c.slug === slug),
@@ -544,27 +507,12 @@ const CATEGORIES_BY_DEMAND: readonly Category[] = (() => {
   return [...ranked, ...rest].filter((c) => !isCategoryPruned(c.slug));
 })();
 
-/** Indexable categories ordered by real search demand, highest first. */
 export function categoriesByDemand(limit?: number): Category[] {
   return CATEGORIES_BY_DEMAND.slice(0, limit);
 }
 
-/** How many cluster siblings a related block may take before the ring fills up. */
 const MAX_CLUSTER_SIBLINGS = 4;
 
-/**
- * Siblings for the related block, built from two rules that fix two different
- * problems:
- *
- * 1. **Cluster siblings first** — links point at genuinely adjacent verticals
- *    (fitness → running → habit tracker), which is what makes them worth a
- *    click and what makes the anchor text meaningful.
- * 2. **Rotating ring window to fill** — the old `slice(0, 6)` handed all 40
- *    category pages the *same* six siblings, so 34 of 40 URLs had exactly one
- *    inbound internal link (the hub) and every related block was byte-identical.
- *    Walking a window forward through the array guarantees each category is
- *    linked from several others and every block is unique per page.
- */
 export function relatedCategories({
   slug,
   limit = 6,
@@ -576,15 +524,11 @@ export function relatedCategories({
   const picked: Category[] = [];
   const push = (c: Category | undefined) => {
     if (!c) return;
-    // Pruned (noindex) pages never receive sibling links.
     if (isCategoryPruned(c.slug)) return;
     if (c.slug !== slug && !picked.some((p) => p.slug === c.slug)) picked.push(c);
   };
 
   if (editorial) {
-    // Ring window *within* the cluster: a plain slice would always pick the
-    // first N members, leaving the tail of every cluster with no inbound
-    // sibling links at all.
     const members = allCategoriesInCluster(editorial.cluster);
     const selfInCluster = members.findIndex((c) => c.slug === slug);
     for (
@@ -603,9 +547,6 @@ export function relatedCategories({
     }
   }
 
-  // Last-resort top-up. The ring above walks the whole of CATEGORIES, so this
-  // only ever fires if there are fewer categories than `limit` — guarded so the
-  // common path doesn't build and scan a 40-item array it will discard.
   if (picked.length < limit) categoriesByDemand().forEach(push);
 
   return picked.slice(0, limit);

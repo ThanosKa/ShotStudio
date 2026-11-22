@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { keepRequestAliveUntil } from "@/lib/db";
 
-// Upstash returns its analytics write as `pending`. A Worker drops unfinished
-// work when the response ends unless it goes to waitUntil.
 const analyticsWrite = vi.hoisted(() => Promise.resolve("recorded"));
 vi.mock("@upstash/ratelimit", () => {
   class Ratelimit {

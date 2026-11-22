@@ -13,7 +13,6 @@ import {
 
 type GscRow = { clicks: number; impressions: number };
 
-/** Parse a GSC "Top pages" export into pathname -> clicks and impressions. */
 function readGsc(file: string): Map<string, GscRow> {
   const rows = new Map<string, GscRow>();
   const text = fs.readFileSync(file, "utf8");
@@ -104,10 +103,6 @@ describe("sitemap", () => {
   });
 });
 
-/**
- * Keep-threshold guard against the raw GSC exports. They live outside the repo
- * (in the sibling _traffic-audit folder), so this is skipped when absent.
- */
 const AUDIT = path.resolve(__dirname, "../../../../_traffic-audit");
 const CURRENT = path.join(
   AUDIT,

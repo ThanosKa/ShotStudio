@@ -1,48 +1,26 @@
 /**
- * Store screenshot specifications, transcribed from the official pages.
- *
- * Sources (fetched 2026-10-01 with WebFetch; the Apple page was re-fetched
- * and read verbatim after a first summarised pass disagreed with it, so the
- * numbers below are the verbatim ones. Apple's page re-read verbatim on
- * 2026-11-11 after its October 2026 update: it added the 1512x2316 11" iPad
- * size and a "Required device sizes" section naming the medium Dynamic Island
- * iPhone display, our 6.3" row. Re-read 2026-11-18 to add the iPhone Duo
- * outer and inner display sizes):
  *  - Apple: https://developer.apple.com/help/app-store-connect/reference/screenshot-specifications
  *  - Google Play: https://support.google.com/googleplay/android-developer/answer/9866151
- *
- * Scope: iPhone and iPad for the App Store; phone and tablet rules for Google
- * Play. iPhone Duo (listed by Apple since October 2026, required from April
- * 2027) is in as two iPhone rows, outer and inner display. Mac, Apple TV,
- * Vision Pro, Apple Watch and the Wear OS / TV / Automotive / XR Play surfaces
- * are left out of the checker on purpose.
- *
- * When Apple or Google change a page, edit this file and the fetch date above.
  */
 
 export type Orientation = "portrait" | "landscape";
 
 export type AppleSize = {
-  /** Display class, e.g. `6.9"` or `Duo (inner display)`. */
   display: string;
   family: "iPhone" | "iPad";
   width: number;
   height: number;
   orientation: Orientation;
-  /** Qualifier Apple prints next to the size, e.g. "with status bar". */
   variant?: string;
 };
 
 type AppleDisplay = {
   display: string;
   family: "iPhone" | "iPad";
-  /** Every size row Apple lists for the display, in page order. */
   sizes: { width: number; height: number; variant?: string }[];
-  /** Apple's "Requirement" line, when the page has one. */
   requirement?: string;
 };
 
-/** Apple's page lists both orientations for every row; we store the portrait rows and derive landscape. */
 const APPLE_DISPLAYS: readonly AppleDisplay[] = [
   {
     display: '6.9"',
@@ -150,10 +128,6 @@ function statusBarSizes(pair: StatusBarPair): AppleSize[] {
   ];
 }
 
-/**
- * Older displays: Apple prints separate "with/without status bar" sizes whose
- * landscape size is not just the portrait size swapped, so these stay explicit.
- */
 const APPLE_STATUS_BAR_PAIRS: readonly StatusBarPair[] = [
   { display: '4"', family: "iPhone", variant: "without status bar", portrait: { width: 640, height: 1096 }, landscape: { width: 1136, height: 600 } },
   { display: '4"', family: "iPhone", variant: "with status bar", portrait: { width: 640, height: 1136 }, landscape: { width: 1136, height: 640 } },
@@ -165,7 +139,6 @@ const APPLE_STATUS_BAR_PAIRS: readonly StatusBarPair[] = [
   { display: '9.7"', family: "iPad", variant: "with status bar", portrait: { width: 768, height: 1024 }, landscape: { width: 1024, height: 768 } },
 ];
 
-/** Every App Store screenshot size, portrait and landscape, as Apple lists them. */
 export const APPLE_SIZES: readonly AppleSize[] = [
   ...APPLE_DISPLAYS.flatMap((d): AppleSize[] =>
     d.sizes.flatMap((s): AppleSize[] => [
@@ -182,32 +155,20 @@ export const APPLE_REQUIREMENTS: readonly { display: string; family: "iPhone" | 
   );
 
 export const APPLE_RULES = {
-  /** "You can upload one to 10 screenshots". */
   minCount: 1,
   maxCount: 10,
   formats: ["image/jpeg", "image/png"],
-  /** "Images can't include alpha channels or transparencies." */
   allowsAlpha: false,
 } as const;
 
 export const GOOGLE_PLAY_RULES = {
   formats: ["image/jpeg", "image/png"],
-  /** "JPEG or 24-bit PNG (no alpha)". */
   allowsAlpha: false,
-  /** "Minimum dimension: 320px". */
   minSide: 320,
-  /** "Maximum dimension: 3840px". */
   maxSide: 3840,
-  /** "The maximum dimension ... can't be more than twice as long as the minimum dimension." */
   maxAspectRatio: 2,
-  /** "...a minimum of two screenshots across different device types." */
   minTotalScreenshots: 2,
-  /** "...up to 8 screenshots for each supported device type." */
   maxPerDeviceType: 8,
-  /**
-   * Enhanced eligibility: at least four screenshots, 16:9 landscape (minimum
-   * 1920x1080) or 9:16 portrait (minimum 1080x1920).
-   */
   promo: {
     minScreenshots: 4,
     portrait: { width: 1080, height: 1920 },

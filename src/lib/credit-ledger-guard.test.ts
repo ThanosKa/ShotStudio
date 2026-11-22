@@ -2,22 +2,16 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
-// Only the Credit Ledger (src/lib/credits.ts) may move Credits: write a User's
-// balance or insert a Transaction. This scans application code and scripts as
-// text, so a change that bypasses the Ledger fails here, not in production.
-
 const ROOT = path.resolve(__dirname, "../..");
 const LEDGER = "src/lib/credits.ts";
 const SCANNED_DIRS = ["src", "scripts", "worker", "emails"];
 const CODE_FILE = /\.(ts|tsx|mjs|js)$/;
-// Test files and the test database helper set balances and insert Transactions directly.
 const TEST_FILE = /(\.test\.|\.spec\.|[\\/]test-db\.)/;
 
 function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:"'`])\/\/.*$/gm, "$1");
 }
 
-/** The text of the call whose opening parenthesis is at `open`. */
 function callArgs(source: string, open: number): string {
   let depth = 0;
   for (let i = open; i < source.length; i++) {
@@ -27,7 +21,6 @@ function callArgs(source: string, open: number): string {
   return source.slice(open);
 }
 
-/** Statement text from `start` to the next semicolon. */
 function statementFrom(source: string, start: number): string {
   const end = source.indexOf(";", start);
   return source.slice(start, end === -1 ? undefined : end);
@@ -37,7 +30,6 @@ export function findLedgerViolations(rawSource: string): string[] {
   const source = stripComments(rawSource);
   const found: string[] = [];
 
-  // A balance write: `.update(users).set({ ...credits... })`.
   for (const m of source.matchAll(/\.update\(\s*users\s*\)/g)) {
     const rest = statementFrom(source, m.index);
     const set = rest.indexOf(".set(");
@@ -46,7 +38,6 @@ export function findLedgerViolations(rawSource: string): string[] {
     }
   }
 
-  // A new User row may start with `credits: 0` and nothing else.
   for (const m of source.matchAll(/\.insert\(\s*users\s*\)/g)) {
     const withoutZero = statementFrom(source, m.index).replace(/\bcredits\s*:\s*0\b/g, "");
     if (/\bcredits\b/.test(withoutZero)) {
@@ -58,7 +49,6 @@ export function findLedgerViolations(rawSource: string): string[] {
     found.push("inserts a Transaction with insert(transactions)");
   }
 
-  // Raw SQL.
   if (/\bupdate\s+"?users"?\s+set\b[^;]*\bcredits\b/i.test(source)) {
     found.push("writes users.credits with raw SQL");
   }

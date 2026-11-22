@@ -1,14 +1,3 @@
-/**
- * IndexNow ping: tells Bing, Yandex and other IndexNow engines which URLs exist.
- * (Google does not support IndexNow; use Search Console for Google.)
- *
- * Run AFTER a deploy, once https://shotstudio.dev/bedfc13f5733ed9217c99edc5423cdac.txt is live:
- *   node scripts/indexnow.mjs            # submit every URL in the live sitemap
- *   node scripts/indexnow.mjs --dry-run  # print the payload, send nothing
- *
- * The key file in public/ proves we own the host. It is not a secret.
- */
-
 const HOST = "shotstudio.dev";
 const KEY = "bedfc13f5733ed9217c99edc5423cdac";
 const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
@@ -43,7 +32,6 @@ const res = await fetch(ENDPOINT, {
   body: JSON.stringify(payload),
 });
 
-// 200 = accepted, 202 = accepted pending key validation.
 console.log(`IndexNow: ${res.status} ${res.statusText} for ${urlList.length} URLs`);
 if (res.status !== 200 && res.status !== 202) {
   console.error(await res.text());

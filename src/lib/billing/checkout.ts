@@ -101,8 +101,6 @@ export async function runCheckoutFulfillment(
   const pack = getCreditPackage(packageId);
   if (!pack) return { kind: "unknown_pack", packageId };
 
-  // The Stripe email never changes an existing User's email: it only creates
-  // the row when the Clerk webhook and JIT User Sync have not run yet.
   const checkoutEmail = session.customer_details?.email ?? null;
   if (checkoutEmail) await createUserIfAbsent({ userId, email: checkoutEmail });
   const [existing] = await db
@@ -121,7 +119,6 @@ export async function runCheckoutFulfillment(
 
   const { granted, balance: newBalance } = await grant({ userId, n: pack.credits, stripePaymentId: session.id });
   if (!granted) {
-    // A replay of a session that already got its credits: no second email.
     log.info({ balance: newBalance }, "credits already granted for this session");
     return { kind: "already_granted", userId, balance: newBalance };
   }

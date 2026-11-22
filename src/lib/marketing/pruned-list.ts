@@ -1,30 +1,6 @@
-// Dependency-free on purpose: next.config.ts imports this file, and the config
-// loader does not resolve the "@/" path alias.
-
-/**
- * Reversible pruning list (2026-10-01 SEO sprint, see PRUNED.md).
- *
- * GSC showed the programmatic /screenshots-for/* and /alternatives/* families
- * sliding into "Crawled - currently not indexed" (7 -> 30 pages). Pages below
- * the keep threshold are noindexed (X-Robots-Tag via next.config.ts), dropped
- * from sitemap.ts, and filtered out of hubs, footer and sibling rings so the
- * pages we keep do not spend links on pages we have told Google to skip.
- *
- * Keep threshold: never prune a URL with >=1 click in either GSC export or
- * >=10 impressions in the 2026-10-01 export, and never prune vpn-apps,
- * pet-care-apps, music-apps, finance-apps or running-apps.
- *
- * Revert: delete an entry here. That one edit restores the header, the
- * sitemap row and every internal link. Bump the matching REVISED date in
- * sitemap.ts when you do.
- *
- * `gsc.clicks` is clicks in the 2026-10-01 plus July exports combined;
- * `gsc.impressions` is the 2026-10-01 export (2026-06-29 to 2026-09-28).
- */
 export type PrunedEntry = {
   path: string;
   action: "noindex" | "redirect";
-  /** Required when action is "redirect". */
   target?: string;
   reason: string;
   gsc: { clicks: number; impressions: number };

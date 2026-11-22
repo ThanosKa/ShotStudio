@@ -3,9 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { runCheckoutFulfillment } from "@/lib/billing/checkout";
 
-// With no Redis (local dev), nothing guards a repeated delivery: it fulfils
-// again, and `grant()` is the only protection against a double credit.
-
 const SECRET = "whsec_test_secret";
 const real = new Stripe("sk_test_unused");
 

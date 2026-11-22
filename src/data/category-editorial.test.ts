@@ -9,22 +9,6 @@ import {
   relatedCategories,
 } from "@/data/category-editorial";
 
-/**
- * `relatedCategories` is the internal-linking backbone of the 40 programmatic
- * category pages, and it looks more complicated than it needs to be. It isn't.
- *
- * The obvious implementation — `CATEGORIES.filter(not-self).slice(0, 6)` — gave
- * every one of the 40 pages the *same* six siblings. That left 33 of them with
- * a single inbound internal link (the hub) and made every related block on the
- * site byte-identical, which is both useless to a reader and a thin-content
- * signal to a crawler.
- *
- * The two-stage design (cluster siblings first, then a rotating ring window to
- * fill) exists to fix exactly that. These tests assert the *properties* that
- * make it worth the complexity, so anyone who later "simplifies" it back to a
- * slice gets a failure explaining why instead of a silent SEO regression.
- */
-
 const LIMIT = 6;
 
 describe("relatedCategories", () => {
@@ -51,10 +35,6 @@ describe("relatedCategories", () => {
     }
   });
 
-  /**
-   * The regression that motivated the whole function: with `.slice(0, 6)` this
-   * was 1 for 33 of 40 categories. The rotating ring currently yields 4–8.
-   */
   it("leaves no indexable category with fewer than two inbound sibling links", () => {
     const inbound = new Map(indexableCategories().map((c) => [c.slug, 0]));
     for (const related of blocks.values()) {
@@ -68,7 +48,6 @@ describe("relatedCategories", () => {
     expect(starved).toEqual([]);
   });
 
-  /** Byte-identical blocks across 40 pages are the thin-content signal. */
   it("gives every indexable category a distinct related block", () => {
     const fingerprints = indexableCategories().map((c) =>
       (blocks.get(c.slug) ?? []).map((r) => r.slug).join(","),
@@ -89,8 +68,6 @@ describe("relatedCategories", () => {
       const cluster = clusterOf(slug);
       if (!cluster) continue;
       const inSameCluster = related.map((r) => clusterOf(r.slug)?.id === cluster.id);
-      // Once the block leaves the cluster it must not come back to it: all the
-      // `true`s are up front.
       const firstOutsider = inSameCluster.indexOf(false);
       if (firstOutsider === -1) continue;
       expect(inSameCluster.slice(firstOutsider), slug).not.toContain(true);
@@ -132,10 +109,6 @@ describe("categoriesByDemand", () => {
     expect(categoriesByDemand(3)).toHaveLength(3);
   });
 
-  /**
-   * The ordering is memoised at module load. Callers must not be able to
-   * corrupt that shared array for everyone else.
-   */
   it("hands out a copy, not the cached ordering", () => {
     const first = categoriesByDemand();
     first.length = 0;
