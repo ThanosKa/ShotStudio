@@ -2,7 +2,7 @@
 title: "App Store screenshot sizes 2026: the full spec"
 description: "Every App Store screenshot size Apple lists in November 2026 for iPhone, iPad, Mac, TV, Vision Pro and Watch, which are required, and what gets rejected."
 publishedAt: "2026-05-10"
-updatedAt: "2026-11-18"
+updatedAt: "2026-11-23"
 heroImage: "/blog/screenshot-sizes-hero.png"
 ---
 
@@ -31,7 +31,7 @@ Apple updated its screenshot specification in October 2026: the page now drops t
 </tr>
 <tr>
 <td className="border-b py-3 pr-4 align-top text-muted-foreground">Color space</td>
-<td className="border-b py-3 pr-4 align-top text-muted-foreground">sRGB or P3 (sRGB strongly recommended)</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Not set by Apple's spec; sRGB keeps colors consistent across the set</td>
 </tr>
 <tr>
 <td className="border-b py-3 pr-4 align-top text-muted-foreground">Transparency</td>
@@ -42,20 +42,16 @@ Apple updated its screenshot specification in October 2026: the page now drops t
 <td className="border-b py-3 pr-4 align-top text-muted-foreground">PNG or JPEG</td>
 </tr>
 <tr>
-<td className="border-b py-3 pr-4 align-top text-muted-foreground">Maximum file size</td>
-<td className="border-b py-3 pr-4 align-top text-muted-foreground">8 MB per image</td>
-</tr>
-<tr>
 <td className="border-b py-3 pr-4 align-top text-muted-foreground">Rounded corners</td>
 <td className="border-b py-3 pr-4 align-top text-muted-foreground">Don't add them — the App Store renders rounded corners itself</td>
 </tr>
 <tr>
 <td className="border-b py-3 pr-4 align-top text-muted-foreground">Status bar</td>
-<td className="border-b py-3 pr-4 align-top text-muted-foreground">Don't fake one — App Store strips it</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">Allowed: Apple lists some sizes both with and without the status bar</td>
 </tr>
 <tr>
 <td className="border-b py-3 pr-4 align-top text-muted-foreground">Quantity</td>
-<td className="border-b py-3 pr-4 align-top text-muted-foreground">1–10 screenshots per locale, per device size</td>
+<td className="border-b py-3 pr-4 align-top text-muted-foreground">1–10 screenshots per device size, per locale</td>
 </tr>
 </tbody>
 </table>
@@ -140,14 +136,13 @@ These are the reasons indie iOS apps get rejected or rendered weirdly on the car
 
 - **A size from the wrong row.** 1284×2778 is a valid Face ID large-display (6.5") size, but it is not a Dynamic Island large-display (6.9") size. Drop it into the wrong slot in App Store Connect and the upload fails. Match the file to the display slot you're filling.
 - **PNG with transparency baked in.** Even one alpha-channel pixel kills the upload. Flatten to a solid background before exporting.
-- **Status bar drawn on top.** Apple strips and re-renders the status bar. If you draw one, it'll get stripped and the bottom of your image will end up taller than expected. Don't include it.
 - **Round corners drawn on the screenshot.** Same story — the App Store applies its own corner radius. If you draw them, you get a double-radius effect.
-- **JPEG compression artifacts in solid-color regions.** App Store carousel re-compresses on the fly; starting from JPEG instead of PNG compounds the artifacts. Submit PNG when you can.
+- **JPEG compression artifacts in solid-color regions.** Flat marketing backgrounds show JPEG banding easily. Apple accepts both formats, so submit PNG when you can.
 - **One color space across the set, then a P3 outlier.** Apple won't reject this but the carousel will render the P3 image with subtly different saturation. Stay in sRGB across the whole set.
 
 ## What you actually need to ship
 
-One to ten screenshots per locale. Most indies ship three. The order on the App Store carousel matters more than people realize — your hero shot has to do all the work in the first 200ms of someone scrolling, because shots 4 onward are behind a "show more" tap that almost nobody takes.
+One to ten screenshots per device size. Most indies ship three. The order matters more than people realize: Apple's [product page guide](https://developer.apple.com/app-store/product-page/) says that, depending on orientation, *"the first one to three images will appear in search results when no app preview is available"*, so your first shots have to sell the app before anyone opens your page.
 
 The safe default for what each shot should *do* is: **shot 1 sells the outcome, shot 2 shows the workflow, shot 3 shows the differentiator**. What that means in practice changes per vertical — compare [fitness app screenshots](/screenshots-for/fitness-apps), where shot 1 has to imply momentum, with [finance app screenshots](/screenshots-for/finance-apps), where shot 1 is one number large enough to read across the room, or [VPN app screenshots](/screenshots-for/vpn-apps), where shot 1 has to prove the connection is safe before anyone reads a word.
 
@@ -222,7 +217,7 @@ ShotStudio v1 outputs iPhone portrait only, at 1290×2796 (a Dynamic Island larg
 - PNG or JPEG, no transparency, 1–10 screenshots per device size; the first three carry the conversion weight.
 - Largest iPhone class: **1290×2796, 1260×2736 or 1320×2868 portrait**.
 - Since October 2026 Apple's "Required device sizes" names the medium Dynamic Island display (1179×2556 or 1206×2622); check your App Store Connect version page for the slots it marks as required.
-- Don't draw a status bar. Don't draw rounded corners.
+- Don't draw rounded corners. A real status bar is fine.
 - iPad, Mac, Apple TV, Vision Pro and Apple Watch need their own uploads; iPhone Duo screenshots become required from April 2027.
 
 Need to ship by tomorrow morning? [Generate three polished shots in under a minute](/sign-up) — no subscription, $7 once. The full breakdown of the three credit packs is on the [ShotStudio pricing page](/pricing), and if you're still shortlisting tools, the [App Store screenshot tool alternatives](/alternatives) index compares AppMockUp, Previewed, Shotbot, AppLaunchpad and AppScreens on price and on how much layout work they leave you.

@@ -105,7 +105,7 @@ describe("blog content built into the Worker", () => {
       slug: SIZES_SLUG,
       title: "App Store screenshot sizes 2026: the full spec",
       publishedAt: "2026-05-10",
-      updatedAt: "2026-11-18",
+      updatedAt: "2026-11-23",
       heroImage: "/blog/screenshot-sizes-hero.png",
     });
     expect(post?.readingTime).toMatch(/^\d+ min read$/);
