@@ -32,6 +32,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 - User-facing errors, toasts or empty states → read `.doc/ux-writing.md`; it came from another project, so apply its copy rules and ignore its paths and i18n
 - Domain terms → read `GLOSSARY.md`
 - Marketing copy, blog posts or SEO pages → read `.agents/product-marketing.md`; code wins on product facts
+- `src/app/sitemap.ts` or `src/app/robots.ts` → read `.claude/docs/seo-files.md`
 - Pruning or restoring a `/screenshots-for` or `/alternatives` URL → read "How pruning works" in `PRUNED.md`
 
 ## Scope
