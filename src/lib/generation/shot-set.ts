@@ -1,3 +1,4 @@
+import "server-only";
 import type { Logger } from "pino";
 import { generateImage } from "@/lib/openrouter";
 import { STYLE_PRESETS, type StylePresetId } from "./presets";
