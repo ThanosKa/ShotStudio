@@ -12,7 +12,7 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
   appmockup: {
     anchor: "AppMockUp alternatives",
     quickAnswer:
-      "AppMockUp is two products under one brand: AppMockUp Studio, a free browser template editor with 400+ App Store screenshot templates, and appmockupgenerator.com, a Gemini-powered AI variant sold as one-time credit packs from $9 for 25 screenshots. Both output 1290×2796, one of Apple's accepted 6.9\" iPhone sizes; both still leave the layout decisions to you.",
+      "AppMockUp is two products under one brand: AppMockUp Studio, a free browser template editor where you do the layout yourself, and appmockupgenerator.com, an AI generator sold as monthly plans from $9/mo for 25 screenshots (as of 2026-11-25). ShotStudio is the one-time option: $7 for two sets of three 1290×2796 shots, no subscription to cancel.",
     switchSteps: [
       "Keep the three source screens you were about to drop into a template — same PNGs, no re-export needed.",
       "Paste your app name and the one-line pitch you already wrote for the App Store description; ShotStudio writes the headline from it.",
@@ -28,7 +28,7 @@ export const COMPETITOR_EDITORIAL: Record<string, CompetitorEditorial> = {
   previewed: {
     anchor: "Previewed alternatives",
     quickAnswer:
-      "Previewed is a browser-based 3D mockup tool covering App Store screenshots, social mockups and promo videos. Lite is free at 720p with a Creative Commons attribution requirement, Plus is $9.99 one-time capped at 10 lifetime exports, and Pro runs $19/mo.",
+      "Previewed is a browser-based 3D mockup tool covering App Store screenshots, social mockups and promo videos. Lite is free at 720p with a Creative Commons attribution requirement, Plus is $9.99 one-time capped at 10 lifetime exports, and Pro runs $19/mo billed $228 a year (pricing page, as of 2026-11-25).",
     switchSteps: [
       "Skip the template gallery — ShotStudio picks the personality preset from your app category instead.",
       "Upload the same three screens; theme and palette are sampled from them, so you don't rebuild your brand in an editor.",

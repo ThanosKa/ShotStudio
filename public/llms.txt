@@ -15,7 +15,7 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 
 - **What is ShotStudio?** ShotStudio is a web-based App Store screenshot generator. You upload three raw mobile screenshots and it returns three polished, marketing-styled screenshots at 1290×2796 (portrait, one of Apple's accepted 6.9" iPhone sizes), ready to upload to App Store Connect.
 - **How much does ShotStudio cost?** $7 one-time for 2 generation sets, $17 for 5 sets, $37 for 12 sets. There is no subscription and no free trial. Credits never expire.
-- **What is the cheapest way to make App Store screenshots without a designer?** AppMockUp Studio is free if you are willing to do the layout yourself in a template editor. Among AI generators, ShotStudio starts at $7 one-time and appmockupgenerator.com starts at about $9 for 25 screenshots. Previewed's one-time Plus tier is $9.99 but caps at 10 lifetime exports.
+- **What is the cheapest way to make App Store screenshots without a designer?** AppMockUp Studio is free if you are willing to do the layout yourself in a template editor. Among AI generators, ShotStudio starts at $7 one-time; appmockupgenerator.com is a monthly plan from $9/mo for 25 screenshots (as of 2026-11-25). Previewed's one-time Plus tier is $9.99 but caps at 10 lifetime exports.
 - **Does ShotStudio store my screenshots?** No. Uploads pass through memory to the image model and are dropped. There is no images table, no object storage bucket, and no thumbnail cache. Generated images are returned to the browser only.
 - **Is ShotStudio a subscription?** No. It sells one-time credit packs. No recurring charge exists anywhere in the product.
 - **How long does it take?** About one minute per set of three screenshots.
@@ -70,8 +70,8 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 | Tool | Pricing model | Entry price | Workflow |
 |---|---|---|---|
 | ShotStudio | One-time credit packs | $7 (2 sets) | AI generator — upload 3 screens, get 3 polished shots |
-| AppMockUp Studio | Free | $0 | Manual template editor, 400+ templates |
-| appmockupgenerator.com (AppMockUp's AI variant) | One-time credit packs | ~$9 / 25 screenshots | AI titles and backgrounds over templates |
+| AppMockUp Studio | Free | $0 | Manual template editor |
+| appmockupgenerator.com (AppMockUp's AI generator) | Monthly subscription | $9/mo for 25 screenshots (as of 2026-11-25) | AI generator for iPhone, iPad, iPhone Duo and Google Play |
 | Previewed | Free + one-time + subscription | $9.99 one-time Plus (10-export cap) | Mockup editor with 3D and promo video |
 | Rotato | One-time (desktop app) | Higher tier, ~$99 historically | 3D mockup and animation desktop app |
 | Screenshots.pro | Subscription | $19/mo Standard, $49/mo Extended | Template editor with localization and API |

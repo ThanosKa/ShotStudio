@@ -104,8 +104,8 @@ Full policy: https://shotstudio.dev/privacy
 | Tool | Pricing model | Entry price | Workflow | Best for |
 |---|---|---|---|---|
 | **ShotStudio** | One-time credit packs | $7 (2 sets) | AI generator: 3 uploads in, 3 polished shots out | Indies who need static App Store shots tonight |
-| **AppMockUp Studio** | Free | $0 | Manual template editor, 400+ templates | Zero budget, willing to do the layout |
-| **appmockupgenerator.com** (AppMockUp's AI variant) | One-time credit packs | ~$9 / 25 screenshots | AI titles and backgrounds over templates | Cheapest AI-assisted option |
+| **AppMockUp Studio** | Free | $0 | Manual template editor | Zero budget, willing to do the layout |
+| **appmockupgenerator.com** (AppMockUp's AI generator) | Monthly subscription | $9/mo for 25 screenshots (as of 2026-11-25) | AI generator for iPhone, iPad, iPhone Duo and Google Play | Teams shipping screenshots every month |
 | **Previewed** | Free + one-time + subscription | $9.99 one-time Plus, capped at 10 exports | Mockup editor with 3D snapshots and promo video | Needs 3D or a promo video too |
 | **Rotato** | One-time, desktop app | Higher tier (~$99 historically) | 3D mockup and animation desktop app | App Preview videos, designer-grade control |
 | **Screenshots.pro** | Subscription | $19/mo Standard, $49/mo Extended | Template editor with localization and API | High-volume shippers, localized stores, CI pipelines |
@@ -140,16 +140,16 @@ Yes — Screenshots.pro covers 23 devices including iPhone 6.9" portrait (1290×
 ### AppMockUp (https://shotstudio.dev/alternatives/appmockup)
 
 **Is AppMockUp worth it for indie iOS developers?**
-AppMockUp Studio is free and unbeatable on price if you don't mind manual template editing. The newer AI variant at appmockupgenerator.com offers credit packs from $9 for 25 screenshots — closer to ShotStudio's model, but still title and background-focused, not full AI-picked layout. Right fit if you want hand control over the design.
+AppMockUp Studio is free and unbeatable on price if you don't mind manual template editing. The AI generator at appmockupgenerator.com does the layout for you, from $9/mo for 25 screenshots (as of 2026-11-25). It fits if you ship screenshots every month; for a once-or-twice-a-year launch, a one-time pack costs less.
 
 **Is AppMockUp free?**
-AppMockUp Studio (app-mockup.com) is 100% free with optional donations via Buy Me a Coffee. The separate AI tool at appmockupgenerator.com uses one-time credit packs starting around $9 for 25 screenshots after 3 free credits. Credits on the AI variant never expire.
+AppMockUp Studio (app-mockup.com) is free with no account required. The separate AI generator at appmockupgenerator.com gives 3 free screenshots, then monthly plans: $9/mo for 25, $19/mo for 70, $39/mo for 180. You can cancel anytime and unused credits roll over for up to 2 months (pricing page, as of 2026-11-25).
 
 **What's a good alternative to AppMockUp?**
-For AI-generated screenshots without manual template work, ShotStudio ($7 one-time) takes you from upload to polished output in about a minute, with theme and palette auto-sampled from your actual app. For pixel-precise control, Rotato or Previewed offer more layout flexibility at higher cost.
+For AI-generated screenshots without manual template work or a subscription, ShotStudio ($7 one-time) takes you from upload to polished output in about a minute, with the light or dark theme sampled from your actual app. For pixel-precise control, Rotato or Previewed offer more layout flexibility at higher cost.
 
 **Can AppMockUp output 1290×2796 screenshots for App Store Connect?**
-Yes — both AppMockUp Studio and the AI variant support iPhone 6.9" portrait (1290×2796). Studio offers 400+ templates across iPhone, iPad, Apple Watch, and Mac; the AI variant covers iPhone and iPad 13" output and adds +1 credit per iPad screenshot.
+The AI generator lists 1290×2796 and 1206×2622 for iPhone, 2048×2732 for 13" iPad, 2007×2853 and 1398×2034 for iPhone Duo, and 9:16 for Google Play (appmockupgenerator.com, as of 2026-11-25). iPad and iPhone Duo need the $19/mo plan or higher.
 
 ### Previewed (https://shotstudio.dev/alternatives/previewed)
 
@@ -157,7 +157,7 @@ Yes — both AppMockUp Studio and the AI variant support iPhone 6.9" portrait (1
 The $9.99 Plus tier is the closest one-time-pay option in the category — a fair fit if you want 3D snapshots or promo video output alongside static screenshots. The 10-export cap on Plus matters if you A/B-test multiple sets. If you only need polished static shots, ShotStudio's $7 Starter pack buys two full sets of three, with no export cap on what you download.
 
 **Is Previewed free?**
-The Lite tier is free but exports at 720p with a Creative Commons attribution requirement — meaning your published screenshots credit Previewed, not your app. For commercial indie use you'll need Plus at $9.99 one-time (10 exports) or Pro at $19/mo ($228/yr unlimited).
+The Lite tier is free but exports at 720p with a Creative Commons attribution requirement — meaning your published screenshots credit Previewed, not your app. For commercial indie use you'll need Plus at $9.99 one-time (10 exports) or Pro at $19/mo ($228/yr unlimited), per its pricing page as of 2026-11-25.
 
 **What's a good alternative to Previewed?**
 For a one-time-pay indie tool with no export cap, ShotStudio is $7 for two sets of three shots, with zero image persistence. For 3D animation specifically, Rotato is the strongest in the category. AppMockUp Studio is the free option if you don't need animation or AI assistance.
@@ -244,10 +244,10 @@ Three PNGs at 1290×2796, one of Apple's accepted 6.9" iPhone sizes, portrait �
 Cash refunds are not offered. The credit is automatically returned to the balance whenever a generation can't be salvaged after retries and fallback.
 
 **How do I make App Store screenshots without a designer?**
-Three practical routes. (1) A free template editor such as AppMockUp Studio — costs nothing, costs you an evening. (2) An AI generator such as ShotStudio — upload three raw screens, get three polished 1290×2796 shots back in about a minute, from $7 one-time. (3) Hire a freelancer for roughly $50–$200 with a multi-day turnaround. Whichever route you take, each image must match one of Apple's listed pixel sizes exactly (1290×2796 is one of the largest iPhone sizes) and have no transparency, or App Store Connect will reject it.
+Three practical routes. (1) A free template editor such as AppMockUp Studio — costs nothing, costs you an evening. (2) An AI generator such as ShotStudio — upload three raw screens, get three polished 1290×2796 shots back in about a minute, from $7 one-time. (3) Hire a designer or freelancer. Whichever route you take, each image must match one of Apple's listed pixel sizes exactly (1290×2796 is one of the largest iPhone sizes) and have no transparency, or App Store Connect will reject it.
 
 **What is the cheapest App Store screenshot tool?**
-AppMockUp Studio is free but manual. Among AI-assisted generators, ShotStudio starts at $7 one-time for two sets (six images) and appmockupgenerator.com starts at about $9 for 25 screenshots. Previewed's Plus tier is $9.99 one-time but limited to 10 lifetime exports. Subscription tools such as Screenshots.pro start at $19/month, which costs more than any one-time option within the first month.
+AppMockUp Studio is free but manual. Among AI-assisted generators, ShotStudio starts at $7 one-time for two sets (six images); appmockupgenerator.com is a monthly plan from $9/mo for 25 screenshots (as of 2026-11-25). Previewed's Plus tier is $9.99 one-time but limited to 10 lifetime exports. Subscription tools such as Screenshots.pro start at $19/month, which costs more than any one-time option within the first month.
 
 **What size do App Store screenshots need to be in 2026?**
 PNG or JPEG, no alpha channel or transparency, 1 to 10 screenshots per device size, in one of Apple's exact sizes. The largest iPhone class (iPhone with Dynamic Island, large display, the 6.9" class) takes 1290×2796, 1260×2736 or 1320×2868 portrait. Since its October 2026 update, Apple's "Required device sizes" lists at least one screenshot for iPhone with Dynamic Island (medium display), 1179×2556 or 1206×2622, while also saying App Store Connect scales the highest-resolution set down for smaller displays; check which slots your App Store Connect version page marks as required. iPad apps also need a 13" set (2064×2752 or 2048×2732). iPhone Duo screenshots become required from April 2027. Full spec: https://shotstudio.dev/blog/app-store-screenshot-sizes-2026

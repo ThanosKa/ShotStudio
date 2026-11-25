@@ -9,7 +9,7 @@ const REVISED = {
   home: "2026-11-04",
   pricing: "2026-11-04",
   screenshotsForHub: "2026-11-13",
-  alternativesHub: "2026-11-16",
+  alternativesHub: "2026-11-25",
   blogHub: "2026-11-13",
   privacy: "2026-07-29",
   terms: "2026-07-29",
@@ -20,7 +20,7 @@ const REVISED = {
 
 const CATEGORY_REVISED: Record<string, string> = {
   "fitness-apps": "2026-11-09",
-  "finance-apps": "2026-11-09",
+  "finance-apps": "2026-11-25",
   "education-apps": "2026-11-09",
   "music-apps": "2026-11-09",
   "weather-apps": "2026-11-09",
@@ -32,8 +32,8 @@ const CATEGORY_REVISED: Record<string, string> = {
 };
 
 const COMPETITOR_REVISED: Record<string, string> = {
-  appmockup: "2026-11-09",
-  previewed: "2026-11-09",
+  appmockup: "2026-11-25",
+  previewed: "2026-11-25",
   shotbot: "2026-11-16",
   applaunchpad: "2026-11-09",
   appscreens: "2026-11-09",
