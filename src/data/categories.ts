@@ -71,7 +71,7 @@ export const CATEGORIES: Category[] = [
       },
       {
         q: "Should I use my brand color or App Store conventions (green for up, red for down)?",
-        a: "Both. Use the App Store conventions for any data visualization (green up, red down) — users read these in 200ms — and let your brand color be the accent for headlines and CTAs.",
+        a: "Both. Use the App Store conventions for any data visualization (green up, red down), which users read at a glance, and let your brand color be the accent for headlines and CTAs.",
       },
       {
         q: "Why does ShotStudio default finance apps to Professional?",
