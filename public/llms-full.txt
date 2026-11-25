@@ -244,7 +244,7 @@ Three PNGs at 1290×2796, one of Apple's accepted 6.9" iPhone sizes, portrait �
 Cash refunds are not offered. The credit is automatically returned to the balance whenever a generation can't be salvaged after retries and fallback.
 
 **How do I make App Store screenshots without a designer?**
-Three practical routes. (1) A free template editor such as AppMockUp Studio — costs nothing, costs you an evening. (2) An AI generator such as ShotStudio — upload three raw screens, get three polished 1290×2796 shots back in about a minute, from $7 one-time. (3) Hire a freelancer for roughly $50–$200 with a multi-day turnaround. Whichever route you take, the output must be 1290×2796, sRGB, with no transparency and no rounded corners, or App Store Connect will reject it.
+Three practical routes. (1) A free template editor such as AppMockUp Studio — costs nothing, costs you an evening. (2) An AI generator such as ShotStudio — upload three raw screens, get three polished 1290×2796 shots back in about a minute, from $7 one-time. (3) Hire a freelancer for roughly $50–$200 with a multi-day turnaround. Whichever route you take, each image must match one of Apple's listed pixel sizes exactly (1290×2796 is one of the largest iPhone sizes) and have no transparency, or App Store Connect will reject it.
 
 **What is the cheapest App Store screenshot tool?**
 AppMockUp Studio is free but manual. Among AI-assisted generators, ShotStudio starts at $7 one-time for two sets (six images) and appmockupgenerator.com starts at about $9 for 25 screenshots. Previewed's Plus tier is $9.99 one-time but limited to 10 lifetime exports. Subscription tools such as Screenshots.pro start at $19/month, which costs more than any one-time option within the first month.

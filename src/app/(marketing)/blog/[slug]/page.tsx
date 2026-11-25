@@ -132,22 +132,22 @@ export default async function BlogPostPage({
                       {
                         "@type": "HowToStep",
                         name: "Use sRGB color space",
-                        text: "Save in sRGB color space. P3 is allowed but causes subtle saturation differences when the carousel renders at smaller sizes; sRGB is the safe default.",
+                        text: "Save every screenshot in the same color space. Apple's spec does not set one; sRGB is the safe default for consistent color across the set.",
                       },
                       {
                         "@type": "HowToStep",
                         name: "Flatten transparency, keep PNG or JPEG",
-                        text: "Apple rejects images with any alpha-channel pixels. Flatten to a solid background and export as PNG (preferred) or JPEG, under 8 MB per image.",
+                        text: "Apple rejects images with any alpha-channel pixels. Flatten to a solid background and export as PNG (preferred) or JPEG.",
                       },
                       {
                         "@type": "HowToStep",
-                        name: "Don't draw status bar or rounded corners",
-                        text: "The App Store applies its own status bar and corner radius. If you draw them yourself, you'll get double-rendering effects.",
+                        name: "Don't draw rounded corners",
+                        text: "Keep the screenshot rectangular and let the App Store round the corners. A real status bar is fine: Apple lists some sizes both with and without it.",
                       },
                       {
                         "@type": "HowToStep",
-                        name: "Upload 3–10 screenshots per locale",
-                        text: "Upload 3 to 10 screenshots per locale via App Store Connect. The first three carry virtually all the conversion weight in the carousel.",
+                        name: "Upload 1–10 screenshots per device size",
+                        text: "Upload 1 to 10 screenshots per device size and locale in App Store Connect. Lead with your strongest shots: Apple shows the first one to three in search results when there is no app preview.",
                       },
                     ],
                   },
