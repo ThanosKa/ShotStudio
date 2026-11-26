@@ -62,7 +62,7 @@ export function MarketingFooter() {
     <footer className="mt-24 border-t">
       <div className="mx-auto max-w-6xl px-6 py-14">
         <div className="grid gap-10 md:grid-cols-12">
-          <div className="md:col-span-3">
+          <div className="flex flex-col md:col-span-3">
             <Wordmark size="md" />
             <p className="mt-4 max-w-xs text-body-lg text-muted-foreground">
               App Store screenshots in under a minute. One-time pay, never
@@ -78,7 +78,7 @@ export function MarketingFooter() {
               </Link>
               .
             </p>
-            <p className="mt-4 text-sm text-muted-foreground">
+            <p className="mt-auto pt-4 text-sm text-muted-foreground">
               <SiteStatus />
             </p>
           </div>
