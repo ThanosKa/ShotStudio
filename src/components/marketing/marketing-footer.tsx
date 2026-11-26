@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
+import { SiteStatus } from "@/components/marketing/site-status";
 import { indexableCompetitors } from "@/lib/marketing/pruned";
 import { categoriesByDemand, categoryAnchor } from "@/data/category-editorial";
 import { competitorAnchor } from "@/data/competitor-editorial";
@@ -61,7 +62,7 @@ export function MarketingFooter() {
     <footer className="mt-24 border-t">
       <div className="mx-auto max-w-6xl px-6 py-14">
         <div className="grid gap-10 md:grid-cols-12">
-          <div className="md:col-span-3">
+          <div className="flex flex-col md:col-span-3">
             <Wordmark size="md" />
             <p className="mt-4 max-w-xs text-body-lg text-muted-foreground">
               App Store screenshots in under a minute. One-time pay, never
@@ -76,6 +77,9 @@ export function MarketingFooter() {
                 Credit packs start at $7
               </Link>
               .
+            </p>
+            <p className="mt-auto pt-4 text-sm text-muted-foreground">
+              <SiteStatus />
             </p>
           </div>
 
@@ -124,6 +128,16 @@ export function MarketingFooter() {
                 className="transition-colors hover:text-foreground"
               >
                 X
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://thanoska.betteruptime.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-foreground"
+              >
+                Status
               </a>
             </li>
             <li>

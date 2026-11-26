@@ -43,6 +43,10 @@ All three need Node 24.22 or newer. `check:worker-bundle` fails if sharp got int
 
 The deploy also sets the Worker's Cron Trigger (every 5 minutes), which refunds Generations left `pending` by a run that was cut off (see `.claude/docs/generation.md`).
 
+### Error tracking
+
+Server, Cron Trigger and browser errors go to Better Stack Errors through the Sentry SDK (`src/lib/error-tracking.ts`, `worker/index.ts`, `src/instrumentation.ts`, `src/instrumentation-client.ts`). Errors that a route catches and logs with `log.error({ err }, ...)` are sent too. It is off unless the build sets `NEXT_PUBLIC_ERROR_TRACKING_ENV`: the deploy workflow sets `production` and the commit SHA as the release. Set `development` in `.env.local` to send local errors, and `production` in `.env.production.local` before a manual deploy. Events carry no user, cookies, headers, bodies, query strings or image data. Uptime: [status page](https://thanoska.betteruptime.com).
+
 To go back to an earlier version, read its id first (the newest deployment is the live one), then send all traffic to it:
 
 ```bash

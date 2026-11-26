@@ -7,6 +7,7 @@ Rules for all code that lint does not enforce. Lint enforces `any`, type asserti
 - Log on the server through `@/lib/logger` (pino), never `console.*`. Client error boundaries (`src/app/error.tsx`, `src/app/global-error.tsx`) and CLIs in `scripts/` keep `console`. So does the logger's own Workers destination (`src/lib/logger/console-line.ts`), which writes each pino line with the console method matching its level, because that is how logs reach Workers Logs.
 - First argument is a structured context object, second is a fixed message string: `log.warn({ userId }, "user not ready")`. Values go in the context, never interpolated into the message.
 - Put errors under the `err` key: `log.error({ err }, "checkout failed")`.
+- An `error` or `fatal` line whose `err` is an `Error` also goes to error tracking (`src/lib/logger/index.ts`), so log an expected failure at `warn`.
 - At the top of any handler or action, create a child logger (`logger.child({ action, ...ids })`) and reuse it.
 
 ## TypeScript

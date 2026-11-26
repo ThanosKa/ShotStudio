@@ -12,9 +12,40 @@ vi.mock("vinext/server/fetch-handler", () => ({
 
 vi.mock("@/lib/generation", () => ({ refundAbandonedGenerations: vi.fn() }));
 
+const sentEvents = vi.hoisted((): Record<string, any>[] => []);
+vi.mock("@/lib/error-tracking", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/error-tracking")>();
+  return {
+    ...actual,
+    ERROR_TRACKING: {
+      ...actual.errorTrackingSettings({ environment: "production", release: undefined }),
+      dsn: "https://public@errors.example.test/1",
+      transport: () => ({
+        send: async ([, items]: [unknown, [{ type: string }, Record<string, any>][]]) => {
+          for (const [header, payload] of items) if (header.type === "event") sentEvents.push(payload);
+          return { statusCode: 200 };
+        },
+        flush: async () => true,
+      }),
+    },
+  };
+});
+
+import { onRequestError } from "@/instrumentation";
 import worker from "./index";
 
 const ctx = { waitUntil: () => {} };
+const cron = { cron: "*/5 * * * *", scheduledTime: Date.now() };
+
+function collectingCtx() {
+  const pending: Promise<unknown>[] = [];
+  return {
+    ctx: { waitUntil: (p: Promise<unknown>) => void pending.push(p) },
+    settled: async () => {
+      while (pending.length > 0) await Promise.allSettled(pending.splice(0));
+    },
+  };
+}
 const request = (path: string, method = "GET") =>
   worker.fetch(new Request(`https://example.test${path}`, { method }), {}, ctx);
 
@@ -90,9 +121,92 @@ describe("Worker Cron Trigger", () => {
     });
     const env = { HYPERDRIVE: { connectionString: "postgres://nobody@127.0.0.1:1/via_hyperdrive" } };
 
-    await worker.scheduled({}, env, ctx);
+    await worker.scheduled(cron, env, ctx);
 
     expect(refundAbandonedGenerations).toHaveBeenCalledTimes(1);
     expect(database).toBe("via_hyperdrive");
+  });
+});
+
+describe("Error tracking", () => {
+  beforeEach(() => {
+    sentEvents.length = 0;
+    vinextFetch.mockReset();
+  });
+
+  it("reports a page failure that reaches the Worker entry, and flushes it before the Worker ends", async () => {
+    vinextFetch.mockImplementation(async () => {
+      throw new Error("page exploded");
+    });
+    const { ctx, settled } = collectingCtx();
+
+    await expect(
+      worker.fetch(new Request("https://example.test/pricing"), {}, ctx),
+    ).rejects.toThrow("page exploded");
+    await settled();
+
+    expect(sentEvents.map((e) => e.exception.values[0].value)).toEqual(["page exploded"]);
+  });
+
+  it("reports a route error that vinext answers with a 500 itself", async () => {
+    vinextFetch.mockImplementation(async (request: Request) => {
+      await onRequestError(
+        Object.assign(new Error("route exploded"), { digest: "123" }),
+        { path: new URL(request.url).pathname, method: request.method, headers: {} },
+        { routerKind: "App Router", routePath: "/api/checkout", routeType: "route", revalidateReason: undefined, renderSource: "react-server-components" },
+      );
+      return new Response(null, { status: 500 });
+    });
+    const { ctx, settled } = collectingCtx();
+
+    const response = await worker.fetch(new Request("https://example.test/api/checkout", { method: "POST" }), {}, ctx);
+    await settled();
+
+    expect(response.status).toBe(500);
+    expect(sentEvents).toHaveLength(1);
+    expect(sentEvents[0].exception.values[0].value).toBe("route exploded");
+    expect(sentEvents[0].tags).toMatchObject({ routePath: "/api/checkout", routeType: "route", digest: "123" });
+  });
+
+  it("reports an error a route catches and logs", async () => {
+    vinextFetch.mockImplementation(async () => {
+      logger.child({ action: "checkout" }).error({ err: new Error("stripe down for a@b.co") }, "checkout failed");
+      return new Response(null, { status: 500 });
+    });
+    const { ctx, settled } = collectingCtx();
+
+    await worker.fetch(new Request("https://example.test/api/checkout?session=x", { method: "POST" }), {}, ctx);
+    await settled();
+
+    expect(sentEvents).toHaveLength(1);
+    expect(sentEvents[0].exception.values[0].value).toBe("stripe down for [email]");
+    expect(sentEvents[0].tags).toMatchObject({ log: "checkout failed" });
+    expect(sentEvents[0].request).toEqual({ method: "POST", url: "https://example.test/api/checkout" });
+    expect(sentEvents[0].user).toBeUndefined();
+  });
+
+  it("reports a failing Cron Trigger run", async () => {
+    vi.mocked(refundAbandonedGenerations).mockRejectedValue(new Error("database unreachable"));
+    const { ctx, settled } = collectingCtx();
+    const env = { HYPERDRIVE: { connectionString: "postgres://nobody@127.0.0.1:1/via_hyperdrive" } };
+
+    await expect(worker.scheduled(cron, env, ctx)).rejects.toThrow("database unreachable");
+    await settled();
+
+    expect(sentEvents.map((e) => e.exception.values[0].value)).toEqual(["database unreachable"]);
+    expect(sentEvents[0].exception.values[0].mechanism.type).toBe("auto.faas.cloudflare.scheduled");
+  });
+
+  it("does not report a missing file it answers with a 404", async () => {
+    vinextFetch.mockImplementation(async () => {
+      throw new Error("auth() was called without middleware");
+    });
+    const { ctx, settled } = collectingCtx();
+
+    const response = await worker.fetch(new Request("https://example.test/favicon.ico"), {}, ctx);
+    await settled();
+
+    expect(response.status).toBe(404);
+    expect(sentEvents).toEqual([]);
   });
 });

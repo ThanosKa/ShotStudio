@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { captureException } from "@sentry/core";
 import Link from "next/link";
 import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export default function ErrorBoundary({
 
   useEffect(() => {
     console.error(error);
+    if (!("digest" in error && error.digest)) captureException(error);
   }, [error]);
 
   return (
