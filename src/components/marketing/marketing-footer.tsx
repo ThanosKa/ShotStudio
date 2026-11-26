@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
+import { SiteStatus } from "@/components/marketing/site-status";
 import { indexableCompetitors } from "@/lib/marketing/pruned";
 import { categoriesByDemand, categoryAnchor } from "@/data/category-editorial";
 import { competitorAnchor } from "@/data/competitor-editorial";
@@ -103,10 +104,13 @@ export function MarketingFooter() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t pt-6 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
-          <p>
-            © {new Date().getFullYear()} ShotStudio. App Store screenshots, one
-            set at a time. Made for indie iOS developers.
-          </p>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+            <p>
+              © {new Date().getFullYear()} ShotStudio. App Store screenshots,
+              one set at a time. Made for indie iOS developers.
+            </p>
+            <SiteStatus />
+          </div>
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <li>
               <a
