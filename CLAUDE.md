@@ -16,6 +16,7 @@ One-time-pay AI App Store screenshot generator: 3 raw mobile screenshots → a p
 - Before declaring done, run `pnpm lint`, `pnpm exec tsc --noEmit` and `pnpm test`. CI runs lint, type-check, tests, the Next build, the Worker build (`pnpm build:vinext`) and `pnpm check:worker-bundle` on PRs into `main`, but check locally first.
 - Production is the Cloudflare Worker `shot-studio`. Merging to `main` updates it: `.github/workflows/deploy.yml` deploys once CI passes, and stops if `drizzle/` changed, so apply the migration first and then press Run workflow. Deploy by hand only with the developer's yes (README, "Deploy on Cloudflare Workers", Node 24.22 or newer).
 - Logs: `npx wrangler tail shot-studio --format pretty` streams live requests through the owner's `wrangler login`, so start it before the request you want to see.
+- Errors: Better Stack Errors (Sentry SDK, `src/lib/error-tracking.ts`) gets server, Cron Trigger and browser errors, plus every `log.error({ err }, ...)`, from the live site only; a build without `NEXT_PUBLIC_ERROR_TRACKING_ENV` sends nothing.
 - `pnpm test` runs once; `pnpm test:watch` watches. Tests use in-memory PGlite, no real database.
 - The developer runs dev servers: ask them to start or restart `pnpm dev`, and never run it yourself.
 - Ask before any script that acts on whatever `.env.local` points at: `db:migrate`, `db:push`, `db:reset` (drops every table), `db:reconcile`, `test:user`.

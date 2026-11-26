@@ -127,6 +127,16 @@ export function MarketingFooter() {
               </a>
             </li>
             <li>
+              <a
+                href="https://thanoska.betteruptime.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-foreground"
+              >
+                Status
+              </a>
+            </li>
+            <li>
               <Link
                 href="/privacy"
                 className="transition-colors hover:text-foreground"

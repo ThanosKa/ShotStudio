@@ -1,5 +1,7 @@
+import { withSentry } from "@sentry/cloudflare";
 import vinext from "vinext/server/fetch-handler";
 import { resolveConnectionString, runWithJobDb, runWithRequestDb } from "@/lib/db";
+import { ERROR_TRACKING } from "@/lib/error-tracking";
 import { refundAbandonedGenerations } from "@/lib/generation";
 import { logger } from "@/lib/logger";
 
@@ -36,4 +38,6 @@ const worker = {
   },
 };
 
-export default worker;
+const { enabled, ...errorTracking } = ERROR_TRACKING;
+
+export default enabled ? withSentry(() => errorTracking, worker) : worker;

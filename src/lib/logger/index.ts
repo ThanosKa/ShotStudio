@@ -1,9 +1,18 @@
+import { captureException } from "@sentry/core";
 import pino from "pino";
 import { isWorkersRuntime } from "@/lib/runtime";
 import { writeLineToConsole } from "./console-line";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isWorkers = isWorkersRuntime();
+const ERROR_LEVEL = 50;
+
+function captureLoggedError(args: unknown[]) {
+  const [context, message] = args;
+  if (typeof context !== "object" || context === null || !("err" in context)) return;
+  if (!(context.err instanceof Error)) return;
+  captureException(context.err, { tags: { log: typeof message === "string" ? message : undefined } });
+}
 
 export function getLoggerConfig() {
   return {
@@ -17,6 +26,12 @@ export function getLoggerConfig() {
     base: {
       service: "shotstudio",
       env: process.env.NODE_ENV,
+    },
+    hooks: {
+      logMethod(args, method, level) {
+        if (level >= ERROR_LEVEL) captureLoggedError(args);
+        method.apply(this, args);
+      },
     },
     serializers: {
       err: pino.stdSerializers.err,
