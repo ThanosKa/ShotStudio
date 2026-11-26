@@ -78,6 +78,9 @@ export function MarketingFooter() {
               </Link>
               .
             </p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              <SiteStatus />
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 md:col-span-9">
@@ -104,13 +107,10 @@ export function MarketingFooter() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t pt-6 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-            <p>
-              © {new Date().getFullYear()} ShotStudio. App Store screenshots,
-              one set at a time. Made for indie iOS developers.
-            </p>
-            <SiteStatus />
-          </div>
+          <p>
+            © {new Date().getFullYear()} ShotStudio. App Store screenshots, one
+            set at a time. Made for indie iOS developers.
+          </p>
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <li>
               <a
