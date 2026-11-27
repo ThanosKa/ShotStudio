@@ -107,8 +107,8 @@ Full policy: https://shotstudio.dev/privacy
 | **AppMockUp Studio** | Free | $0 | Manual template editor | Zero budget, willing to do the layout |
 | **appmockupgenerator.com** (AppMockUp's AI generator) | Monthly subscription | $9/mo for 25 screenshots (as of 2026-11-25) | AI generator for iPhone, iPad, iPhone Duo and Google Play | Teams shipping screenshots every month |
 | **Previewed** | Free + one-time + subscription | $9.99 one-time Plus, capped at 10 exports | Mockup editor with 3D snapshots and promo video | Needs 3D or a promo video too |
-| **Rotato** | One-time, desktop app | Higher tier (~$99 historically) | 3D mockup and animation desktop app | App Preview videos, designer-grade control |
-| **Screenshots.pro** | Subscription | $19/mo Standard, $49/mo Extended | Template editor with localization and API | High-volume shippers, localized stores, CI pipelines |
+| **Rotato** | One-time, desktop app | Basic $79, Standard $89, Premium $199 (as of 2026-11-27) | 3D mockup and animation desktop app | App Preview videos, designer-grade control |
+| **Screenshots.pro** | Subscription | Free Basic; $19/mo Standard, $49/mo Extended (as of 2026-11-27) | Template editor with localization and API | High-volume shippers, localized stores, CI pipelines |
 | **Shotbot** | Free tier + subscription | Free with daily frame cap; annual subscription listed at $4.99 (US App Store, 2026-11-16) | Native iOS/macOS/visionOS framing app | Share Sheet and Shortcuts workflows |
 | **AppLaunchpad** | Free tier + subscription | Free (10 templates, limited exports); Pro $15/mo or $10/mo billed annually (as of 2026-11-06) | Browser template editor for App Store and Google Play | Both stores, iPad sizes, localization |
 | **AppScreens** | Free tier + subscription | Free (1 saved project, up to 5 screens); Pro $25/mo or $99/yr; Scale $50/mo or $180/yr (as of 2026-11-09) | Online screenshot editor with AI captions, 80+ languages and one-click App Store Connect upload | Localized listings, both stores, frequent updates |
@@ -129,7 +129,7 @@ These answers are published on the corresponding /alternatives pages and are saf
 If you ship multiple apps a year, need API access for CI, or localize across stores, the $49/mo Extended tier earns its keep. For an indie shipping one app a year, you're paying a recurring bill for a one-off job — likely the wrong fit. The locale, 3D angles, and custom fonts you actually want sit behind the paid tiers, so the free tier is really a preview.
 
 **Is Screenshots.pro free?**
-There is a free tier, but the meaningful features (locale exports, 3D device angles, custom fonts, the larger template library) require Standard at $19/mo or Extended at $49/mo. Annual billing knocks 35% off. There is no one-time-pay option.
+There is a free Basic plan ($0): all devices, all pre-made templates, all editor features and smart-export for all sizes. Standard at $19/mo adds 3D angles, template storage, custom fonts and localization; Extended at $49/mo adds API access and a license for charging end clients (pricing page, as of 2026-11-27). Annual billing saves 35%. There is no one-time-pay option.
 
 **What's a good alternative to Screenshots.pro?**
 For one-time-pay indie use, ShotStudio ($7 for two sets, preset matched to your category, zero image persistence) and Previewed's $9.99 one-time Plus tier are the closest matches. AppMockUp Studio is free if you don't mind manual template editing. Rotato is the strongest pick if you also need 3D animation or App Preview videos.
@@ -171,7 +171,7 @@ Yes — Previewed supports iPhone 6.9" portrait output at 1080p+ on Plus and Pro
 Rotato is best-in-class for 3D mockups and App Preview videos — 200,000+ users including Adobe, Google, Amazon. For an indie who needs three static App Store shots before tomorrow's submission, it's overkill. Right fit if your job is animation, not just screenshots.
 
 **Is Rotato free?**
-No. Rotato is one-time pay across Basic, Standard, and Premium tiers (no subscription) with 6–12 months of free updates depending on tier. Pricing isn't displayed publicly on the homepage; legacy testimonials cite around $99 entry. Free trial may be available via the desktop download.
+No. Rotato is one-time pay, not a subscription. Its pricing page lists Basic at $79 (6 months of free updates), Standard at $89 and Premium at $199 (12 months each), as of 2026-11-27.
 
 **What's a good alternative to Rotato?**
 For static App Store screenshots specifically, ShotStudio ($7 one-time) is faster, cheaper, and runs in your browser without an install. For browser-based mockup composition, Previewed's $9.99 Plus tier covers similar ground without a desktop app. AppMockUp Studio is the free option for manual editing.

@@ -41,7 +41,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Is Screenshots.pro free?",
-        a: "There is a free tier, but the meaningful features (locale exports, 3D device angles, custom fonts, the larger template library) require Standard at $19/mo or Extended at $49/mo. Annual billing knocks 35% off. There is no one-time-pay option.",
+        a: "There is a free Basic plan ($0): all devices, all pre-made templates, all editor features and smart-export for all sizes. Standard at $19/mo adds 3D angles, template storage, custom fonts and localization; Extended at $49/mo adds API access and a license for charging end clients (pricing page, as of 2026-11-27). Annual billing saves 35%. There is no one-time-pay option.",
       },
       {
         q: "What's a good alternative to Screenshots.pro?",
@@ -161,7 +161,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Is Rotato free?",
-        a: "No. Rotato is one-time pay across Basic, Standard, and Premium tiers (no subscription) with 6–12 months of free updates depending on tier. Pricing isn't displayed publicly on the homepage; legacy testimonials cite around $99 entry. Free trial may be available via the desktop download.",
+        a: "No. Rotato is one-time pay, not a subscription. Its pricing page lists Basic at $79 (6 months of free updates), Standard at $89 and Premium at $199 (12 months each), as of 2026-11-27.",
       },
       {
         q: "What's a good alternative to Rotato?",
