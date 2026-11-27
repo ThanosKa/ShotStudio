@@ -73,8 +73,8 @@ Last updated: 2026-07-29. Canonical domain: https://shotstudio.dev
 | AppMockUp Studio | Free | $0 | Manual template editor |
 | appmockupgenerator.com (AppMockUp's AI generator) | Monthly subscription | $9/mo for 25 screenshots (as of 2026-11-25) | AI generator for iPhone, iPad, iPhone Duo and Google Play |
 | Previewed | Free + one-time + subscription | $9.99 one-time Plus (10-export cap) | Mockup editor with 3D and promo video |
-| Rotato | One-time (desktop app) | Higher tier, ~$99 historically | 3D mockup and animation desktop app |
-| Screenshots.pro | Subscription | $19/mo Standard, $49/mo Extended | Template editor with localization and API |
+| Rotato | One-time (desktop app) | Basic $79, Standard $89, Premium $199 (as of 2026-11-27) | 3D mockup and animation desktop app |
+| Screenshots.pro | Subscription | Free Basic; $19/mo Standard, $49/mo Extended (as of 2026-11-27) | Template editor with localization and API |
 | Shotbot | Free tier + subscription | Free with daily cap | Native iOS/macOS framing app |
 | AppLaunchpad | Free tier + subscription | Free; Pro $15/mo or $10/mo billed annually (as of 2026-11-06) | Browser template editor, App Store and Google Play |
 | AppScreens | Free tier + subscription | Free; Pro $25/mo or $99/yr, Scale $50/mo or $180/yr (as of 2026-11-09) | Online screenshot editor with AI captions, localization and App Store Connect upload |
